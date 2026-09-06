@@ -1,4 +1,4 @@
-# SIWASMA — DPM FASILKOM UNIVERSITAS MERCU BUANA
+Dashboard DPM FASILKOM UNIVERSITAS MERCU BUANA
 
 **Sistem Informasi Pengawasan, Akuntabilitas, dan Transparansi Ormawa**  
 Dewan Perwakilan Mahasiswa Fakultas Ilmu Komputer (DPM FASILKOM) — Universitas Mercu Buana.
