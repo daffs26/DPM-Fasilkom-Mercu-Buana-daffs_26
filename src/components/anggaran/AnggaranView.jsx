@@ -22,7 +22,9 @@ import {
   Scale,
   FileImage,
   ExternalLink,
-  Eye
+  Eye,
+  Printer,
+  Download
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -33,6 +35,7 @@ import {
   DialogFooter 
 } from '@/components/ui/dialog';
 import DropdownSelect from '@/components/ui/dropdown-select';
+import { exportFinancialWorkbook, exportFormattedCSV } from '../../utils/exportExcel';
 
 export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPrintDoc }) {
   const { 
@@ -41,7 +44,8 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
     budgetTransactions = [], 
     deleteBudgetTransaction,
     selectedOrmawaFilter,
-    setSelectedOrmawaFilter
+    setSelectedOrmawaFilter,
+    currentUserName
   } = useStore();
 
   const [activeSubTab, setActiveSubTab] = useState('proker'); // 'proker' | 'transaksi'
@@ -129,12 +133,85 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
     }))
   ];
 
+  // =========================================================================
+  // FITUR 2: EKSPOR REKAPITULASI KE EXCEL (.XLSX) / CSV & LAPORAN CETAK PDF
+  // =========================================================================
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+
+  const handleDownloadExcel = async () => {
+    try {
+      setIsExportingExcel(true);
+      await exportFinancialWorkbook({
+        totalPaguFakultas,
+        totalRabTerencana,
+        totalRealisasiAktual,
+        sisaSaldoFakultas,
+        persentaseSerapanFakultas,
+        ormawas: filteredOrmawas,
+        prokers: filteredProkers,
+        transactions: filteredTransactions,
+        selectedFilter: selectedOrmawaFilter,
+        currentUserName
+      });
+    } catch (err) {
+      console.error('Failed to export Excel:', err);
+      // Fallback ke CSV jika terjadi kendala pada browser
+      exportFormattedCSV({
+        totalPaguFakultas,
+        totalRabTerencana,
+        totalRealisasiAktual,
+        sisaSaldoFakultas,
+        persentaseSerapanFakultas,
+        ormawas: filteredOrmawas,
+        prokers: filteredProkers,
+        transactions: filteredTransactions,
+        selectedFilter: selectedOrmawaFilter
+      });
+    } finally {
+      setIsExportingExcel(false);
+    }
+  };
+
+  const handleDownloadCSV = () => {
+    exportFormattedCSV({
+      totalPaguFakultas,
+      totalRabTerencana,
+      totalRealisasiAktual,
+      sisaSaldoFakultas,
+      persentaseSerapanFakultas,
+      ormawas: filteredOrmawas,
+      prokers: filteredProkers,
+      transactions: filteredTransactions,
+      selectedFilter: selectedOrmawaFilter
+    });
+  };
+
+  const handlePrintRekap = () => {
+    if (onPrintDoc) {
+      onPrintDoc({
+        type: 'rekap_anggaran',
+        title: 'LAPORAN REKAPITULASI PENGAWASAN ANGGARAN & LPJ ORMAWA',
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        filter: selectedOrmawaFilter,
+        totalPaguFakultas,
+        totalRabTerencana,
+        totalRealisasiAktual,
+        sisaSaldoFakultas,
+        persentaseSerapanFakultas,
+        ormawas: filteredOrmawas,
+        prokers: filteredProkers,
+        transactions: filteredTransactions,
+        signer: currentUserName || 'Muhammad Daffa Aulia Syahrul'
+      });
+    }
+  };
+
   return (
     <div className="space-y-6 w-full max-w-full overflow-hidden">
       {/* 1. Header & Quick Action Buttons */}
       <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200/80 shadow-soft w-full max-w-full">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
               <Wallet className="w-5 h-5" />
             </div>
@@ -145,22 +222,56 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
             </div>
           </div>
 
-          {/* Action Buttons: Atur Anggaran & Input Anggaran */}
-          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          {/* Action Buttons: Ekspor Excel (.xlsx), Cetak PDF, Unduh CSV, Atur Anggaran, Input Kas */}
+          <div className="flex items-center gap-2 flex-wrap xl:justify-end">
+            {/* Tombol Utama: Unduh Excel Resmi (.xlsx) */}
+            <button
+              type="button"
+              onClick={handleDownloadExcel}
+              disabled={isExportingExcel}
+              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition cursor-pointer active:scale-95"
+              title="Unduh Laporan Rekapitulasi Berformat Microsoft Excel (.xlsx) dengan Kop Surat, Warna & Multi-Sheet"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-100" />
+              <span>{isExportingExcel ? 'Menyiapkan...' : 'Excel (.xlsx)'}</span>
+            </button>
+
+            {/* Tombol Cetak PDF */}
+            <button
+              type="button"
+              onClick={handlePrintRekap}
+              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95"
+              title="Cetak Laporan Rekapitulasi Anggaran & LPJ Semester Resmi DPM FASILKOM"
+            >
+              <Printer className="w-3.5 h-3.5 text-slate-600" />
+              <span>Cetak PDF</span>
+            </button>
+
+            {/* Tombol CSV */}
+            <button
+              type="button"
+              onClick={handleDownloadCSV}
+              className="shrink-0 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95"
+              title="Unduh data tabel dalam format CSV ringan"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>CSV</span>
+            </button>
+
             <button
               onClick={onOpenSetPagu}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition"
+              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95"
             >
-              <Settings2 className="w-4 h-4 text-slate-500" />
-              <span>Atur Alokasi Anggaran</span>
+              <Settings2 className="w-3.5 h-3.5 text-slate-500" />
+              <span>Atur Anggaran</span>
             </button>
 
             <button
               onClick={onOpenAddTransaction}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition"
+              className="shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer active:scale-95 whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
-              <span>Input Anggaran</span>
+              <span>Input Kas</span>
             </button>
           </div>
         </div>
@@ -400,8 +511,27 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
+              onClick={handleDownloadExcel}
+              disabled={isExportingExcel}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95 disabled:opacity-50"
+              title="Unduh Rekapitulasi Excel (.xlsx) Resmi"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">{isExportingExcel ? 'Menyiapkan...' : 'Ekspor Excel'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadCSV}
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer"
+              title="Unduh data dalam format CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>CSV</span>
+            </button>
+            <button
               onClick={onOpenAddTransaction}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Input Pencairan</span>

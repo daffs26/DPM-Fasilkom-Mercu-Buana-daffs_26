@@ -16,7 +16,8 @@ import {
   Printer,
   Layers,
   Eye,
-  Trash2
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 import {
   Dialog,
@@ -41,6 +42,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     
     let matchStatus = true;
     if (statusFilter === 'pending') matchStatus = p.status === 'proposal_pending';
+    if (statusFilter === 'revisi') matchStatus = p.status === 'proposal_revisi' || p.proposal?.reviewStatus === 'revisi';
     if (statusFilter === 'approved') matchStatus = p.status === 'proposal_approved';
     if (statusFilter === 'overdue') matchStatus = p.status === 'lpj_overdue';
     if (statusFilter === 'completed') matchStatus = p.status === 'completed';
@@ -63,8 +65,10 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           {[
             { id: 'all', label: 'Semua Status' },
-            { id: 'pending', label: 'Review DPM' },
-            { id: 'overdue', label: 'LPJ Terlambat (> H+14)' },
+            { id: 'pending', label: 'Menunggu Review' },
+            { id: 'revisi', label: 'Perlu Revisi' },
+            { id: 'approved', label: 'Proposal ACC' },
+            { id: 'overdue', label: 'LPJ Terlambat' },
             { id: 'completed', label: 'Proker Selesai' }
           ].map((tab) => {
             const isSelected = statusFilter === tab.id;
@@ -72,7 +76,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 cursor-pointer ${
                   isSelected
                     ? 'bg-blue-600 text-white shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -102,6 +106,8 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
           const ormawa = ormawas.find(o => o.id === p.ormawaId);
           const isOverdue = p.status === 'lpj_overdue';
           const isCompleted = p.status === 'completed';
+          const isRevisi = p.status === 'proposal_revisi' || p.proposal?.reviewStatus === 'revisi';
+          const pendingRevisions = p.proposal?.revisionItems?.filter(i => !i.completed).length || 0;
 
           return (
             <div
@@ -131,6 +137,10 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                     ) : isOverdue ? (
                       <span className="bg-red-50 text-red-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-red-300 flex items-center gap-1 animate-pulse">
                         <AlertOctagon className="w-3 h-3 text-red-600" /> LPJ Terlambat
+                      </span>
+                    ) : isRevisi ? (
+                      <span className="bg-amber-50 text-amber-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-amber-300 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3 text-amber-600" /> Perlu Revisi {pendingRevisions > 0 ? `(${pendingRevisions})` : ''}
                       </span>
                     ) : p.proposal?.reviewStatus === 'approved' ? (
                       <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-blue-200">

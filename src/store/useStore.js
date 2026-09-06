@@ -91,7 +91,8 @@ export const useStore = create(
             reviewStatus: 'pending',
             approvedDate: null,
             approvedBy: null,
-            notes: []
+            notes: [],
+            revisionItems: []
           } : {
             fileName: null,
             fileSize: null,
@@ -100,7 +101,8 @@ export const useStore = create(
             reviewStatus: 'not_uploaded',
             approvedDate: null,
             approvedBy: null,
-            notes: []
+            notes: [],
+            revisionItems: []
           },
           inspection: null,
           lpj: {
@@ -184,7 +186,8 @@ export const useStore = create(
             reviewStatus: 'pending',
             approvedDate: null,
             approvedBy: null,
-            notes: proker.proposal?.notes || []
+            notes: proker.proposal?.notes || [],
+            revisionItems: proker.proposal?.revisionItems || []
           };
 
           const ormawaName = state.ormawas.find(o => o.id === proker.ormawaId)?.name || 'Ormawa';
@@ -232,10 +235,11 @@ export const useStore = create(
 
           const updatedProposal = {
             ...proker.proposal,
-            reviewStatus: status,
+            reviewStatus: isApproved ? 'approved' : 'revisi',
             approvedDate: isApproved ? todayStr : null,
             approvedBy: isApproved ? get().currentUserName : null,
-            notes: updatedNotes
+            notes: updatedNotes,
+            revisionItems: proker.proposal.revisionItems || []
           };
 
           const newLog = {
@@ -246,7 +250,7 @@ export const useStore = create(
             title: isApproved ? `Proposal Disetujui (ACC): ${proker.title}` : `Catatan Revisi Proposal: ${proker.title}`,
             description: isApproved 
               ? `Ketua DPM resmi menyetujui proposal ${proker.title}. Proker siap berlanjut ke tahap pelaksanaan.`
-              : `DPM memberikan catatan revisi: "${noteText || 'Tolong lengkapi rincian anggaran dan rundown'}"`,
+              : `DPM memberikan catatan revisi: "${noteText || 'Proposal memerlukan revisi butir teknis sebelum disetujui.'}"`,
             actor: get().currentUserName
           };
 
@@ -257,6 +261,121 @@ export const useStore = create(
               proposal: updatedProposal
             } : p),
             activityLogs: [newLog, ...state.activityLogs]
+          };
+        });
+      },
+
+      // ACTION: TAMBAH BUTIR REVISI PROPOSAL (ITEMIZED REVISION)
+      addProposalRevisionItem: (prokerId, text) => {
+        if (!text || !text.trim()) return;
+        const todayStr = new Date().toISOString().split('T')[0];
+        const newItem = {
+          id: `rev-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+          text: text.trim(),
+          completed: false,
+          addedBy: get().currentUserName,
+          date: todayStr
+        };
+
+        set((state) => {
+          const proker = state.prokers.find(p => p.id === prokerId);
+          if (!proker || !proker.proposal) return state;
+
+          const currentRevisionItems = proker.proposal.revisionItems || [];
+          const updatedRevisionItems = [...currentRevisionItems, newItem];
+
+          const updatedProposal = {
+            ...proker.proposal,
+            revisionItems: updatedRevisionItems,
+            reviewStatus: 'revisi'
+          };
+
+          const newLog = {
+            id: `log-${Date.now()}`,
+            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+            ormawaId: proker.ormawaId,
+            type: 'proposal_revision_item_added',
+            title: `Poin Revisi Proposal Ditambahkan: ${proker.title}`,
+            description: `${get().currentUserName} menambahkan butir revisi: "${newItem.text}".`,
+            actor: get().currentUserName,
+            prokerTitle: proker.title,
+            prokerId: proker.id
+          };
+
+          return {
+            prokers: state.prokers.map(p => p.id === prokerId ? {
+              ...p,
+              status: 'proposal_revisi',
+              proposal: updatedProposal
+            } : p),
+            activityLogs: [newLog, ...state.activityLogs]
+          };
+        });
+      },
+
+      // ACTION: TOGGLE STATUS SELESAI BUTIR REVISI (CHECKLIST)
+      toggleProposalRevisionItem: (prokerId, itemId) => {
+        set((state) => {
+          const proker = state.prokers.find(p => p.id === prokerId);
+          if (!proker || !proker.proposal || !proker.proposal.revisionItems) return state;
+
+          let toggledItemText = '';
+          let isNowCompleted = false;
+
+          const updatedRevisionItems = proker.proposal.revisionItems.map(item => {
+            if (item.id === itemId) {
+              toggledItemText = item.text;
+              isNowCompleted = !item.completed;
+              return { ...item, completed: !item.completed };
+            }
+            return item;
+          });
+
+          const updatedProposal = {
+            ...proker.proposal,
+            revisionItems: updatedRevisionItems
+          };
+
+          const newLog = {
+            id: `log-${Date.now()}`,
+            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+            ormawaId: proker.ormawaId,
+            type: 'proposal_revision_item_toggled',
+            title: `Butir Revisi Proposal ${isNowCompleted ? 'Diselesaikan' : 'Dibatalkan'}: ${proker.title}`,
+            description: `Butir revisi "${toggledItemText}" ditandai ${isNowCompleted ? 'SELESAI DIPERBAIKI' : 'BELUM SELESAI'} oleh ${get().currentUserName}.`,
+            actor: get().currentUserName,
+            prokerTitle: proker.title,
+            prokerId: proker.id
+          };
+
+          return {
+            prokers: state.prokers.map(p => p.id === prokerId ? {
+              ...p,
+              proposal: updatedProposal
+            } : p),
+            activityLogs: [newLog, ...state.activityLogs]
+          };
+        });
+      },
+
+      // ACTION: HAPUS BUTIR REVISI PROPOSAL
+      deleteProposalRevisionItem: (prokerId, itemId) => {
+        set((state) => {
+          const proker = state.prokers.find(p => p.id === prokerId);
+          if (!proker || !proker.proposal || !proker.proposal.revisionItems) return state;
+
+          const updatedRevisionItems = proker.proposal.revisionItems.filter(item => item.id !== itemId);
+
+          const updatedProposal = {
+            ...proker.proposal,
+            revisionItems: updatedRevisionItems
+          };
+
+          return {
+            prokers: state.prokers.map(p => p.id === prokerId ? {
+              ...p,
+              proposal: updatedProposal
+            } : p)
           };
         });
       },
