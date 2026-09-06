@@ -1,0 +1,40 @@
+# Logs & Dependensi
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+node_modules
+dist
+dist-ssr
+
+# File Lingkungan & Kredensial Rahasia (Penting)
+.env
+.env.*
+*.env
+*.local
+
+# File & Direktori AI / Agen / Scratch
+.agents/
+.qoder/
+.gemini/
+.ai/
+scratch/
+*.prompt
+*.agent
+
+# Gambar Screenshot Pengujian Lokal di Root (Aset gambar di public & src tetap aman)
+/*.png
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
