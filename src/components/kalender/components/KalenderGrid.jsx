@@ -16,6 +16,7 @@ export default function KalenderGrid({
   handleNextMonth,
   handleSelectMonth,
   handleSelectYear,
+  handleGoToToday,
   onOpenAddProker,
   monthNames,
   weekdayNames,
@@ -26,15 +27,29 @@ export default function KalenderGrid({
       <div>
         {/* Header Kalender & Navigasi */}
         <div className="flex flex-col gap-2.5 pb-2.5 border-b border-slate-100 w-full">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs shrink-0">
-              <CalendarIcon className="w-4 h-4" />
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs shrink-0">
+                <CalendarIcon className="w-4 h-4" />
+              </div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+                  {monthNames[currentMonth]} {currentYear}
+                </h3>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
-                {monthNames[currentMonth]} {currentYear}
-              </h3>
-            </div>
+
+            {/* Tombol Cepat Hari Ini */}
+            {handleGoToToday && (
+              <button
+                type="button"
+                onClick={handleGoToToday}
+                className="px-2.5 py-1 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition shadow-2xs shrink-0 cursor-pointer"
+                title="Kembali ke Tanggal Hari Ini"
+              >
+                Hari Ini
+              </button>
+            )}
           </div>
 
           {/* Selector & Navigasi Tombol: Memanjang Memenuhi Card */}

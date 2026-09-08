@@ -43,19 +43,30 @@ export default function DashboardBudgetCard({
           </div>
         </div>
 
-        {/* Ormawa Breakdown */}
-        <div className="space-y-2 pt-1">
+        {/* Ormawa Breakdown with micro progress bars */}
+        <div className="space-y-2.5 pt-1">
           {ormawas.map(o => {
             const pct = o.paguAnggaran > 0 ? Math.round((o.serapanAnggaran / o.paguAnggaran) * 100) : 0;
             return (
-              <div key={o.id} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: o.color?.primary || '#2563EB' }} />
-                  <span className="font-semibold text-slate-700 text-[11px]">{o.shortName}</span>
+              <div key={o.id} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: o.color?.primary || '#2563EB' }} />
+                    <span className="font-semibold text-slate-700 text-[11px]">{o.shortName}</span>
+                  </div>
+                  <div className="text-right font-medium text-slate-600 text-[11px]">
+                    <span>{formatRupiah(o.serapanAnggaran)}</span>
+                    <span className="text-[10px] text-slate-500 font-bold ml-1.5">({pct}%)</span>
+                  </div>
                 </div>
-                <div className="text-right font-medium text-slate-600 text-[11px]">
-                  <span>{formatRupiah(o.serapanAnggaran)}</span>
-                  <span className="text-[10px] text-slate-400 ml-1.5">({pct}%)</span>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ 
+                      width: `${Math.min(pct, 100)}%`, 
+                      backgroundColor: o.color?.primary || '#2563EB' 
+                    }}
+                  />
                 </div>
               </div>
             );

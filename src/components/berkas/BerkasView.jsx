@@ -15,7 +15,10 @@ import {
   FileCheck,
   Tag,
   Files,
-  ScrollText
+  ScrollText,
+  X,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 
 export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
@@ -24,6 +27,7 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
   const [selectedFolder, setSelectedFolder] = useState('all'); // 'all' | 'proposal' | 'lpj' | 'other'
   const [selectedFileItem, setSelectedFileItem] = useState(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isTemplateBannerOpen, setIsTemplateBannerOpen] = useState(true);
 
   // Kumpulkan semua berkas dari seluruh proker
   const allFiles = [];
@@ -231,29 +235,54 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
 
         {/* 2. CENTER AREA: FILE GRID */}
         <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
-          {/* Banner Pintasan Template Dokumen Resmi */}
-          <div className="mb-5 p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 to-indigo-50/70 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <ScrollText className="w-5 h-5" />
+          {/* Banner Pintasan Template Dokumen Resmi (Collapsible) */}
+          {isTemplateBannerOpen ? (
+            <div className="mb-4 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 to-indigo-50/70 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs relative">
+              <div className="flex items-center gap-3 min-w-0 flex-1 pr-6 sm:pr-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <ScrollText className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-xs font-bold text-slate-900 truncate">
+                    Butuh Template Dokumen &amp; Format Baku Ormawa?
+                  </h4>
+                  <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-1">
+                    Format surat izin dispensasi, sidang umum, proposal sponsor, dan peminjaman ruangan.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">
-                  Butuh Template Dokumen &amp; Surat Resmi Ormawa?
-                </h4>
-                <p className="text-[11px] text-slate-600 mt-0.5">
-                  Tersedia format baku surat izin dispensasi panitia, sidang umum, proposal sponsor, dan peminjaman ruangan.
-                </p>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setActiveTab('template')}
+                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 shadow-2xs transition shrink-0 cursor-pointer"
+                >
+                  <span>Buka Bank Template</span>
+                  <ScrollText className="w-3.5 h-3.5 text-blue-600" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsTemplateBannerOpen(false)}
+                  className="w-7 h-7 rounded-lg bg-white/80 hover:bg-white text-slate-400 hover:text-slate-700 flex items-center justify-center transition border border-blue-100 shrink-0"
+                  title="Tutup Banner"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
-            <button
-              onClick={() => setActiveTab('template')}
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 shadow-2xs transition shrink-0 cursor-pointer"
-            >
-              <span>Buka Bank Template</span>
-              <ScrollText className="w-3.5 h-3.5 text-blue-600" />
-            </button>
-          </div>
+          ) : (
+            <div className="mb-3 flex items-center justify-between px-3 py-1.5 rounded-xl bg-blue-50/50 border border-blue-100 text-xs">
+              <span className="text-[11px] text-blue-800 font-medium">
+                💡 Bank Template Dokumen &amp; Surat Resmi tersedia di menu Template.
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsTemplateBannerOpen(true)}
+                className="text-[11px] font-bold text-blue-600 hover:underline"
+              >
+                Tampilkan Panduan
+              </button>
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>

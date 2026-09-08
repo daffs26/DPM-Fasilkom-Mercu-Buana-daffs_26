@@ -75,6 +75,12 @@ export default function AnggaranKpiCards({
               {persentaseSerapanFakultas}%
             </span>
           </div>
+          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
+            <div 
+              className="bg-amber-500 h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(persentaseSerapanFakultas, 100)}%` }}
+            />
+          </div>
           <p className="text-[10px] text-slate-500 mt-1">
             Total dana kas yang telah terserap
           </p>
@@ -92,9 +98,20 @@ export default function AnggaranKpiCards({
           </div>
         </div>
         <div>
-          <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
-            {formatRupiah(sisaSaldoFakultas)}
-          </h3>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+              {formatRupiah(sisaSaldoFakultas)}
+            </h3>
+            <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded-md">
+              {Math.max(0, 100 - persentaseSerapanFakultas)}% Sisa
+            </span>
+          </div>
+          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
+            <div 
+              className="bg-indigo-500 h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.max(0, 100 - persentaseSerapanFakultas)}%` }}
+            />
+          </div>
           <p className="text-[10px] text-slate-500 mt-1">
             Dana fakultas siap dialokasikan
           </p>

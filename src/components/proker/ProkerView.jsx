@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { 
   Plus, 
@@ -10,19 +10,21 @@ import {
   Award, 
   MapPin, 
   Users, 
-  DollarSign, 
   Calendar,
   AlertOctagon,
   Printer,
   Layers,
   Eye,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  TrendingUp
 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter
@@ -32,23 +34,45 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
   const { prokers, ormawas, selectedOrmawaFilter, setSelectedOrmawaFilter, searchQuery, deleteProker } = useStore();
   const [statusFilter, setStatusFilter] = useState('all');
   const [prokerToDelete, setProkerToDelete] = useState(null);
+  const [isKpiExpanded, setIsKpiExpanded] = useState(false);
+
+  // Filter ormawa dasar untuk menghitung status counts
+  const ormawaProkers = useMemo(() => {
+    return prokers.filter(p => selectedOrmawaFilter === 'all' || p.ormawaId === selectedOrmawaFilter);
+  }, [prokers, selectedOrmawaFilter]);
+
+  // Hitungan kuantitas per status secara real-time
+  const statusCounts = useMemo(() => {
+    return {
+      all: ormawaProkers.length,
+      pending: ormawaProkers.filter(p => p.status === 'proposal_pending').length,
+      revisi: ormawaProkers.filter(p => p.status === 'proposal_revisi' || p.proposal?.reviewStatus === 'revisi').length,
+      approved: ormawaProkers.filter(p => p.status === 'proposal_approved').length,
+      overdue: ormawaProkers.filter(p => p.status === 'lpj_overdue').length,
+      completed: ormawaProkers.filter(p => p.status === 'completed').length,
+    };
+  }, [ormawaProkers]);
 
   // Filter gabungan
-  const filtered = prokers.filter((p) => {
-    const matchOrmawa = selectedOrmawaFilter === 'all' || p.ormawaId === selectedOrmawaFilter;
-    const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.pic.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.divisi.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    let matchStatus = true;
-    if (statusFilter === 'pending') matchStatus = p.status === 'proposal_pending';
-    if (statusFilter === 'revisi') matchStatus = p.status === 'proposal_revisi' || p.proposal?.reviewStatus === 'revisi';
-    if (statusFilter === 'approved') matchStatus = p.status === 'proposal_approved';
-    if (statusFilter === 'overdue') matchStatus = p.status === 'lpj_overdue';
-    if (statusFilter === 'completed') matchStatus = p.status === 'completed';
+  const filtered = useMemo(() => {
+    return prokers.filter((p) => {
+      const matchOrmawa = selectedOrmawaFilter === 'all' || p.ormawaId === selectedOrmawaFilter;
+      const q = (searchQuery || '').toLowerCase().trim();
+      const matchSearch = !q || 
+        p.title.toLowerCase().includes(q) ||
+        p.pic.toLowerCase().includes(q) ||
+        p.divisi.toLowerCase().includes(q);
+      
+      let matchStatus = true;
+      if (statusFilter === 'pending') matchStatus = p.status === 'proposal_pending';
+      if (statusFilter === 'revisi') matchStatus = p.status === 'proposal_revisi' || p.proposal?.reviewStatus === 'revisi';
+      if (statusFilter === 'approved') matchStatus = p.status === 'proposal_approved';
+      if (statusFilter === 'overdue') matchStatus = p.status === 'lpj_overdue';
+      if (statusFilter === 'completed') matchStatus = p.status === 'completed';
 
-    return matchOrmawa && matchSearch && matchStatus;
-  });
+      return matchOrmawa && matchSearch && matchStatus;
+    });
+  }, [prokers, selectedOrmawaFilter, searchQuery, statusFilter]);
 
   const handleConfirmDelete = () => {
     if (prokerToDelete) {
@@ -57,51 +81,111 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     }
   };
 
+  const filterTabs = [
+    { id: 'all', label: 'Semua Status', count: statusCounts.all, color: 'text-slate-600' },
+    { id: 'pending', label: 'Menunggu Review', count: statusCounts.pending, color: 'text-amber-600' },
+    { id: 'revisi', label: 'Perlu Revisi', count: statusCounts.revisi, color: 'text-rose-600' },
+    { id: 'approved', label: 'Proposal ACC', count: statusCounts.approved, color: 'text-blue-600' },
+    { id: 'overdue', label: 'LPJ Terlambat', count: statusCounts.overdue, color: 'text-red-600' },
+    { id: 'completed', label: 'Proker Selesai', count: statusCounts.completed, color: 'text-emerald-600' }
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Top Controls: Filter Status & Add / History Buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-slate-200/80 shadow-soft">
-        {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          {[
-            { id: 'all', label: 'Semua Status' },
-            { id: 'pending', label: 'Menunggu Review' },
-            { id: 'revisi', label: 'Perlu Revisi' },
-            { id: 'approved', label: 'Proposal ACC' },
-            { id: 'overdue', label: 'LPJ Terlambat' },
-            { id: 'completed', label: 'Proker Selesai' }
-          ].map((tab) => {
+    <div className="space-y-4 sm:space-y-5">
+      {/* 1. TOP EFFICIENCY STRIP: Mini KPI & Ringkasan Cepat */}
+      <div className="bg-white rounded-3xl p-3.5 sm:p-4 border border-slate-200/80 shadow-soft transition-all duration-300">
+        <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                Manajemen &amp; Pengawasan Program Kerja
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsKpiExpanded(!isKpiExpanded)}
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl text-[11px] font-bold transition shadow-2xs cursor-pointer"
+              title={isKpiExpanded ? 'Tutup Ringkasan' : 'Buka Ringkasan KPI'}
+            >
+              {isKpiExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              <span>{isKpiExpanded ? 'Ringkas KPI' : 'Statistik KPI'}</span>
+            </button>
+            <button
+              onClick={onOpenAddProker}
+              className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition shrink-0 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tambah Proker</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Expanded Mini KPI Strip */}
+        {isKpiExpanded && (
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-3 animate-in fade-in-50 duration-200">
+            <div className="p-2.5 bg-slate-50 rounded-2xl border border-slate-200/80 text-center">
+              <span className="text-[10px] text-slate-500 font-bold uppercase block">Total Proker</span>
+              <span className="text-base font-black text-slate-900 block mt-0.5">{statusCounts.all}</span>
+            </div>
+            <div className="p-2.5 bg-blue-50/60 rounded-2xl border border-blue-200 text-center">
+              <span className="text-[10px] text-blue-700 font-bold uppercase block">Proposal ACC</span>
+              <span className="text-base font-black text-blue-900 block mt-0.5">{statusCounts.approved}</span>
+            </div>
+            <div className="p-2.5 bg-amber-50/60 rounded-2xl border border-amber-200 text-center">
+              <span className="text-[10px] text-amber-800 font-bold uppercase block">Perlu Revisi</span>
+              <span className="text-base font-black text-amber-900 block mt-0.5">{statusCounts.revisi}</span>
+            </div>
+            <div className="p-2.5 bg-rose-50/60 rounded-2xl border border-rose-200 text-center">
+              <span className="text-[10px] text-rose-700 font-bold uppercase block">LPJ Terlambat</span>
+              <span className="text-base font-black text-rose-900 block mt-0.5">{statusCounts.overdue}</span>
+            </div>
+            <div className="p-2.5 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-center col-span-2 sm:col-span-1">
+              <span className="text-[10px] text-emerald-700 font-bold uppercase block">Selesai Diaudit</span>
+              <span className="text-base font-black text-emerald-900 block mt-0.5">{statusCounts.completed}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Filter Status Tabs with Smart Real-Time Badges */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pt-2.5 hide-scrollbar">
+          {filterTabs.map((tab) => {
             const isSelected = statusFilter === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition shrink-0 cursor-pointer ${
                   isSelected
                     ? 'bg-blue-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 bg-slate-50 border border-slate-200/60'
                 }`}
               >
-                {tab.label}
+                <span>{tab.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  isSelected
+                    ? 'bg-white/20 text-white'
+                    : tab.count > 0 && tab.id === 'overdue'
+                    ? 'bg-rose-100 text-rose-700'
+                    : tab.count > 0 && tab.id === 'revisi'
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-slate-200 text-slate-700'
+                }`}>
+                  {tab.count}
+                </span>
               </button>
             );
           })}
         </div>
-
-        {/* Action Buttons: Histori Proker & Tambah Proker Baru */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={onOpenAddProker}
-            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition shrink-0 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tambah Program Kerja</span>
-          </button>
-        </div>
       </div>
 
-      {/* Grid Kartu Proker */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* 2. GRID KARTU PROGRAM KERJA */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         {filtered.map((p) => {
           const ormawa = ormawas.find(o => o.id === p.ormawaId);
           const isOverdue = p.status === 'lpj_overdue';
@@ -120,7 +204,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 {/* Header Card: Ormawa Logo, Status & Tombol Hapus */}
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-xl bg-slate-50 border border-slate-200 p-0.5 shrink-0 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-xl bg-slate-50 border border-slate-200 p-0.5 shrink-0 flex items-center justify-center shadow-2xs">
                       <img src={ormawa?.logo} alt={ormawa?.name} className="w-full h-full object-contain" />
                     </div>
                     <span className="font-extrabold text-xs text-slate-900">
@@ -140,7 +224,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                       </span>
                     ) : isRevisi ? (
                       <span className="bg-amber-50 text-amber-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-amber-300 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3 text-amber-600" /> Perlu Revisi {pendingRevisions > 0 ? `(${pendingRevisions})` : ''}
+                        <AlertCircle className="w-3 h-3 text-amber-600" /> Revisi {pendingRevisions > 0 ? `(${pendingRevisions})` : ''}
                       </span>
                     ) : p.proposal?.reviewStatus === 'approved' ? (
                       <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-blue-200">
@@ -156,7 +240,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                       </span>
                     )}
 
-                    {/* Tombol Hapus di Header Card */}
+                    {/* Tombol Hapus */}
                     <button
                       type="button"
                       onClick={(e) => {
@@ -172,7 +256,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 </div>
 
                 {/* Judul & Divisi */}
-                <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2">
+                <h3 className="font-extrabold text-slate-900 text-sm leading-snug line-clamp-2">
                   {p.title}
                 </h3>
                 <p className="text-[11px] text-slate-600 font-medium mt-1">
@@ -182,16 +266,16 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 {/* Info Metrik: Tanggal, Lokasi, Target & RAB */}
                 <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                    <Calendar className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                     <span>{p.startDate} s/d {p.endDate}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                    <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                     <span className="truncate">{p.location}</span>
                   </div>
                   <div className="flex items-center justify-between pt-1">
                     <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-slate-600" />
+                      <Users className="w-3.5 h-3.5 text-slate-500" />
                       <span>{p.targetPeserta} Peserta</span>
                     </span>
                     <span className="font-bold text-slate-900">
@@ -201,8 +285,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 </div>
 
                 {/* Berkas Pengawasan Snapshot */}
-                <div className="mt-4 p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
-                  {/* Proposal Row */}
+                <div className="mt-3.5 p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600 font-medium">1. Proposal:</span>
                     {p.proposal?.fileName ? (
@@ -210,11 +293,10 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                         {p.proposal.isDadakan ? '⚠️ Terlambat (< H-14)' : '✓ Ada'} ({p.proposal.uploadDate})
                       </span>
                     ) : (
-                      <span className="text-slate-600">Belum diunggah</span>
+                      <span className="text-slate-500">Belum diunggah</span>
                     )}
                   </div>
 
-                  {/* LPJ Row */}
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600 font-medium">2. Berkas LPJ:</span>
                     {p.lpj?.fileName ? (
@@ -226,7 +308,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                         🔴 Terlambat (&gt; H+14)
                       </span>
                     ) : (
-                      <span className="text-slate-600">
+                      <span className="text-slate-500">
                         Batas: {p.lpj?.deadlineDate || 'H+14'}
                       </span>
                     )}
@@ -326,7 +408,6 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }

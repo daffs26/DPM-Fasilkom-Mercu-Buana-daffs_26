@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
-import { Calendar as CalendarIcon, AlertTriangle } from 'lucide-react';
+import { Calendar as CalendarIcon, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { getHoliday } from '../../data/holidays';
 import KalenderGrid from './components/KalenderGrid';
 import KalenderSidebar from './components/KalenderSidebar';
@@ -32,6 +32,7 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
   const [currentYear, setCurrentYear] = useState(initialYear);
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState(todayISO);
+  const [isCollisionExpanded, setIsCollisionExpanded] = useState(false);
 
   useEffect(() => {
     onDateChange?.(selectedDate);
@@ -85,6 +86,13 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
     const yearNum = Number(yr);
     setCurrentYear(yearNum);
     syncDateForNewMonthYear(yearNum, currentMonth);
+  };
+
+  const handleGoToToday = () => {
+    const yr = Math.min(Math.max(today.getFullYear(), 2026), 2028);
+    setCurrentYear(yr);
+    setCurrentMonth(today.getMonth());
+    setSelectedDate(todayISO);
   };
 
   // Deteksi Tabrakan Jadwal
@@ -202,25 +210,48 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
 
   return (
     <div className="space-y-3.5">
-      {/* Collision Alert Banner */}
+      {/* Collision Alert Banner with Smart Space-Saving Toggle */}
       {collisions.length > 0 ? (
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-amber-900 shadow-2xs">
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <h4 className="font-bold text-xs text-amber-800">
-              Peringatan Sistem: Ditemukan {collisions.length} Jadwal Kegiatan yang Berdekatan / Bentrok!
-            </h4>
-            <p className="text-[11px] text-amber-700 mt-0.5 leading-relaxed">
-              DPM Fasilkom merekomendasikan koordinasi teknis antar-ormawa terkait agar penggunaan fasilitas aula, laboratorium, dan audiens mahasiswa tidak saling berebut.
-            </p>
+        <div className="p-2.5 sm:p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start justify-between gap-2.5 text-amber-900 shadow-2xs transition-all duration-200">
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="font-extrabold text-xs text-amber-800 truncate">
+                  Peringatan Sistem: {collisions.length} Jadwal Kegiatan Berdekatan / Bentrok!
+                </h4>
+                <span className="hidden sm:inline-flex text-[9px] font-mono font-bold bg-amber-200/70 text-amber-900 px-1.5 py-0.2 rounded-full">
+                  Perlu Koordinasi
+                </span>
+              </div>
+              {isCollisionExpanded && (
+                <p className="text-[11px] text-amber-700 mt-1 leading-relaxed animate-in fade-in-50 duration-150">
+                  DPM Fasilkom merekomendasikan koordinasi teknis antar-ormawa terkait agar penggunaan fasilitas aula, laboratorium, dan audiens mahasiswa tidak saling berebut.
+                </p>
+              )}
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsCollisionExpanded(!isCollisionExpanded)}
+            className="flex items-center gap-1 text-[11px] font-bold text-amber-800 hover:text-amber-950 px-2 py-0.5 rounded-lg bg-amber-100/60 hover:bg-amber-100 border border-amber-300/60 shrink-0 transition"
+          >
+            {isCollisionExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            <span>{isCollisionExpanded ? 'Tutup' : 'Detail'}</span>
+          </button>
         </div>
       ) : (
-        <div className="py-2.5 px-4 bg-emerald-50/90 border border-emerald-200 rounded-2xl flex items-center gap-2.5 text-emerald-900 shadow-2xs">
-          <CalendarIcon className="w-4 h-4 text-emerald-600 shrink-0" />
-          <p className="text-xs font-bold text-emerald-800">
-            Jadwal Terpadu Aman: Tidak ditemukan tabrakan tanggal proker aktif antar-ormawa saat ini.
-          </p>
+        <div className="py-2 px-3.5 bg-emerald-50/90 border border-emerald-200 rounded-2xl flex items-center justify-between gap-2 text-emerald-900 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <p className="text-xs font-bold text-emerald-800">
+              Jadwal Terpadu Aman: Tidak ada tabrakan proker aktif antar-ormawa.
+            </p>
+          </div>
+          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+            Kondisi Normal
+          </span>
         </div>
       )}
 
@@ -241,6 +272,7 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
             handleNextMonth={handleNextMonth}
             handleSelectMonth={handleSelectMonth}
             handleSelectYear={handleSelectYear}
+            handleGoToToday={handleGoToToday}
             onOpenAddProker={onOpenAddProker}
             monthNames={MONTH_NAMES}
             weekdayNames={WEEKDAY_NAMES}

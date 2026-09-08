@@ -53,6 +53,17 @@ export default function HistoryView() {
     });
   }, [prokerLogs, typeFilter, selectedOrmawaFilter, searchQuery]);
 
+  // Hitung jumlah log per ormawa
+  const ormawaCounts = useMemo(() => {
+    const counts = { all: prokerLogs.length };
+    prokerLogs.forEach((l) => {
+      if (l.ormawaId) {
+        counts[l.ormawaId] = (counts[l.ormawaId] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [prokerLogs]);
+
   const ormawaOptions = [
     { id: 'all', label: 'Semua Ormawa' },
     { id: 'dpm', label: 'DPM' },
@@ -78,18 +89,24 @@ export default function HistoryView() {
         <div className="flex items-center gap-1.5 overflow-x-auto bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 shrink-0 self-start sm:self-auto">
           {ormawaOptions.map((item) => {
             const isSelected = selectedOrmawaFilter === item.id;
+            const count = ormawaCounts[item.id] || 0;
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setSelectedOrmawaFilter(item.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                   isSelected
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {item.label}
+                <span>{item.label}</span>
+                <span className={`text-[10px] font-extrabold px-1.5 py-0.2 rounded-full ${
+                  isSelected ? 'bg-slate-100 text-slate-800' : 'bg-slate-200/60 text-slate-500'
+                }`}>
+                  {count}
+                </span>
               </button>
             );
           })}

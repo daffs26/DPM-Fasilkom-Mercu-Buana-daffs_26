@@ -1,42 +1,113 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
-import { AlertOctagon, Plus, Printer, CheckCircle2, ShieldAlert, FileText, ArrowRight } from 'lucide-react';
+import { AlertOctagon, Plus, Printer, CheckCircle2, ShieldAlert, FileText, ArrowRight, Filter } from 'lucide-react';
 
 export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
   const { suratPeringatan, ormawas, resolveSP } = useStore();
+  const [filterStatus, setFilterStatus] = useState('all');
 
-  const activeCount = suratPeringatan.filter(s => s.status === 'active').length;
-  const resolvedCount = suratPeringatan.filter(s => s.status === 'resolved').length;
+  const activeCount = useMemo(() => suratPeringatan.filter(s => s.status === 'active').length, [suratPeringatan]);
+  const resolvedCount = useMemo(() => suratPeringatan.filter(s => s.status === 'resolved').length, [suratPeringatan]);
+
+  const filteredSuratPeringatan = useMemo(() => {
+    if (filterStatus === 'active') return suratPeringatan.filter(s => s.status === 'active');
+    if (filterStatus === 'resolved') return suratPeringatan.filter(s => s.status === 'resolved');
+    return suratPeringatan;
+  }, [suratPeringatan, filterStatus]);
 
   return (
     <div className="space-y-6">
-      {/* Top Banner Overview */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-700 flex items-center justify-center shrink-0">
-            <AlertOctagon className="w-6 h-6 text-red-600" />
+      {/* Top Banner Overview & Filter Bar */}
+      <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-soft space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center shrink-0 border border-rose-100">
+              <AlertOctagon className="w-5 h-5 text-rose-600" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-extrabold text-slate-900 text-sm">
+                  Surat Peringatan (SP) Ormawa
+                </h3>
+                {activeCount > 0 && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
+                    {activeCount} SP Aktif
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Pengawasan kedisiplinan administratif, tenggat proposal, dan pelaporan LPJ ormawa.
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-slate-900 text-sm">
-             Surat Peringatan (SP) DPM FASILKOM UMB
-            </h3>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onOpenIssueSP}
+              className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-bold shadow-xs transition active:scale-95 shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Terbitkan SP Baru</span>
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Status Filter Tabs with Counts */}
+        <div className="flex items-center gap-2 pt-1 border-t border-slate-100 overflow-x-auto pb-1 hide-scrollbar">
           <button
-            onClick={onOpenIssueSP}
-            className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-700/20 transition active:scale-95"
+            onClick={() => setFilterStatus('all')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
+              filterStatus === 'all'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
+            }`}
           >
-            <Plus className="w-4 h-4" />
-            <span>Terbitkan SP Baru</span>
+            <span>Semua SP</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+              filterStatus === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+            }`}>
+              {suratPeringatan.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setFilterStatus('active')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
+              filterStatus === 'active'
+                ? 'bg-rose-600 text-white shadow-xs'
+                : 'bg-slate-50 text-rose-700 hover:bg-rose-50 border border-slate-200/60'
+            }`}
+          >
+            <span>SP Aktif</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+              filterStatus === 'active' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-700'
+            }`}>
+              {activeCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setFilterStatus('resolved')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
+              filterStatus === 'resolved'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'bg-slate-50 text-emerald-700 hover:bg-emerald-50 border border-slate-200/60'
+            }`}
+          >
+            <span>Terselesaikan</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+              filterStatus === 'resolved' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+            }`}>
+              {resolvedCount}
+            </span>
           </button>
         </div>
       </div>
 
       {/* Grid of Surat Peringatan */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {suratPeringatan.map((sp) => {
+        {filteredSuratPeringatan.map((sp) => {
           const ormawa = ormawas.find(o => o.id === sp.ormawaId);
           const isActive = sp.status === 'active';
 
@@ -124,13 +195,29 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
         })}
       </div>
 
-      {suratPeringatan.length === 0 && (
-        <div className="bg-white rounded-3xl p-12 text-center border border-slate-200">
+      {filteredSuratPeringatan.length === 0 && (
+        <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-soft">
           <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-          <h4 className="font-bold text-slate-900 text-sm">Tidak Ada Surat Peringatan Aktif</h4>
-          <p className="text-xs text-slate-600 mt-0.5">
-            Seluruh ormawa Fasilkom saat ini mematuhi batas waktu dan tupoksi organisasi.
+          <h4 className="font-bold text-slate-900 text-sm">
+            {filterStatus === 'all'
+              ? 'Tidak Ada Surat Peringatan'
+              : filterStatus === 'active'
+              ? 'Tidak Ada Surat Peringatan yang Sedang Aktif'
+              : 'Belum Ada Surat Peringatan yang Ditandai Terselesaikan'}
+          </h4>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            {filterStatus === 'active'
+              ? 'Seluruh ormawa Fasilkom saat ini tertib administratif dan mematuhi tenggat proker.'
+              : 'Daftar riwayat SP akan tampil di sini setelah ada surat yang diselesaikan.'}
           </p>
+          {filterStatus !== 'all' && (
+            <button
+              onClick={() => setFilterStatus('all')}
+              className="mt-3 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+            >
+              Lihat Semua SP
+            </button>
+          )}
         </div>
       )}
     </div>
