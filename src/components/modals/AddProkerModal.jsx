@@ -381,29 +381,31 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
             <button
               type="button"
               onClick={() => setShowExtraDetails(!showExtraDetails)}
-              className="w-full py-2.5 px-3 rounded-2xl bg-blue-50/70 hover:bg-blue-50 border border-blue-100 text-blue-700 font-bold text-xs flex items-center justify-between transition cursor-pointer"
+              className="w-full py-2.5 px-3 rounded-2xl bg-blue-50/70 hover:bg-blue-50 border border-blue-100 text-blue-700 font-bold text-xs flex items-center justify-between gap-2 transition cursor-pointer"
             >
-              <span className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-blue-600" />
-                <span>Isi Rincian Panitia &amp; Tujuan Sekarang (Opsional)</span>
+              <span className="flex items-center gap-2 min-w-0 flex-1 text-left">
+                <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+                <span className="text-[11px] sm:text-xs leading-snug">
+                  Isi Rincian Panitia &amp; Tujuan Sekarang (Opsional)
+                </span>
               </span>
-              <span className="text-[10px] bg-white border border-blue-200 px-2 py-0.5 rounded-full font-bold">
+              <span className="text-[10px] bg-white border border-blue-200 px-2.5 py-1 rounded-full font-bold shrink-0 whitespace-nowrap shadow-2xs">
                 {showExtraDetails ? 'Tutup' : '+ Buka'}
               </span>
             </button>
 
             {showExtraDetails && (
-              <div className="mt-3 p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3 animate-in fade-in-50 duration-150">
+              <div className="mt-3 p-3.5 sm:p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3 animate-in fade-in-50 duration-150">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">
+                  <label className="font-bold text-slate-700 block mb-1.5 text-[11px] sm:text-xs">
                     Tujuan &amp; Output Kegiatan (Ketik 1 tujuan per baris)
                   </label>
                   <textarea
-                    rows={3}
+                    rows={4}
                     value={tujuanText}
                     onChange={(e) => setTujuanText(e.target.value)}
-                    placeholder="Contoh:&#10;Meningkatkan pemahaman keorganisasian mahasiswa&#10;Menghasilkan keputusan musyawarah yang transparan"
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                    placeholder="Contoh:&#10;• Meningkatkan pemahaman keorganisasian mahasiswa&#10;• Menghasilkan keputusan musyawarah yang transparan"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 leading-relaxed placeholder:text-slate-400 placeholder:leading-relaxed min-h-[96px] focus:outline-none focus:ring-2 focus:ring-slate-900 resize-y"
                   />
                 </div>
 

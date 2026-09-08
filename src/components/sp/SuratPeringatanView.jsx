@@ -18,15 +18,15 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
   return (
     <div className="space-y-6">
       {/* Top Banner Overview & Filter Bar */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-soft space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center shrink-0 border border-rose-100">
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-soft space-y-3.5 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center shrink-0 border border-rose-100 mt-0.5 sm:mt-0">
               <AlertOctagon className="w-5 h-5 text-rose-600" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-extrabold text-slate-900 text-sm">
+                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
                   Surat Peringatan (SP) Ormawa
                 </h3>
                 {activeCount > 0 && (
@@ -36,16 +36,16 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed">
                 Pengawasan kedisiplinan administratif, tenggat proposal, dan pelaporan LPJ ormawa.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={onOpenIssueSP}
-              className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-bold shadow-xs transition active:scale-95 shrink-0"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-bold shadow-xs transition active:scale-95 shrink-0 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Terbitkan SP Baru</span>
@@ -54,7 +54,7 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
         </div>
 
         {/* Status Filter Tabs with Counts */}
-        <div className="flex items-center gap-2 pt-1 border-t border-slate-100 overflow-x-auto pb-1 hide-scrollbar">
+        <div className="flex items-center gap-2 pt-2 border-t border-slate-100 overflow-x-auto pb-1 hide-scrollbar -mx-0.5 px-0.5">
           <button
             onClick={() => setFilterStatus('all')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${

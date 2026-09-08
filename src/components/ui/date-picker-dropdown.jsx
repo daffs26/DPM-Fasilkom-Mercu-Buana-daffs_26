@@ -214,7 +214,7 @@ export default function DatePickerDropdown({
 
       {/* Calendar Dropdown Popover */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 z-50 bg-white rounded-2xl p-4 shadow-xl border border-slate-100 w-72 sm:w-76 animate-in fade-in zoom-in-95 duration-150 select-none">
+        <div className="absolute right-0 sm:left-0 sm:right-auto top-full mt-2 z-50 bg-white rounded-2xl p-3 sm:p-4 shadow-xl border border-slate-100 w-[275px] sm:w-76 max-w-[calc(100vw-2rem)] animate-in fade-in zoom-in-95 duration-150 select-none">
           {/* Header Navigation */}
           <div className="flex items-center justify-between mb-4 px-1">
             <button

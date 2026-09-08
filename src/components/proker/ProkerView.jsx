@@ -94,23 +94,21 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     <div className="space-y-4 sm:space-y-5">
       {/* 1. TOP EFFICIENCY STRIP: Mini KPI & Ringkasan Cepat */}
       <div className="bg-white rounded-3xl p-3.5 sm:p-4 border border-slate-200/80 shadow-soft transition-all duration-300">
-        <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
+          <div className="flex items-center gap-2 min-w-0">
             <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
               <Layers className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                Manajemen &amp; Pengawasan Program Kerja
-              </h3>
-            </div>
+            <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm truncate sm:whitespace-normal">
+              Manajemen &amp; Pengawasan Program Kerja
+            </h3>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setIsKpiExpanded(!isKpiExpanded)}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl text-[11px] font-bold transition shadow-2xs cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl text-[11px] font-bold transition shadow-2xs cursor-pointer"
               title={isKpiExpanded ? 'Tutup Ringkasan' : 'Buka Ringkasan KPI'}
             >
               {isKpiExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -118,7 +116,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
             </button>
             <button
               onClick={onOpenAddProker}
-              className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition shrink-0 cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Tambah Proker</span>
