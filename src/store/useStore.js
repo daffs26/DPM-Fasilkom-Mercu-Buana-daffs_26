@@ -871,7 +871,10 @@ export const useStore = create(
         ...currentState,
         ...persistedState,
         templates: (persistedState && Array.isArray(persistedState.templates) && persistedState.templates.length > 0)
-          ? persistedState.templates
+          ? persistedState.templates.map((t) => {
+              const defaultTpl = currentState.templates?.find((init) => init.id === t.id && init.isOfficial);
+              return defaultTpl ? { ...t, title: defaultTpl.title, description: defaultTpl.description } : t;
+            })
           : currentState.templates,
         budgetTransactions: (persistedState && Array.isArray(persistedState.budgetTransactions))
           ? persistedState.budgetTransactions

@@ -242,7 +242,7 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
                   Butuh Template Dokumen &amp; Surat Resmi Ormawa?
                 </h4>
                 <p className="text-[11px] text-slate-600 mt-0.5">
-                  Tersedia format baku surat izin dispensasi panitia, sidang umum ormawa (SUO), proposal sponsor, dan peminjaman ruangan.
+                  Tersedia format baku surat izin dispensasi panitia, sidang umum, proposal sponsor, dan peminjaman ruangan.
                 </p>
               </div>
             </div>

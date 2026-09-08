@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, AlertOctagon, Menu, ChevronDown, X } from 'lucide-react';
+import { Search, Plus, AlertOctagon, Menu, ChevronDown, X, Building2, Filter, Check } from 'lucide-react';
 
 export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar }) {
   const { 
@@ -16,15 +16,27 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
   } = useStore();
 
   const [isOrmawaDropdownOpen, setIsOrmawaDropdownOpen] = useState(false);
+  const [isDesktopOrmawaOpen, setIsDesktopOrmawaOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
+  const desktopDropdownRef = useRef(null);
 
   const overdueCount = prokers.filter(p => p.status === 'lpj_overdue').length;
   const activeOrmawa = ormawas.find(o => o.id === selectedOrmawaFilter);
 
-  // Close dropdowns on click outside
+  const ormawaOrder = ['dpm', 'bem', 'himti', 'himsisfo'];
+  const sortedOrmawas = useMemo(() => {
+    return [...ormawas].sort((a, b) => {
+      const idxA = ormawaOrder.indexOf(a.id);
+      const idxB = ormawaOrder.indexOf(b.id);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return 0;
+    });
+  }, [ormawas]);
+
+  // Close dropdowns on click outside & Escape
   useEffect(() => {
     function handleClickOutside(e) {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -33,9 +45,24 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsOrmawaDropdownOpen(false);
       }
+      if (desktopDropdownRef.current && !desktopDropdownRef.current.contains(e.target)) {
+        setIsDesktopOrmawaOpen(false);
+      }
     }
+
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') {
+        setIsDesktopOrmawaOpen(false);
+        setIsOrmawaDropdownOpen(false);
+      }
+    }
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const mobileInputRef = useRef(null);
@@ -178,7 +205,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                   }`}
                 >
                   <span>Semua Ormawa</span>
-                  <span className="text-[10px] bg-slate-100 px-1.5 py-0.2 rounded-full font-bold text-slate-600">
+                  <span className="text-[10px] bg-slate-100 px-1.5 py-0.2 rounded-full font-bold text-blue-600">
                     {prokers.length}
                   </span>
                 </button>
@@ -202,7 +229,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                       className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition ${
                         isSelected
                           ? `${getOrmawaMobileStyle(o.id)} shadow-2xs`
-                          : 'text-slate-700 hover:bg-slate-50'
+                          : 'text-blue-700 hover:bg-slate-50'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -387,104 +414,160 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
           </div>
         </div>
 
-        {/* Ormawa Quick Filter Tabs - Clean, Spaced, and Distinct */}
-        <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-slate-100 overflow-x-auto pb-0.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">
-            Ormawa:
-          </span>
-
-          {/* Semua Tab */}
-          <button
-            onClick={() => setSelectedOrmawaFilter('all')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 border ${
-              selectedOrmawaFilter === 'all'
-                ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-            }`}
-          >
-            <span>Semua Ormawa</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-              selectedOrmawaFilter === 'all' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'
-            }`}>
-              {prokers.length}
+        {/* Ormawa Dropdown Filter - Modern, Compact, and Elegant */}
+        <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100">
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-slate-400" />
+              Ormawa:
             </span>
-          </button>
 
-          {/* DPM */}
-          <button
-            onClick={() => setSelectedOrmawaFilter('dpm')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition shrink-0 border ${
-              selectedOrmawaFilter === 'dpm'
-                ? 'bg-slate-900 border-slate-900 text-white shadow-xs ring-2 ring-slate-900/15'
-                : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
-            }`}
-          >
-            <div className="w-2 h-2 rounded-full bg-slate-900 shrink-0" />
-            <img src="/logos/logo-dpm.png" alt="DPM" className="w-4 h-4 object-contain shrink-0" />
-            <span>DPM</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-              selectedOrmawaFilter === 'dpm' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'
-            }`}>
-              {prokers.filter(p => p.ormawaId === 'dpm').length}
-            </span>
-          </button>
+            {/* Custom Interactive Dropdown */}
+            <div className="relative" ref={desktopDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsDesktopOrmawaOpen(prev => !prev)}
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-slate-300 text-xs font-bold text-slate-800 shadow-2xs hover:shadow-xs transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+              >
+                {activeOrmawa ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-md bg-white border border-slate-200/80 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                      <img src={activeOrmawa.logo} alt={activeOrmawa.shortName} className="w-full h-full object-contain" />
+                    </div>
+                    <span className="font-extrabold text-slate-900">{activeOrmawa.shortName}</span>
+                    <span className="text-[10px] text-slate-400 font-normal hidden xl:inline">({activeOrmawa.name})</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-slate-900">Semua Ormawa Fasilkom</span>
+                  </div>
+                )}
 
-          {/* BEM */}
-          <button
-            onClick={() => setSelectedOrmawaFilter('bem')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition shrink-0 border ${
-              selectedOrmawaFilter === 'bem'
-                ? 'bg-sky-500 border-sky-500 text-white shadow-xs ring-2 ring-sky-400/20'
-                : 'bg-white border-sky-200 text-sky-900 hover:bg-sky-50/60'
-            }`}
-          >
-            <div className="w-2 h-2 rounded-full bg-sky-400 shrink-0" />
-            <img src="/logos/logo-bem.png" alt="BEM" className="w-4 h-4 object-contain shrink-0" />
-            <span>BEM</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-              selectedOrmawaFilter === 'bem' ? 'bg-sky-600 text-white' : 'bg-sky-100 text-sky-800'
-            }`}>
-              {prokers.filter(p => p.ormawaId === 'bem').length}
-            </span>
-          </button>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-extrabold bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                  {selectedOrmawaFilter === 'all' 
+                    ? `${prokers.length} Proker` 
+                    : `${prokers.filter(p => p.ormawaId === selectedOrmawaFilter).length} Proker`
+                  }
+                </span>
 
-          {/* HIMTI */}
-          <button
-            onClick={() => setSelectedOrmawaFilter('himti')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition shrink-0 border ${
-              selectedOrmawaFilter === 'himti'
-                ? 'bg-blue-900 border-blue-900 text-white shadow-xs ring-2 ring-blue-900/20'
-                : 'bg-white border-blue-200 text-blue-950 hover:bg-blue-50/60'
-            }`}
-          >
-            <div className="w-2 h-2 rounded-full bg-blue-900 shrink-0" />
-            <img src="/logos/logo-himti.png" alt="HIMTI" className="w-4 h-4 object-contain shrink-0" />
-            <span>HIMTI</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-              selectedOrmawaFilter === 'himti' ? 'bg-blue-950 text-white' : 'bg-blue-100 text-blue-950'
-            }`}>
-              {prokers.filter(p => p.ormawaId === 'himti').length}
-            </span>
-          </button>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-transform duration-200 ${isDesktopOrmawaOpen ? 'rotate-180 text-slate-900' : ''}`} />
+              </button>
 
-          {/* HIMSISFO */}
-          <button
-            onClick={() => setSelectedOrmawaFilter('himsisfo')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition shrink-0 border ${
-              selectedOrmawaFilter === 'himsisfo'
-                ? 'bg-[#9A7B56] border-[#9A7B56] text-white shadow-xs ring-2 ring-[#9A7B56]/20'
-                : 'bg-white border-[#E8DEC8] text-[#785E43] hover:bg-[#FBF9F5]'
-            }`}
-          >
-            <div className="w-2 h-2 rounded-full bg-[#9A7B56] shrink-0" />
-            <img src="/logos/logo-himsisfo.png" alt="HIMSISFO" className="w-4 h-4 object-contain shrink-0" />
-            <span>HIMSISFO</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-              selectedOrmawaFilter === 'himsisfo' ? 'bg-[#785E43] text-white' : 'bg-[#F2ECE1] text-[#785E43]'
-            }`}>
-              {prokers.filter(p => p.ormawaId === 'himsisfo').length}
+              {/* Floating Popover Menu */}
+              {isDesktopOrmawaOpen && (
+                <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl border border-slate-200/90 shadow-xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 flex items-center justify-between border-b border-slate-100 mb-1">
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                      Filter Lembaga Ormawa
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-400">
+                      T.A. 2026/2027
+                    </span>
+                  </div>
+
+                  {/* Opsi: Semua Ormawa */}
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedOrmawaFilter('all'); setIsDesktopOrmawaOpen(false); }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedOrmawaFilter === 'all'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-blue-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="text-left">
+                        <div className="leading-tight">Semua Ormawa</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
+                        selectedOrmawaFilter === 'all' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-blue-600'
+                      }`}>
+                        {prokers.length}
+                      </span>
+                      {selectedOrmawaFilter === 'all' && <Check className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                  </button>
+
+                  <div className="h-px bg-slate-100 my-1" />
+
+                  {/* Opsi per Ormawa */}
+                  {sortedOrmawas.map((o) => {
+                    const isSelected = selectedOrmawaFilter === o.id;
+                    const count = prokers.filter(p => p.ormawaId === o.id).length;
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        onClick={() => { setSelectedOrmawaFilter(o.id); setIsDesktopOrmawaOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? 'text-blue-700  shadow-xs'
+                            : 'text-blue-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-6 h-6 rounded-lg bg-white p-0.5 border border-slate-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                            <img src={o.logo} alt={o.shortName} className="w-full h-full object-contain" />
+                          </div>
+
+                          <div className="text-left truncate">
+                            <div className="leading-tight flex items-center gap-1.5">
+                              <span>{o.shortName}</span>
+                              <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded shrink-0 ${
+                                isSelected ? 'text-blue-700 bg-blue-200'
+                            : 'text-blue-700 hover:bg-slate-50'
+                              }`}>
+                                {o.type?.split(' ')[0] || 'Ormawa'}
+                              </span>
+
+                            </div>
+                            
+                            <div className={`text-[10px] font-normal truncate max-w-[130px] ${
+                              isSelected ? 'text-slate-300' : 'text-slate-400'
+                            }`}>
+                              {o.name}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
+                            isSelected ? 'bg-slate-300 text-blue-700' : 'bg-slate-100 text-blue-600'
+                          }`}>
+                            {count}
+                          </span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Tombol Reset Cepat bila sedang memfilter satu ormawa */}
+            {selectedOrmawaFilter !== 'all' && (
+              <button
+                type="button"
+                onClick={() => setSelectedOrmawaFilter('all')}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition cursor-pointer"
+                title="Tampilkan kembali seluruh ormawa"
+              >
+                <X className="w-3 h-3" />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
+
+          {/* Info Status Filter di sisi kanan */}
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <span className="text-[11px] font-medium">
+              Menampilkan <strong className="text-slate-800 font-bold">{selectedOrmawaFilter === 'all' ? prokers.length : prokers.filter(p => p.ormawaId === selectedOrmawaFilter).length}</strong> proker terdaftar
             </span>
-          </button>
+          </div>
         </div>
       </div>
     </header>

@@ -210,7 +210,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                         {p.proposal.isDadakan ? '⚠️ Terlambat (< H-14)' : '✓ Ada'} ({p.proposal.uploadDate})
                       </span>
                     ) : (
-                      <span className="text-slate-600 italic">Belum diunggah</span>
+                      <span className="text-slate-600">Belum diunggah</span>
                     )}
                   </div>
 

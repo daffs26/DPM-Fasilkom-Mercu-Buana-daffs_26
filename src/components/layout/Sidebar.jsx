@@ -50,7 +50,7 @@ export default function Sidebar({ isOpen, onClose }) {
     },
     {
       id: 'proker',
-      label: 'Monitoring Proker',
+      label: 'Proker',
       icon: Layers,
       badge: pendingProposalCount > 0 ? { text: `${pendingProposalCount} Pending`, color: 'bg-amber-100 text-amber-800' } : null
     },

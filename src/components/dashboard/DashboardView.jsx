@@ -409,24 +409,12 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
                       <h3 className="font-extrabold text-slate-900 text-sm tracking-normal">
                         Indeks Kinerja: {activeOrmawa?.shortName}
                       </h3>
-                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
-                        Fokus Ormawa Terpilih
-                      </span>
                     </div>
                     <p className="text-[11px] text-slate-500 mt-0.5 truncate">
                       {activeOrmawa?.name} • Evaluasi Kepatuhan Periode 2026/2027
                     </p>
                   </div>
                 </div>
-
-                <button
-                  onClick={() => setSelectedOrmawaFilter('all')}
-                  className="text-xs font-bold text-slate-600 hover:text-blue-700 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl border border-slate-200/80 hover:border-blue-200 transition flex items-center gap-1.5 self-start sm:self-center shrink-0"
-                  title="Kembali melihat perbandingan seluruh ormawa"
-                >
-                  <Layers className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Lihat Semua Ormawa</span>
-                </button>
               </div>
 
               {/* Grid Komparatif Khusus Ormawa Terpilih */}

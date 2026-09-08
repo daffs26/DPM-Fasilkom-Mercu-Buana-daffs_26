@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -38,7 +38,10 @@ import {
   CheckSquare,
   Square,
   ListTodo,
-  AlertCircle
+  AlertCircle,
+  Link2,
+  UploadCloud,
+  FileImage
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
@@ -132,8 +135,48 @@ export default function DetailProkerModal({
   const [newRab, setNewRab] = useState({
     pos: '',
     desc: '',
-    subtotal: ''
+    subtotal: '',
+    link: '',
+    receiptPhoto: null,
+    receiptName: '',
+    receiptSize: ''
   });
+  const [previewRabReceipt, setPreviewRabReceipt] = useState(null);
+  const rabReceiptInputRef = useRef(null);
+
+  const handleRabReceiptChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran berkas bukti pembayaran terlalu besar! Maksimal 5 MB.');
+      return;
+    }
+
+    const sizeInKb = Math.round(file.size / 1024);
+    const sizeStr = sizeInKb > 1024 ? `${(sizeInKb / 1024).toFixed(1)} MB` : `${sizeInKb} KB`;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setNewRab(prev => ({
+        ...prev,
+        receiptPhoto: event.target.result,
+        receiptName: file.name,
+        receiptSize: sizeStr
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveRabReceipt = () => {
+    setNewRab(prev => ({
+      ...prev,
+      receiptPhoto: null,
+      receiptName: '',
+      receiptSize: ''
+    }));
+    if (rabReceiptInputRef.current) rabReceiptInputRef.current.value = '';
+  };
 
   // Sync state whenever proker changes
   useEffect(() => {
@@ -344,7 +387,11 @@ export default function DetailProkerModal({
     const updated = [...rabItems, {
       pos: newRab.pos.trim(),
       desc: newRab.desc.trim() || 'Biaya operasional kegiatan',
-      subtotal: rawSubtotal
+      subtotal: rawSubtotal,
+      link: newRab.link?.trim() || '',
+      receiptPhoto: newRab.receiptPhoto || null,
+      receiptName: newRab.receiptName || '',
+      receiptSize: newRab.receiptSize || ''
     }];
     setRabItems(updated);
     const calculatedTotal = updated.reduce((acc, curr) => acc + (curr.subtotal || 0), 0);
@@ -352,7 +399,16 @@ export default function DetailProkerModal({
       rabBreakdown: updated,
       rab: calculatedTotal
     });
-    setNewRab({ pos: '', desc: '', subtotal: '' });
+    setNewRab({
+      pos: '',
+      desc: '',
+      subtotal: '',
+      link: '',
+      receiptPhoto: null,
+      receiptName: '',
+      receiptSize: ''
+    });
+    if (rabReceiptInputRef.current) rabReceiptInputRef.current.value = '';
     setIsAddingRab(false);
   };
 
@@ -367,7 +423,8 @@ export default function DetailProkerModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-[96vw] sm:max-w-3xl p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xl max-h-[92vh] flex flex-col">
         {/* Header Proker */}
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2 shrink-0">
@@ -1178,17 +1235,122 @@ export default function DetailProkerModal({
                     </div>
                   </div>
 
+                  {/* Input Tambahan: Link Toko Online / E-Commerce (Opsional) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                        <Link2 className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Link Toko Online / E-Commerce Barang</span>
+                      </label>
+                      <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                        Opsional
+                      </span>
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="Contoh: https://tokopedia.com/... atau https://shopee.co.id/... (Boleh dikosongkan)"
+                      value={newRab.link}
+                      onChange={(e) => setNewRab({ ...newRab, link: e.target.value })}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      Tautan produk online memudahkan tim pengawas DPM memverifikasi estimasi harga barang di RAB. Form tetap dapat disimpan meski kolom ini kosong.
+                    </p>
+                  </div>
+
+                  {/* Input Tambahan 2: Placeholder Unggah Bukti Pembayaran / Nota (Opsional) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                        <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Unggah Bukti Pembayaran / Nota / Kuitansi</span>
+                      </label>
+                      <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                        Opsional
+                      </span>
+                    </div>
+
+                    <input 
+                      type="file" 
+                      ref={rabReceiptInputRef} 
+                      onChange={handleRabReceiptChange} 
+                      accept="image/*,.pdf" 
+                      className="hidden" 
+                    />
+
+                    {!newRab.receiptPhoto ? (
+                      <div 
+                        onClick={() => rabReceiptInputRef.current?.click()}
+                        className="border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-white hover:bg-emerald-50/20 rounded-xl p-3 text-center cursor-pointer transition flex items-center justify-center gap-3 group shadow-2xs"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                          <UploadCloud className="w-4 h-4" />
+                        </div>
+                        <div className="text-left">
+                          <span className="text-xs font-bold text-slate-700 block group-hover:text-emerald-700 transition">
+                            Pilih file foto nota / kuitansi / struk belanja
+                          </span>
+                          <span className="text-[10px] text-slate-400 block">
+                            Format JPG, PNG, atau PDF (Maks. 5 MB) • Boleh dikosongkan jika belum ada nota
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-2.5 bg-white border border-emerald-200 rounded-xl flex items-center justify-between gap-3 shadow-2xs">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {newRab.receiptPhoto.startsWith('data:image') ? (
+                            <img 
+                              src={newRab.receiptPhoto} 
+                              alt="Thumbnail Nota" 
+                              className="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0" 
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200">
+                              <Receipt className="w-4 h-4" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <span className="font-bold text-xs text-slate-900 truncate block">
+                              {newRab.receiptName || 'Bukti Pembayaran Terlampir'}
+                            </span>
+                            <span className="text-[10px] text-emerald-600 font-semibold block">
+                              {newRab.receiptSize ? `${newRab.receiptSize} • Siap disimpan` : 'Siap disimpan'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => rabReceiptInputRef.current?.click()}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition cursor-pointer"
+                          >
+                            Ganti
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleRemoveRabReceipt}
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            title="Hapus nota ini"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex items-center justify-end gap-2 pt-1">
                     <button
                       type="button"
                       onClick={() => setIsAddingRab(false)}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100"
+                      className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer"
                     >
                       Batal
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs"
+                      className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer"
                     >
                       Simpan Pos RAB
                     </button>
@@ -1206,8 +1368,36 @@ export default function DetailProkerModal({
                   {rabItems.map((item, idx) => (
                     <div key={`rab-item-${idx}`} className="p-3 flex items-center justify-between gap-3 text-xs hover:bg-slate-50/50 group">
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-slate-900">{item.pos}</span>
+                          {item.link && (
+                            <a
+                              href={item.link.startsWith('http') ? item.link : `https://${item.link}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 px-2 py-0.5 rounded-md transition shadow-2xs"
+                              title="Buka link toko online barang ini di tab baru"
+                            >
+                              <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                              <span className="truncate max-w-[180px] sm:max-w-xs">Lihat Toko Online</span>
+                            </a>
+                          )}
+                          {item.receiptPhoto && (
+                            <button
+                              type="button"
+                              onClick={() => setPreviewRabReceipt({
+                                photo: item.receiptPhoto,
+                                name: item.receiptName || `Nota - ${item.pos}`,
+                                pos: item.pos,
+                                subtotal: item.subtotal
+                              })}
+                              className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2 py-0.5 rounded-md transition shadow-2xs cursor-pointer"
+                              title="Lihat foto bukti pembayaran / nota belanja"
+                            >
+                              <Receipt className="w-2.5 h-2.5 shrink-0" />
+                              <span>Lihat Bukti Nota</span>
+                            </button>
+                          )}
                         </div>
                         <p className="text-[10px] text-slate-500 mt-0.5">{item.desc}</p>
                       </div>
@@ -1218,7 +1408,7 @@ export default function DetailProkerModal({
                         <button
                           type="button"
                           onClick={() => handleDeleteRab(idx)}
-                          className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition"
+                          className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                           title="Hapus pos RAB ini"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1454,6 +1644,50 @@ export default function DetailProkerModal({
           </button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      {/* Modal Pratinjau Foto Bukti Pembayaran RAB */}
+      {previewRabReceipt && (
+        <Dialog open={!!previewRabReceipt} onOpenChange={() => setPreviewRabReceipt(null)}>
+          <DialogContent className="w-[92vw] sm:max-w-md p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-2xl">
+            <DialogHeader className="pb-2 border-b border-slate-100">
+              <DialogTitle className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-emerald-600" />
+                <span>Bukti Pembayaran: {previewRabReceipt.pos}</span>
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-500">
+                Nominal Biaya: Rp {(previewRabReceipt.subtotal || 0).toLocaleString('id-ID')}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-3 flex items-center justify-center">
+              {previewRabReceipt.photo && String(previewRabReceipt.photo).startsWith('data:image') ? (
+                <img 
+                  src={previewRabReceipt.photo} 
+                  alt={previewRabReceipt.name} 
+                  className="max-h-80 w-auto rounded-xl object-contain border border-slate-200 shadow-xs"
+                />
+              ) : (
+                <div className="p-8 text-center bg-slate-50 rounded-xl border border-slate-200 w-full">
+                  <Receipt className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-800">{previewRabReceipt.name}</p>
+                  <p className="text-[11px] text-slate-500 mt-1">Dokumen bukti pembayaran terlampir sah</p>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setPreviewRabReceipt(null)}
+                className="w-full py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition cursor-pointer text-center"
+              >
+                Tutup Pratinjau
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }

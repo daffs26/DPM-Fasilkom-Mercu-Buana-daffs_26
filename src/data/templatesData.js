@@ -65,7 +65,7 @@ NIM. 41824010013`
   },
   {
     id: 'tpl-sidang-umum',
-    title: 'Dokumen & Tata Tertib Sidang Umum Ormawa (SUO)',
+    title: 'Dokumen & Tata Tertib Sidang Umum',
     category: 'Persidangan',
     categorySlug: 'persidangan',
     format: 'DOCX',
