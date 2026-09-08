@@ -143,7 +143,108 @@ export default function LoginView({ onSwitchToRegister }) {
             </Button>
           </form>
 
-          <div className="mt-8 text-center flex flex-col gap-4">
+          {/* Section: Direct Demo Login (1-Klik) */}
+          <div className="mt-5 p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl">
+            <div className="flex items-center justify-between gap-2 mb-2.5">
+              <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                Akses Demo 1-Klik
+              </span>
+              <span className="text-[10px] font-bold text-amber-700 bg-amber-100/70 border border-amber-300 px-2 py-0.5 rounded-full">
+                Testing Mode
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setLoading(true);
+                  setTimeout(() => {
+                    const res = login('admin', '123');
+                    if (!res.success) setError(res.message);
+                    setLoading(false);
+                  }, 200);
+                }}
+                className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 hover:border-slate-800 hover:bg-slate-900 hover:text-white transition shadow-2xs group text-left cursor-pointer"
+              >
+                <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-slate-900">
+                  DPM
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold truncate">DPM Ketua</p>
+                  <p className="text-[10px] text-slate-400 group-hover:text-slate-300">Legislatif</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setLoading(true);
+                  setTimeout(() => {
+                    const res = login('bem', '123');
+                    if (!res.success) setError(res.message);
+                    setLoading(false);
+                  }, 200);
+                }}
+                className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 hover:border-sky-500 hover:bg-sky-600 hover:text-white transition shadow-2xs group text-left cursor-pointer"
+              >
+                <div className="w-6 h-6 rounded-lg bg-sky-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-sky-600">
+                  BEM
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold truncate">BEM Fasilkom</p>
+                  <p className="text-[10px] text-slate-400 group-hover:text-sky-100">Eksekutif</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setLoading(true);
+                  setTimeout(() => {
+                    const res = login('himti', '123');
+                    if (!res.success) setError(res.message);
+                    setLoading(false);
+                  }, 200);
+                }}
+                className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 hover:border-blue-900 hover:bg-blue-950 hover:text-white transition shadow-2xs group text-left cursor-pointer"
+              >
+                <div className="w-6 h-6 rounded-lg bg-blue-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-blue-950">
+                  TI
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold truncate">HiMTI</p>
+                  <p className="text-[10px] text-slate-400 group-hover:text-blue-200">Teknik Informatika</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setLoading(true);
+                  setTimeout(() => {
+                    const res = login('himsisfo', '123');
+                    if (!res.success) setError(res.message);
+                    setLoading(false);
+                  }, 200);
+                }}
+                className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 hover:border-amber-800 hover:bg-amber-900 hover:text-white transition shadow-2xs group text-left cursor-pointer"
+              >
+                <div className="w-6 h-6 rounded-lg bg-amber-800 text-white flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-amber-900">
+                  SI
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold truncate">HIMSISFO</p>
+                  <p className="text-[10px] text-slate-400 group-hover:text-amber-200">Sistem Informasi</p>
+                </div>
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-400 text-center mt-2 italic">
+              *Akses instan ini akan dihapus otomatis setelah integrasi database.
+            </p>
+          </div>
+
+          <div className="mt-6 text-center flex flex-col gap-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200"></div>

@@ -29,6 +29,10 @@ export const useStore = create(
       templates: INITIAL_TEMPLATES,
       budgetTransactions: INITIAL_BUDGET_TRANSACTIONS,
       
+      // Approval & Workflow State
+      deletionRequests: [], // { id, prokerId, prokerTitle, ormawaId, requesterName, reasonCategory, reasonDetails, date, status: 'pending'|'approved'|'rejected', reviewNote }
+      notifications: [], // { id, title, message, time, date, type, targetOrmawaId, isRead, linkTab, linkId }
+      
       // Auth State
       users: INITIAL_USERS,
       pendingAccounts: INITIAL_PENDING_USERS,
@@ -54,8 +58,51 @@ export const useStore = create(
         return { success: false, message: 'Username atau password salah, atau akun belum di-ACC DPM.' };
       },
 
+      // Direct Login khusus akun demo (akan dihapus saat integrasi backend)
+      directLogin: (username) => {
+        const user = get().users.find(u => u.username === username && u.status === 'approved');
+        if (user) {
+          set({ currentUser: user });
+          return { success: true };
+        }
+        return { success: false, message: `Akun demo ${username} tidak ditemukan.` };
+      },
+
       logout: () => {
         set({ currentUser: null, activeTab: 'dashboard' });
+      },
+
+      updateUserProfile: (userId, updatedData) => {
+        set((state) => {
+          const updatedUsers = state.users.map(u => u.id === userId ? { ...u, ...updatedData } : u);
+          const updatedCurrentUser = state.currentUser?.id === userId ? { ...state.currentUser, ...updatedData } : state.currentUser;
+          return {
+            users: updatedUsers,
+            currentUser: updatedCurrentUser
+          };
+        });
+        return { success: true };
+      },
+
+      changeUserPassword: (userId, oldPassword, newPassword) => {
+        const user = get().users.find(u => u.id === userId);
+        if (!user) return { success: false, message: 'Pengguna tidak ditemukan.' };
+        if (user.password !== oldPassword) {
+          return { success: false, message: 'Password saat ini salah.' };
+        }
+        if (!newPassword || newPassword.length < 3) {
+          return { success: false, message: 'Password baru minimal 3 karakter.' };
+        }
+
+        set((state) => {
+          const updatedUsers = state.users.map(u => u.id === userId ? { ...u, password: newPassword } : u);
+          const updatedCurrentUser = state.currentUser?.id === userId ? { ...state.currentUser, password: newPassword } : state.currentUser;
+          return {
+            users: updatedUsers,
+            currentUser: updatedCurrentUser
+          };
+        });
+        return { success: true, message: 'Password berhasil diperbarui!' };
       },
 
       register: (name, nim, ormawaId, role, username, password) => {
@@ -75,8 +122,21 @@ export const useStore = create(
           status: 'pending'
         };
         
+        const newNotif = {
+          id: `notif-${Date.now()}`,
+          title: 'Registrasi Akun Baru Menunggu ACC',
+          message: `${name} (${role.toUpperCase()} ${ormawaId.toUpperCase()}) telah mendaftar dan menunggu validasi DPM.`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: 'account_pending',
+          targetOrmawaId: 'dpm',
+          isRead: false,
+          linkTab: 'dashboard'
+        };
+
         set((state) => ({
-          pendingAccounts: [newAccount, ...state.pendingAccounts]
+          pendingAccounts: [newAccount, ...state.pendingAccounts],
+          notifications: [newNotif, ...state.notifications]
         }));
         
         return { success: true };
@@ -87,9 +147,22 @@ export const useStore = create(
           const account = state.pendingAccounts.find(a => a.id === userId);
           if (!account) return state;
           
+          const approvedNotif = {
+            id: `notif-${Date.now()}`,
+            title: 'Akun Anda Telah Disetujui DPM',
+            message: `Akun ${account.name} resmi disetujui. Anda kini memiliki akses penuh sebagai pengurus ${account.ormawaId.toUpperCase()}.`,
+            time: 'Baru saja',
+            date: get().getFormattedDate(),
+            type: 'account_approved',
+            targetOrmawaId: account.ormawaId,
+            isRead: false,
+            linkTab: 'dashboard'
+          };
+
           return {
             pendingAccounts: state.pendingAccounts.filter(a => a.id !== userId),
-            users: [...state.users, { ...account, status: 'approved' }]
+            users: [...state.users, { ...account, status: 'approved' }],
+            notifications: [approvedNotif, ...state.notifications]
           };
         });
       },
@@ -164,7 +237,7 @@ export const useStore = create(
         return prokerItem;
       },
 
-      // HAPUS PROGRAM KERJA
+      // HAPUS PROGRAM KERJA (LANGSUNG OLEH DPM)
       deleteProker: (prokerId) => {
         set((state) => {
           const target = state.prokers.find(p => p.id === prokerId);
@@ -182,9 +255,176 @@ export const useStore = create(
 
           return {
             prokers: state.prokers.filter(p => p.id !== prokerId),
+            deletionRequests: state.deletionRequests.filter(r => r.prokerId !== prokerId),
             activityLogs: newLog ? [newLog, ...state.activityLogs] : state.activityLogs
           };
         });
+      },
+
+      // PERMOHONAN HAPUS PROKER OLEH ORMAWA (MENUNGGU ACC DPM)
+      requestProkerDeletion: ({ prokerId, reasonCategory, reasonDetails }) => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const proker = get().prokers.find(p => p.id === prokerId);
+        if (!proker) return { success: false, message: 'Proker tidak ditemukan' };
+
+        const ormawa = get().ormawas.find(o => o.id === proker.ormawaId);
+        const ormawaName = ormawa?.name || proker.ormawaId.toUpperCase();
+        const requesterName = get().currentUser?.name || 'Pengurus Ormawa';
+
+        const newRequest = {
+          id: `delreq-${Date.now()}`,
+          prokerId,
+          prokerTitle: proker.title,
+          ormawaId: proker.ormawaId,
+          ormawaName,
+          requesterName,
+          requesterRole: get().currentUser?.role || 'pengurus',
+          reasonCategory: reasonCategory || 'Kendala Lainnya',
+          reasonDetails: reasonDetails || 'Permohonan pembatalan proker oleh ormawa.',
+          date: todayStr,
+          status: 'pending', // 'pending' | 'approved' | 'rejected'
+          reviewNote: null,
+          reviewedBy: null,
+          reviewedDate: null
+        };
+
+        const newLog = createLogEntry({
+          ormawaId: proker.ormawaId,
+          type: 'proker_deletion_requested',
+          title: `Permohonan Hapus Proker: ${proker.title}`,
+          description: `${requesterName} (${ormawaName}) mengajukan permohonan pembatalan/penghapusan program kerja "${proker.title}". Alasan: [${newRequest.reasonCategory}] ${newRequest.reasonDetails}. Menunggu verifikasi DPM.`,
+          actor: requesterName,
+          prokerTitle: proker.title,
+          prokerId: proker.id,
+          formattedDate: get().getFormattedDate()
+        });
+
+        const newNotif = {
+          id: `notif-${Date.now()}`,
+          title: `Permohonan Hapus Proker: ${proker.title}`,
+          message: `${ormawaName} mengajukan permohonan pembatalan program kerja "${proker.title}". Alasan: ${newRequest.reasonCategory}.`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: 'deletion_request',
+          targetOrmawaId: 'dpm',
+          isRead: false,
+          linkTab: 'proker',
+          linkId: proker.id
+        };
+
+        set((state) => ({
+          prokers: state.prokers.map(p => p.id === prokerId ? { ...p, deletionPending: true, previousStatus: p.status, status: 'deletion_pending' } : p),
+          deletionRequests: [newRequest, ...state.deletionRequests],
+          activityLogs: [newLog, ...state.activityLogs],
+          notifications: [newNotif, ...state.notifications]
+        }));
+
+        return { success: true };
+      },
+
+      // ACC PERMOHONAN HAPUS OLEH DPM
+      approveProkerDeletion: (requestId, reviewNote = '') => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const req = get().deletionRequests.find(r => r.id === requestId);
+        if (!req) return { success: false, message: 'Permohonan tidak ditemukan' };
+
+        const reviewerName = get().currentUser?.name || 'Ketua DPM';
+
+        const newLog = createLogEntry({
+          ormawaId: req.ormawaId,
+          type: 'proker_deletion_approved',
+          title: `Permohonan Hapus Disetujui DPM: ${req.prokerTitle}`,
+          description: `DPM (${reviewerName}) menyetujui penghapusan proker "${req.prokerTitle}" dari ${req.ormawaName}. Proker resmi dihapus dari sistem pengawasan.${reviewNote ? ` Catatan: "${reviewNote}"` : ''}`,
+          actor: reviewerName,
+          prokerTitle: req.prokerTitle,
+          prokerId: req.prokerId,
+          formattedDate: get().getFormattedDate()
+        });
+
+        const ormawaNotif = {
+          id: `notif-${Date.now()}`,
+          title: `Permohonan Hapus Proker Disetujui (ACC)`,
+          message: `DPM telah menyetujui permohonan pembatalan proker "${req.prokerTitle}". Proker telah dihapus dari agenda.${reviewNote ? ` Catatan: "${reviewNote}"` : ''}`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: 'deletion_approved',
+          targetOrmawaId: req.ormawaId,
+          isRead: false,
+          linkTab: 'proker',
+          linkId: req.prokerId
+        };
+
+        set((state) => ({
+          prokers: state.prokers.filter(p => p.id !== req.prokerId),
+          deletionRequests: state.deletionRequests.map(r => r.id === requestId ? {
+            ...r,
+            status: 'approved',
+            reviewNote: reviewNote || 'Disetujui oleh DPM FASILKOM',
+            reviewedBy: reviewerName,
+            reviewedDate: todayStr
+          } : r),
+          activityLogs: [newLog, ...state.activityLogs],
+          notifications: [ormawaNotif, ...state.notifications]
+        }));
+
+        return { success: true };
+      },
+
+      // TOLAK PERMOHONAN HAPUS OLEH DPM
+      rejectProkerDeletion: (requestId, reviewNote = 'Permohonan dibatalkan oleh DPM') => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const req = get().deletionRequests.find(r => r.id === requestId);
+        if (!req) return { success: false, message: 'Permohonan tidak ditemukan' };
+
+        const reviewerName = get().currentUser?.name || 'Ketua DPM';
+
+        const newLog = createLogEntry({
+          ormawaId: req.ormawaId,
+          type: 'proker_deletion_rejected',
+          title: `Permohonan Hapus Ditolak DPM: ${req.prokerTitle}`,
+          description: `DPM menolak permohonan penghapusan proker "${req.prokerTitle}". Alasan penolakan: "${reviewNote}". Proker dikembalikan ke status aktif pengawasan.`,
+          actor: reviewerName,
+          prokerTitle: req.prokerTitle,
+          prokerId: req.prokerId,
+          formattedDate: get().getFormattedDate()
+        });
+
+        const ormawaNotif = {
+          id: `notif-${Date.now()}`,
+          title: `Permohonan Hapus Proker Ditolak DPM`,
+          message: `DPM tidak menyetujui permohonan pembatalan proker "${req.prokerTitle}". Catatan DPM: "${reviewNote}". Proker tetap harus dilaksanakan / dikoordinasikan kembali.`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: 'deletion_rejected',
+          targetOrmawaId: req.ormawaId,
+          isRead: false,
+          linkTab: 'proker',
+          linkId: req.prokerId
+        };
+
+        set((state) => ({
+          prokers: state.prokers.map(p => {
+            if (p.id === req.prokerId) {
+              return {
+                ...p,
+                deletionPending: false,
+                status: p.previousStatus || (p.proposal?.fileName ? 'proposal_pending' : 'draft')
+              };
+            }
+            return p;
+          }),
+          deletionRequests: state.deletionRequests.map(r => r.id === requestId ? {
+            ...r,
+            status: 'rejected',
+            reviewNote,
+            reviewedBy: reviewerName,
+            reviewedDate: todayStr
+          } : r),
+          activityLogs: [newLog, ...state.activityLogs],
+          notifications: [ormawaNotif, ...state.notifications]
+        }));
+
+        return { success: true };
       },
 
       // 2. UPLOAD PROPOSAL UNTUK PROKER TERTENTU
@@ -400,6 +640,142 @@ export const useStore = create(
         }));
       },
 
+      // SUBMIT REVISI PROPOSAL OLEH ORMAWA
+      submitProposalRevision: (prokerId, fileInfo, changelogNotes = '') => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const proker = get().prokers.find(p => p.id === prokerId);
+        if (!proker) return { success: false, message: 'Proker tidak ditemukan' };
+
+        const ormawa = get().ormawas.find(o => o.id === proker.ormawaId);
+        const ormawaName = ormawa?.name || proker.ormawaId.toUpperCase();
+        const currentVersion = proker.proposal?.version || 1;
+        const newVersion = currentVersion + 1;
+
+        const newChangelogNote = {
+          id: Date.now(),
+          author: get().currentUser?.name || ormawaName,
+          text: `[Revisi v${newVersion}] ${changelogNotes || 'Pengajuan berkas perbaikan proposal sesuai catatan DPM.'}`,
+          date: todayStr,
+          isChangelog: true
+        };
+
+        const existingNotes = proker.proposal?.notes || [];
+
+        const updatedProposal = {
+          ...proker.proposal,
+          fileName: fileInfo?.name || `Proposal_Revisi_v${newVersion}_${proker.title.replace(/\s+/g, '_')}.pdf`,
+          fileSize: fileInfo?.size || '2.8 MB',
+          uploadDate: todayStr,
+          reviewStatus: 'pending',
+          version: newVersion,
+          notes: [...existingNotes, newChangelogNote]
+        };
+
+        const newLog = createLogEntry({
+          ormawaId: proker.ormawaId,
+          type: 'proposal_revision_submitted',
+          title: `Berkas Revisi Proposal Diunggah: ${proker.title} (v${newVersion})`,
+          description: `${ormawaName} mengunggah berkas revisi proposal ke-${newVersion}. Catatan perbaikan: "${changelogNotes || 'Telah disesuaikan dengan checklist revisi DPM'}". Status dialihkan kembali ke antrean review DPM.`,
+          actor: get().currentUser?.name || ormawaName,
+          prokerTitle: proker.title,
+          prokerId: proker.id,
+          formattedDate: get().getFormattedDate()
+        });
+
+        const dpmNotif = {
+          id: `notif-${Date.now()}`,
+          title: `Revisi Proposal Masuk: ${proker.title}`,
+          message: `${ormawaName} telah mengunggah revisi proposal (v${newVersion}) untuk ditinjau ulang DPM.`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: 'proposal_revised',
+          targetOrmawaId: 'dpm',
+          isRead: false,
+          linkTab: 'proker',
+          linkId: proker.id
+        };
+
+        set((state) => ({
+          prokers: state.prokers.map(p => p.id === prokerId ? {
+            ...p,
+            status: 'proposal_pending',
+            proposal: updatedProposal
+          } : p),
+          activityLogs: [newLog, ...state.activityLogs],
+          notifications: [dpmNotif, ...state.notifications]
+        }));
+
+        return { success: true };
+      },
+
+      // SUBMIT REVISI LPJ OLEH ORMAWA
+      submitLpjRevision: (prokerId, fileInfo, changelogNotes = '') => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const proker = get().prokers.find(p => p.id === prokerId);
+        if (!proker) return { success: false, message: 'Proker tidak ditemukan' };
+
+        const ormawa = get().ormawas.find(o => o.id === proker.ormawaId);
+        const ormawaName = ormawa?.name || proker.ormawaId.toUpperCase();
+        const currentVersion = proker.lpj?.version || 1;
+        const newVersion = currentVersion + 1;
+
+        const newChangelogNote = {
+          id: Date.now(),
+          author: get().currentUser?.name || ormawaName,
+          text: `[Revisi LPJ v${newVersion}] ${changelogNotes || 'Perbaikan berkas LPJ dan kelengkapan bukti transaksi.'}`,
+          date: todayStr,
+          isChangelog: true
+        };
+
+        const existingNotes = proker.lpj?.notes || [];
+
+        const updatedLpj = {
+          ...proker.lpj,
+          fileName: fileInfo?.name || `LPJ_Revisi_v${newVersion}_${proker.title.replace(/\s+/g, '_')}.pdf`,
+          fileSize: fileInfo?.size || '5.5 MB',
+          uploadDate: todayStr,
+          reviewStatus: 'pending',
+          version: newVersion,
+          notes: [...existingNotes, newChangelogNote]
+        };
+
+        const newLog = createLogEntry({
+          ormawaId: proker.ormawaId,
+          type: 'lpj_revision_submitted',
+          title: `Berkas Revisi LPJ Diunggah: ${proker.title}`,
+          description: `${ormawaName} mengunggah berkas revisi LPJ. Catatan: "${changelogNotes}". Menunggu audit ulang DPM.`,
+          actor: get().currentUser?.name || ormawaName,
+          prokerTitle: proker.title,
+          prokerId: proker.id,
+          formattedDate: get().getFormattedDate()
+        });
+
+        const dpmNotif = {
+          id: `notif-${Date.now()}`,
+          title: `Revisi LPJ Masuk: ${proker.title}`,
+          message: `${ormawaName} telah mengunggah revisi LPJ untuk diaudit kembali oleh DPM.`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: 'lpj_revised',
+          targetOrmawaId: 'dpm',
+          isRead: false,
+          linkTab: 'proker',
+          linkId: proker.id
+        };
+
+        set((state) => ({
+          prokers: state.prokers.map(p => p.id === prokerId ? {
+            ...p,
+            status: 'lpj_pending',
+            lpj: updatedLpj
+          } : p),
+          activityLogs: [newLog, ...state.activityLogs],
+          notifications: [dpmNotif, ...state.notifications]
+        }));
+
+        return { success: true };
+      },
+
       // 4. INSPEKSI LAPANGAN HARI-H DPM
       saveInspection: (prokerId, inspectionData) => {
         const todayStr = new Date().toISOString().split('T')[0];
@@ -605,7 +981,11 @@ export const useStore = create(
           date: todayStr,
           signer: 'Muhammad Daffa Aulia Syahrul',
           signerRole: 'Ketua DPM FASILKOM Universitas Mercu Buana',
-          status: 'active'
+          status: 'active', // 'active' | 'clarification_submitted' | 'resolved'
+          clarification: null,
+          resolveNote: null,
+          clarificationRejectNote: null,
+          resolvedDate: null
         };
 
         const newLog = createLogEntry({
@@ -617,19 +997,139 @@ export const useStore = create(
           formattedDate: get().getFormattedDate()
         });
 
+        const spNotif = {
+          id: `notif-${Date.now()}`,
+          title: `Surat Peringatan ${spPayload.level} Diterbitkan!`,
+          message: `DPM menerbitkan SP ${spPayload.level} untuk kegiatan "${spPayload.prokerTitle}". Segera berikan tanggapan / klarifikasi.`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: 'sp_issued',
+          targetOrmawaId: spPayload.ormawaId,
+          isRead: false,
+          linkTab: 'sp',
+          linkId: spItem.id
+        };
+
         set((state) => ({
           suratPeringatan: [spItem, ...state.suratPeringatan],
-          activityLogs: [newLog, ...state.activityLogs]
+          activityLogs: [newLog, ...state.activityLogs],
+          notifications: [spNotif, ...state.notifications]
         }));
 
         return spItem;
       },
 
-      // 8. RESOLVE SP
-      resolveSP: (spId) => {
+      // 8. RESOLVE SP LANGSUNG OLEH DPM
+      resolveSP: (spId, noteText = 'SP ditandai terselesaikan oleh DPM') => {
+        const todayStr = new Date().toISOString().split('T')[0];
         set((state) => ({
-          suratPeringatan: state.suratPeringatan.map(s => s.id === spId ? { ...s, status: 'resolved' } : s)
+          suratPeringatan: state.suratPeringatan.map(s => s.id === spId ? { 
+            ...s, 
+            status: 'resolved',
+            resolveNote: noteText,
+            resolvedDate: todayStr
+          } : s)
         }));
+      },
+
+      // SUBMIT KLARIFIKASI / TANGGAPAN SP OLEH ORMAWA
+      submitSPClarification: (spId, clarificationData) => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const sp = get().suratPeringatan.find(s => s.id === spId);
+        if (!sp) return { success: false, message: 'SP tidak ditemukan' };
+
+        const clarificationObj = {
+          text: clarificationData.text || '',
+          fileName: clarificationData.fileName || 'Surat_Tanggapan_SP.pdf',
+          fileSize: clarificationData.fileSize || '1.5 MB',
+          targetDate: clarificationData.targetDate || '',
+          date: todayStr,
+          submittedBy: get().currentUser?.name || 'Pengurus Ormawa'
+        };
+
+        const newLog = createLogEntry({
+          ormawaId: sp.ormawaId,
+          type: 'sp_clarification_submitted',
+          title: `Tanggapan SP Diajukan: ${sp.title}`,
+          description: `${sp.ormawaName} mengajukan klarifikasi & tanggapan atas ${sp.title}. Catatan: "${clarificationObj.text}". Komitmen penyelesaian: ${clarificationObj.targetDate || '-'}.`,
+          actor: clarificationObj.submittedBy,
+          formattedDate: get().getFormattedDate()
+        });
+
+        const dpmNotif = {
+          id: `notif-${Date.now()}`,
+          title: `Tanggapan SP Masuk: ${sp.ormawaName}`,
+          message: `${sp.ormawaName} mengajukan surat tanggapan/klarifikasi atas ${sp.title}. Menunggu evaluasi DPM.`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: 'sp_clarification',
+          targetOrmawaId: 'dpm',
+          isRead: false,
+          linkTab: 'sp',
+          linkId: sp.id
+        };
+
+        set((state) => ({
+          suratPeringatan: state.suratPeringatan.map(s => s.id === spId ? {
+            ...s,
+            status: 'clarification_submitted',
+            clarification: clarificationObj
+          } : s),
+          activityLogs: [newLog, ...state.activityLogs],
+          notifications: [dpmNotif, ...state.notifications]
+        }));
+
+        return { success: true };
+      },
+
+      // REVIEW KLARIFIKASI SP OLEH DPM
+      reviewSPClarification: (spId, { decision, reviewNotes }) => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const sp = get().suratPeringatan.find(s => s.id === spId);
+        if (!sp) return { success: false, message: 'SP tidak ditemukan' };
+
+        const reviewerName = get().currentUser?.name || 'Ketua DPM';
+        const isAccepted = decision === 'approved';
+
+        const newLog = createLogEntry({
+          ormawaId: sp.ormawaId,
+          type: isAccepted ? 'sp_resolved' : 'sp_clarification_rejected',
+          title: isAccepted ? `SP Diselesaikan (Resolved): ${sp.title}` : `Tanggapan SP Ditolak DPM: ${sp.title}`,
+          description: isAccepted 
+            ? `DPM menerima klarifikasi dari ${sp.ormawaName}. SP No: ${sp.noSurat} resmi ditandai Terselesaikan. Catatan: "${reviewNotes || 'Sanksi dicabut dan evaluasi diterima.'}"`
+            : `DPM menolak klarifikasi dari ${sp.ormawaName}. Alasan: "${reviewNotes}". Status SP tetap Aktif.`,
+          actor: reviewerName,
+          formattedDate: get().getFormattedDate()
+        });
+
+        const ormawaNotif = {
+          id: `notif-${Date.now()}`,
+          title: isAccepted ? `Klarifikasi SP Diterima DPM (Resolved)` : `Tanggapan SP Belum Diterima DPM`,
+          message: isAccepted 
+            ? `DPM telah menerima klarifikasi atas ${sp.title}. Status sanksi administratif telah diselesaikan.`
+            : `DPM belum menerima tanggapan atas ${sp.title}. Catatan evaluasi: "${reviewNotes}". SP tetap berlaku aktif.`,
+          time: 'Baru saja',
+          date: get().getFormattedDate(),
+          type: isAccepted ? 'sp_resolved' : 'sp_rejected',
+          targetOrmawaId: sp.ormawaId,
+          isRead: false,
+          linkTab: 'sp',
+          linkId: sp.id
+        };
+
+        set((state) => ({
+          suratPeringatan: state.suratPeringatan.map(s => s.id === spId ? {
+            ...s,
+            status: isAccepted ? 'resolved' : 'active',
+            resolveNote: isAccepted ? reviewNotes : s.resolveNote,
+            clarificationRejectNote: !isAccepted ? reviewNotes : null,
+            resolvedDate: isAccepted ? todayStr : s.resolvedDate
+          } : s),
+          activityLogs: [newLog, ...state.activityLogs],
+          notifications: [ormawaNotif, ...state.notifications]
+        }));
+
+        return { success: true };
       },
 
       // 9. BANK TEMPLATE DOKUMEN
@@ -853,6 +1353,36 @@ export const useStore = create(
         });
       },
 
+      // 12. NOTIFIKASI INTERAKTIF ROLE-AWARE
+      addNotification: (notif) => {
+        set((state) => ({
+          notifications: [{
+            id: `notif-${Date.now()}`,
+            time: 'Baru saja',
+            date: get().getFormattedDate(),
+            isRead: false,
+            ...notif
+          }, ...state.notifications]
+        }));
+      },
+
+      markNotificationAsRead: (notifId) => {
+        set((state) => ({
+          notifications: state.notifications.map(n => n.id === notifId ? { ...n, isRead: true } : n)
+        }));
+      },
+
+      markAllNotificationsAsRead: (targetOrmawaId) => {
+        set((state) => ({
+          notifications: state.notifications.map(n => {
+            if (!targetOrmawaId || n.targetOrmawaId === targetOrmawaId || (targetOrmawaId !== 'dpm' && n.targetOrmawaId === 'all') || targetOrmawaId === 'dpm') {
+              return { ...n, isRead: true };
+            }
+            return n;
+          })
+        }));
+      },
+
       // Tracking read status for Histori Proker notification badge
       lastReadHistoryCount: 0,
       markHistoryAsRead: () => {
@@ -869,6 +1399,10 @@ export const useStore = create(
           activityLogs: INITIAL_ACTIVITY_LOGS,
           templates: INITIAL_TEMPLATES,
           budgetTransactions: INITIAL_BUDGET_TRANSACTIONS,
+          deletionRequests: [],
+          notifications: [],
+          users: INITIAL_USERS,
+          pendingAccounts: INITIAL_PENDING_USERS,
           lastReadHistoryCount: 0
         });
       }
@@ -882,11 +1416,28 @@ export const useStore = create(
         activityLogs: state.activityLogs,
         templates: state.templates,
         budgetTransactions: state.budgetTransactions,
+        deletionRequests: state.deletionRequests,
+        notifications: state.notifications,
+        users: state.users,
+        pendingAccounts: state.pendingAccounts,
+        currentUser: state.currentUser,
         lastReadHistoryCount: state.lastReadHistoryCount
       }),
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...persistedState,
+        users: (persistedState && Array.isArray(persistedState.users) && persistedState.users.length > 0)
+          ? [
+              ...persistedState.users,
+              ...currentState.users.filter(u => !persistedState.users.some(pu => pu.username === u.username))
+            ]
+          : currentState.users,
+        deletionRequests: (persistedState && Array.isArray(persistedState.deletionRequests))
+          ? persistedState.deletionRequests
+          : currentState.deletionRequests,
+        notifications: (persistedState && Array.isArray(persistedState.notifications))
+          ? persistedState.notifications
+          : currentState.notifications,
         templates: (persistedState && Array.isArray(persistedState.templates) && persistedState.templates.length > 0)
           ? persistedState.templates.map((t) => {
               const defaultTpl = currentState.templates?.find((init) => init.id === t.id && init.isOfficial);

@@ -11,7 +11,20 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import DatePickerDropdown from '@/components/ui/date-picker-dropdown';
-import { X, UploadCloud, AlertTriangle, Calendar, Users, DollarSign, MapPin, CheckCircle2, Sparkles } from 'lucide-react';
+import { 
+  X, 
+  UploadCloud, 
+  AlertTriangle, 
+  Calendar, 
+  Users, 
+  DollarSign, 
+  MapPin, 
+  CheckCircle2, 
+  Sparkles,
+  Plus,
+  Trash2,
+  Phone
+} from 'lucide-react';
 
 export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
   const { ormawas, prokers, addProker, currentUser } = useStore();
@@ -32,8 +45,10 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
   // State rincian opsional saat pendaftaran
   const [showExtraDetails, setShowExtraDetails] = useState(false);
   const [tujuanText, setTujuanText] = useState('');
-  const [sekretarisName, setSekretarisName] = useState('');
-  const [bendaharaName, setBendaharaName] = useState('');
+  const [panitiaList, setPanitiaList] = useState([
+    { role: '', name: '', nim: '', division: '', contact: '' },
+    { role: '', name: '', division: '', contact: '' }
+  ]);
 
   // Sinkronisasi otomatis tanggal mulai acara berdasarkan tanggal terpilih saat modal dibuka
   useEffect(() => {
@@ -81,6 +96,25 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
     }
   };
 
+  const handleAddPanitiaRow = (roleName = '', divisionName = '') => {
+    setPanitiaList(prev => [
+      ...prev,
+      { role: roleName, name: '', nim: '', division: divisionName, contact: '' }
+    ]);
+  };
+
+  const handleRemovePanitiaRow = (index) => {
+    setPanitiaList(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePanitiaChange = (index, field, value) => {
+    setPanitiaList(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim() || !startDate || !pic.trim()) {
@@ -91,14 +125,24 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
     const tujuanArray = tujuanText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
     const customPanitia = [];
     if (pic.trim()) {
-      customPanitia.push({ role: 'Ketua Pelaksana', name: pic.trim(), contact: picContact.trim() || '0812-xxxx-xxxx', division: 'BPH' });
+      customPanitia.push({
+        role: 'Ketua Pelaksana',
+        name: pic.trim(),
+        contact: picContact.trim() || '0812-xxxx-xxxx',
+        division: divisi.trim() || 'BPH'
+      });
     }
-    if (sekretarisName.trim()) {
-      customPanitia.push({ role: 'Sekretaris', name: sekretarisName.trim(), contact: '0813-xxxx-xxxx', division: 'Kesekretariatan' });
-    }
-    if (bendaharaName.trim()) {
-      customPanitia.push({ role: 'Bendahara', name: bendaharaName.trim(), contact: '0812-xxxx-xxxx', division: 'Keuangan' });
-    }
+    panitiaList.forEach(p => {
+      if (p.name.trim() || p.role.trim()) {
+        customPanitia.push({
+          role: p.role.trim() || 'Anggota Panitia',
+          name: p.name.trim() || 'Panitia Pelaksana',
+          nim: p.nim?.trim() || '',
+          contact: p.contact.trim() || '0812-xxxx-xxxx',
+          division: p.division.trim() || 'Panitia Pelaksana'
+        });
+      }
+    });
 
     addProker({
       ormawaId,
@@ -374,7 +418,7 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Gambaran umum pelaksanaan kegiatan..."
+              placeholder=""
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
             />
           </div>
@@ -387,7 +431,6 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
               className="w-full py-2.5 px-3 rounded-2xl bg-blue-50/70 hover:bg-blue-50 border border-blue-100 text-blue-700 font-bold text-xs flex items-center justify-between gap-2 transition cursor-pointer"
             >
               <span className="flex items-center gap-2 min-w-0 flex-1 text-left">
-                <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
                 <span className="text-[11px] sm:text-xs leading-snug">
                   Isi Rincian Panitia &amp; Tujuan Sekarang (Opsional)
                 </span>
@@ -407,40 +450,130 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
                     rows={4}
                     value={tujuanText}
                     onChange={(e) => setTujuanText(e.target.value)}
-                    placeholder="Contoh:&#10;• Meningkatkan pemahaman keorganisasian mahasiswa&#10;• Menghasilkan keputusan musyawarah yang transparan"
+                    placeholder=""
                     className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 leading-relaxed placeholder:text-slate-400 placeholder:leading-relaxed min-h-[96px] focus:outline-none focus:ring-2 focus:ring-slate-900 resize-y"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">
-                      Nama Sekretaris Panitia
-                    </label>
-                    <input
-                      type="text"
-                      value={sekretarisName}
-                      onChange={(e) => setSekretarisName(e.target.value)}
-                      placeholder="Nama sekretaris pelaksana"
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                    />
+                {/* Struktur Kepanitiaan Kustom */}
+                <div className="space-y-2.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-blue-600" />
+                      <label className="font-bold text-slate-800 text-[11px] sm:text-xs">
+                        Susunan Panitia Pelaksana ({panitiaList.length})
+                      </label>
+                    </div>
                   </div>
-                  <div>
-                    <label className="font-bold text-slate-700 block mb-1">
-                      Nama Bendahara Panitia
-                    </label>
-                    <input
-                      type="text"
-                      value={bendaharaName}
-                      onChange={(e) => setBendaharaName(e.target.value)}
-                      placeholder="Nama bendahara pelaksana"
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                    />
+
+                  {/* Daftar Baris Panitia */}
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-0.5">
+                    {panitiaList.map((p, idx) => (
+                      <div 
+                        key={idx}
+                        className="p-3 rounded-2xl border border-slate-200/90 bg-white shadow-2xs space-y-2 relative group"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-extrabold text-blue-700 uppercase tracking-wider">
+                            Panitia #{idx + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePanitiaRow(idx)}
+                            className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            title="Hapus baris panitia ini"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                              Role / Jabatan Panitia <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={p.role}
+                              onChange={(e) => handlePanitiaChange(idx, 'role', e.target.value)}
+                              placeholder=""
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                              Nama <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={p.name}
+                              onChange={(e) => handlePanitiaChange(idx, 'name', e.target.value)}
+                              placeholder=""
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                              NIM Mahasiswa
+                            </label>
+                            <input
+                              type="text"
+                              value={p.nim || ''}
+                              onChange={(e) => handlePanitiaChange(idx, 'nim', e.target.value)}
+                              placeholder=""
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                              Divisi
+                            </label>
+                            <input
+                              type="text"
+                              value={p.division}
+                              onChange={(e) => handlePanitiaChange(idx, 'division', e.target.value)}
+                              placeholder=""
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                              No. Telepon
+                            </label>
+                            <input
+                              type="text"
+                              value={p.contact}
+                              onChange={(e) => handlePanitiaChange(idx, 'contact', e.target.value)}
+                              placeholder=""
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {panitiaList.length === 0 && (
+                      <div className="p-4 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white text-slate-400 text-xs">
+                        Belum ada panitia tambahan. Klik tombol <strong>"+ Tambah Baris"</strong> atau gunakan tombol pilihan cepat di atas.
+                      </div>
+                    )}
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddPanitiaRow('', '')}
+                    className="w-full py-2 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 text-slate-600 hover:text-blue-600 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tambah Anggota Panitia Lainnya</span>
+                  </button>
                 </div>
 
-                <p className="text-[10px] text-slate-500 italic">
-                  💡 Catatan: Anda juga bisa menambah atau mengubah Rundown, Panitia, dan Rincian Pos RAB kapan saja melalui tombol <strong>"Detail Proker"</strong>.
+                <p className="text-[10px] text-slate-500">
+                 Catatan: Anda juga bisa menambah atau mengubah Rundown, Panitia, dan Rincian Pos RAB kapan saja melalui tombol <strong>"Detail Proker"</strong>.
                 </p>
               </div>
             )}

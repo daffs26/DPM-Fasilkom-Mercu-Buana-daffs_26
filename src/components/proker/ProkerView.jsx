@@ -20,7 +20,8 @@ import {
   ChevronDown,
   ChevronUp,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  UploadCloud
 } from 'lucide-react';
 import {
   Dialog,
@@ -30,6 +31,9 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import RequestDeleteProkerModal from '../modals/RequestDeleteProkerModal';
+import SubmitRevisionModal from '../modals/SubmitRevisionModal';
+import ManageDeletionRequestsModal from '../modals/ManageDeletionRequestsModal';
 
 export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDetailProker, onAuditLPJ, onPrintDoc }) {
   const { 
@@ -39,11 +43,17 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     setSelectedOrmawaFilter, 
     searchQuery, 
     deleteProker,
+    deletionRequests,
     currentUser
   } = useStore();
   const [statusFilter, setStatusFilter] = useState('all');
   const [prokerToDelete, setProkerToDelete] = useState(null);
+  const [prokerToRequestDelete, setProkerToRequestDelete] = useState(null);
+  const [prokerToRevise, setProkerToRevise] = useState(null);
+  const [isManageDeletionOpen, setIsManageDeletionOpen] = useState(false);
   const [isKpiExpanded, setIsKpiExpanded] = useState(false);
+
+  const pendingDeletionCount = (deletionRequests || []).filter(r => r.status === 'pending').length;
 
   // Filter ormawa dasar untuk menghitung status counts
   const ormawaProkers = useMemo(() => {
@@ -83,13 +93,16 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     });
   }, [prokers, selectedOrmawaFilter, searchQuery, statusFilter]);
 
+  const handleInitiateDelete = (p) => {
+    if (currentUser?.ormawaId === 'dpm') {
+      setProkerToDelete(p);
+    } else {
+      setProkerToRequestDelete(p);
+    }
+  };
+
   const handleConfirmDelete = () => {
     if (prokerToDelete) {
-      if (currentUser?.ormawaId !== 'dpm') {
-        alert('Permintaan penghapusan proker telah dikirim ke DPM dan menunggu ACC.');
-        setProkerToDelete(null);
-        return;
-      }
       deleteProker(prokerToDelete.id);
       setProkerToDelete(null);
     }
@@ -118,7 +131,17 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
             </h3>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+            {currentUser?.ormawaId === 'dpm' && pendingDeletionCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsManageDeletionOpen(true)}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer animate-pulse"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Permohonan Hapus ({pendingDeletionCount})</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setIsKpiExpanded(!isKpiExpanded)}
@@ -226,7 +249,11 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
 
                   <div className="flex items-center gap-1.5">
                     {/* Status Badge */}
-                    {isCompleted ? (
+                    {p.status === 'deletion_pending' || p.deletionPending ? (
+                      <span className="bg-rose-50 text-rose-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-rose-200 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-rose-600" /> Hapus (Menunggu DPM)
+                      </span>
+                    ) : isCompleted ? (
                       <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Selesai ({p.lpj?.auditScore})
                       </span>
@@ -257,10 +284,10 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setProkerToDelete(p);
+                        handleInitiateDelete(p);
                       }}
                       className="p-1 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                      title="Hapus Program Kerja"
+                      title={currentUser?.ormawaId === 'dpm' ? "Hapus Program Kerja" : "Ajukan Permohonan Hapus"}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -329,22 +356,36 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5">
+              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5 flex-wrap">
                 <button
                   type="button"
                   onClick={() => onOpenDetailProker ? onOpenDetailProker(p) : onReviewProposal(p)}
-                  className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 min-w-[90px] py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Eye className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Detail Proker</span>
+                  <span>Detail</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => onAuditLPJ(p)}
-                  className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition text-center cursor-pointer"
-                >
-                  {p.lpj?.auditScore ? 'Hasil Audit' : 'Audit LPJ'}
-                </button>
+
+                {isRevisi && (currentUser?.ormawaId === p.ormawaId || currentUser?.ormawaId !== 'dpm') ? (
+                  <button
+                    type="button"
+                    onClick={() => setProkerToRevise(p)}
+                    className="flex-1 min-w-[110px] py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                    title="Unggah Berkas Revisi"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    <span>Kirim Revisi</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onAuditLPJ(p)}
+                    className="flex-1 min-w-[90px] py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition text-center cursor-pointer"
+                  >
+                    {p.lpj?.auditScore ? 'Hasil Audit' : 'Audit LPJ'}
+                  </button>
+                )}
+
                 {p.status === 'completed' && (
                   <button
                     type="button"
@@ -359,10 +400,10 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setProkerToDelete(p);
+                    handleInitiateDelete(p);
                   }}
                   className="p-2 border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition shrink-0 cursor-pointer"
-                  title="Hapus Program Kerja"
+                  title={currentUser?.ormawaId === 'dpm' ? "Hapus Program Kerja" : "Ajukan Permohonan Hapus"}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -384,7 +425,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
         </div>
       )}
 
-      {/* Modal Alert Konfirmasi Hapus Proker */}
+      {/* Modal Alert Konfirmasi Hapus Proker (Khusus DPM) */}
       <Dialog open={Boolean(prokerToDelete)} onOpenChange={(open) => !open && setProkerToDelete(null)}>
         <DialogContent className="max-w-md p-6 rounded-3xl border border-slate-200 shadow-2xl">
           <div className="flex items-start gap-3.5">
@@ -393,17 +434,11 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
             </div>
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-base font-extrabold text-slate-900">
-                Hapus Program Kerja?
+                Hapus Program Kerja Langsung?
               </DialogTitle>
-              {currentUser?.ormawaId === 'dpm' ? (
-                <DialogDescription className="text-slate-600 text-xs mt-1.5">
-                  Anda yakin ingin menghapus proker <strong>{prokerToDelete?.title}</strong>? Data yang dihapus tidak dapat dikembalikan.
-                </DialogDescription>
-              ) : (
-                <DialogDescription className="text-slate-600 text-xs mt-1.5">
-                  Anda yakin ingin mengajukan penghapusan proker <strong>{prokerToDelete?.title}</strong>? Permintaan ini memerlukan persetujuan dari DPM.
-                </DialogDescription>
-              )}
+              <DialogDescription className="text-slate-600 text-xs mt-1.5">
+                Sebagai DPM, Anda dapat menghapus proker <strong>{prokerToDelete?.title}</strong> secara langsung. Data yang dihapus tidak dapat dikembalikan.
+              </DialogDescription>
             </div>
           </div>
 
@@ -420,11 +455,31 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
               onClick={handleConfirmDelete}
               className="rounded-xl text-xs font-bold w-full sm:w-auto"
             >
-              {currentUser?.ormawaId === 'dpm' ? 'Ya, Hapus Proker' : 'Ajukan Penghapusan'}
+              Ya, Hapus Proker
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal Permohonan Hapus (Ormawa -> DPM) */}
+      <RequestDeleteProkerModal
+        isOpen={Boolean(prokerToRequestDelete)}
+        onClose={() => setProkerToRequestDelete(null)}
+        proker={prokerToRequestDelete}
+      />
+
+      {/* Modal Unggah Revisi Berkas (Ormawa) */}
+      <SubmitRevisionModal
+        isOpen={Boolean(prokerToRevise)}
+        onClose={() => setProkerToRevise(null)}
+        proker={prokerToRevise}
+      />
+
+      {/* Modal Kelola Permohonan Hapus (DPM) */}
+      <ManageDeletionRequestsModal
+        isOpen={isManageDeletionOpen}
+        onClose={() => setIsManageDeletionOpen(false)}
+      />
     </div>
   );
 }

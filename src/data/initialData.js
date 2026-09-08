@@ -112,6 +112,36 @@ export const INITIAL_USERS = [
     username: 'admin',
     password: '123', // Demo purpose
     status: 'approved'
+  },
+  {
+    id: 'user-bem-ketua',
+    name: 'Rafi Pratama',
+    nim: '41822010001',
+    ormawaId: 'bem',
+    role: 'ketua',
+    username: 'bem',
+    password: '123',
+    status: 'approved'
+  },
+  {
+    id: 'user-himti-ketua',
+    name: 'Aldi Renaldi',
+    nim: '41522010002',
+    ormawaId: 'himti',
+    role: 'ketua',
+    username: 'himti',
+    password: '123',
+    status: 'approved'
+  },
+  {
+    id: 'user-himsisfo-ketua',
+    name: 'Fadlan Maulana',
+    nim: '41822010003',
+    ormawaId: 'himsisfo',
+    role: 'ketua',
+    username: 'himsisfo',
+    password: '123',
+    status: 'approved'
   }
 ];
 

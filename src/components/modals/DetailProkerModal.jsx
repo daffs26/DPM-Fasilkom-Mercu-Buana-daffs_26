@@ -87,7 +87,7 @@ export default function DetailProkerModal({
   // Local states for Kepanitiaan
   const [panitiaItems, setPanitiaItems] = useState(defaultPanitia);
   const [isAddingPanitia, setIsAddingPanitia] = useState(false);
-  const [newPanitia, setNewPanitia] = useState({ role: '', name: '', division: '', contact: '' });
+  const [newPanitia, setNewPanitia] = useState({ role: '', name: '', nim: '', division: '', contact: '' });
 
   // Local states for Rundown
   const [rundownItems, setRundownItems] = useState(defaultRundown);
@@ -223,12 +223,13 @@ export default function DetailProkerModal({
     const updated = [...panitiaItems, {
       role: newPanitia.role.trim(),
       name: newPanitia.name.trim(),
+      nim: newPanitia.nim?.trim() || '',
       division: newPanitia.division.trim() || 'Panitia Pelaksana',
       contact: newPanitia.contact.trim() || '0812-xxxx-xxxx'
     }];
     setPanitiaItems(updated);
     updateProkerDetails(proker.id, { kepanitiaan: updated });
-    setNewPanitia({ role: '', name: '', division: '', contact: '' });
+    setNewPanitia({ role: '', name: '', nim: '', division: '', contact: '' });
     setIsAddingPanitia(false);
   };
 

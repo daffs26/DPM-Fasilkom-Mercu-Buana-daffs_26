@@ -65,6 +65,16 @@ export default function DetailPanitiaTab({
               />
             </div>
             <div>
+              <label className="text-[11px] font-bold text-slate-700 block mb-1">Nomor Induk Mahasiswa (NIM)</label>
+              <input
+                type="text"
+                placeholder="Contoh: 41822010000"
+                value={newPanitia.nim || ''}
+                onChange={(e) => setNewPanitia({ ...newPanitia, nim: e.target.value })}
+                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div>
               <label className="text-[11px] font-bold text-slate-700 block mb-1">Divisi / Seksi</label>
               <input
                 type="text"
@@ -74,7 +84,7 @@ export default function DetailPanitiaTab({
                 className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
               />
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <label className="text-[11px] font-bold text-slate-700 block mb-1">No. WhatsApp / Kontak</label>
               <input
                 type="text"
@@ -90,13 +100,13 @@ export default function DetailPanitiaTab({
             <button
               type="button"
               onClick={() => setIsAddingPanitia(false)}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100"
+              className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs"
+              className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer"
             >
               Simpan Panitia
             </button>
@@ -122,7 +132,7 @@ export default function DetailPanitiaTab({
                   {p.name}
                 </h5>
                 <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-                  {p.division}
+                  {p.nim ? `NIM: ${p.nim} • ` : ''}{p.division}
                 </p>
               </div>
             </div>
