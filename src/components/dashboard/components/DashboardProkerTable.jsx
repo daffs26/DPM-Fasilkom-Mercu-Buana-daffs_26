@@ -22,13 +22,6 @@ export default function DashboardProkerTable({
             Monitoring berkas proposal, inspeksi hari-H, dan audit LPJ
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onOpenAddProker}
-          className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
-        >
-          <span>+ Proker Baru</span>
-        </button>
       </div>
 
       {/* 1. DESKTOP SHADCN UI TABLE */}
