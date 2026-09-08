@@ -695,8 +695,9 @@ export const useStore = create(
           ormawaId: newTx.ormawaId,
           prokerId: newTx.prokerId || null,
           type: newTx.type || 'termin1',
+          txMode: newTx.txMode || (['termin1', 'termin2', 'operasional', 'konsumsi_logistik', 'lainnya'].includes(newTx.type) ? 'pengeluaran' : 'pemasukan'),
           category: newTx.category || 'Dana Kemahasiswaan Fakultas',
-          title: newTx.title || 'Pencairan Anggaran',
+          title: newTx.title || (newTx.txMode === 'pemasukan' ? 'Pemasukan Kas' : 'Pencairan Anggaran'),
           nominal,
           date: newTx.date || todayStr,
           pic: newTx.pic || get().currentUserName,
@@ -710,9 +711,10 @@ export const useStore = create(
         set((state) => {
           const updatedTransactions = [txItem, ...(state.budgetTransactions || [])];
           
+          const isExpense = txItem.txMode === 'pengeluaran' || ['termin1', 'termin2', 'operasional', 'konsumsi_logistik', 'lainnya'].includes(txItem.type);
+
           const updatedOrmawas = state.ormawas.map(o => {
             if (o.id === newTx.ormawaId) {
-              const isExpense = ['termin1', 'termin2', 'operasional', 'lainnya'].includes(txItem.type);
               const additionalSerapan = isExpense ? nominal : 0;
               return {
                 ...o,
@@ -723,7 +725,7 @@ export const useStore = create(
           });
 
           let updatedProkers = state.prokers;
-          if (newTx.prokerId) {
+          if (newTx.prokerId && isExpense) {
             updatedProkers = state.prokers.map(p => {
               if (p.id === newTx.prokerId) {
                 return {
@@ -745,7 +747,7 @@ export const useStore = create(
               createLogEntry({
                 ormawaId: newTx.ormawaId,
                 type: 'transaction_added',
-                title: `Transaksi Anggaran ${ormawa?.shortName || ''} Dicatat`,
+                title: `${txItem.txMode === 'pemasukan' ? 'Pemasukan Kas' : 'Pengeluaran Kas'} ${ormawa?.shortName || ''} Dicatat`,
                 description: `${txItem.title}: Rp ${nominal.toLocaleString('id-ID')} (${txItem.category})`,
                 actor: get().currentUserName,
                 formattedDate: get().getFormattedDate()
@@ -765,7 +767,7 @@ export const useStore = create(
 
           const updatedTransactions = (state.budgetTransactions || []).filter(t => t.id !== transactionId);
 
-          const isExpense = ['termin1', 'termin2', 'operasional', 'lainnya'].includes(tx.type);
+          const isExpense = tx.txMode === 'pengeluaran' || ['termin1', 'termin2', 'operasional', 'konsumsi_logistik', 'lainnya'].includes(tx.type);
           const updatedOrmawas = state.ormawas.map(o => {
             if (o.id === tx.ormawaId && isExpense) {
               return {

@@ -46,9 +46,15 @@ export default function App() {
   const [printDocData, setPrintDocData] = useState(null);
   const [isSetPaguOpen, setIsSetPaguOpen] = useState(false);
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
+  const [addTransactionConfig, setAddTransactionConfig] = useState({ mode: 'pengeluaran', ormawaId: '' });
 
   // Mobile sidebar state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleOpenAddTransaction = (mode = 'pengeluaran', ormawaId = '') => {
+    setAddTransactionConfig({ mode, ormawaId });
+    setIsAddTransactionOpen(true);
+  };
 
   const handleOpenAddProker = (date = '') => {
     setInitialProkerDate(typeof date === 'string' ? date : '');
@@ -109,7 +115,7 @@ export default function App() {
             {activeTab === 'anggaran' && (
               <AnggaranView 
                 onOpenSetPagu={() => setIsSetPaguOpen(true)}
-                onOpenAddTransaction={() => setIsAddTransactionOpen(true)}
+                onOpenAddTransaction={handleOpenAddTransaction}
                 onPrintDoc={(docData) => setPrintDocData(docData)}
               />
             )}
@@ -203,6 +209,8 @@ export default function App() {
         {isAddTransactionOpen && (
           <AddTransactionModal 
             isOpen={isAddTransactionOpen}
+            initialMode={addTransactionConfig.mode}
+            initialOrmawa={addTransactionConfig.ormawaId}
             onClose={() => setIsAddTransactionOpen(false)}
           />
         )}

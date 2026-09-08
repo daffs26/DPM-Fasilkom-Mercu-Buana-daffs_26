@@ -21,7 +21,7 @@ export default function AnggaranTransactionTable({
         <Receipt className="w-10 h-10 text-slate-400 mx-auto mb-2" />
         <h4 className="text-xs font-bold text-slate-800">Belum Ada Riwayat Transaksi Anggaran</h4>
         <p className="text-[11px] text-slate-500 mt-1 max-w-sm mx-auto">
-          Klik tombol <strong>"Input Kas"</strong> di atas untuk mencatat pencairan termin proker atau dana operasional kas.
+          Pilih salah satu Ormawa untuk mencatat <strong>"+ Pemasukan"</strong> atau <strong>"+ Pengeluaran"</strong> kas.
         </p>
       </div>
     );
@@ -31,7 +31,7 @@ export default function AnggaranTransactionTable({
     <div className="space-y-2.5">
       {filteredTransactions.map((tx) => {
         const ormawa = ormawas.find(o => o.id === tx.ormawaId);
-        const isExpense = ['termin1', 'termin2', 'operasional', 'lainnya'].includes(tx.type);
+        const isExpense = tx.txMode ? tx.txMode === 'pengeluaran' : ['termin1', 'termin2', 'operasional', 'konsumsi_logistik', 'lainnya'].includes(tx.type);
         const typeBadge = getTransactionTypeBadge(tx.type);
 
         return (

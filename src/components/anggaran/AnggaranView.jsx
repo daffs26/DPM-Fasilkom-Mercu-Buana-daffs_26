@@ -6,9 +6,10 @@ import {
   Settings2, 
   FileSpreadsheet, 
   Printer, 
-  Download 
+  Download,
+  ArrowDownLeft,
+  ArrowUpRight
 } from 'lucide-react';
-import DropdownSelect from '@/components/ui/dropdown-select';
 import { exportFinancialWorkbook, exportFormattedCSV } from '../../utils/exportExcel';
 
 // Sub-components
@@ -28,6 +29,8 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
     setSelectedOrmawaFilter,
     currentUserName
   } = useStore();
+
+  const activeOrmawaObj = ormawas.find(o => o.id === selectedOrmawaFilter);
 
   const [activeSubTab, setActiveSubTab] = useState('proker'); // 'proker' | 'transaksi'
   const [collapsedCards, setCollapsedCards] = useState({});
@@ -71,30 +74,7 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
     return budgetTransactions.filter(t => t.ormawaId === selectedOrmawaFilter);
   }, [budgetTransactions, selectedOrmawaFilter]);
 
-  const ormawaOrder = ['dpm', 'bem', 'himsisfo', 'himti'];
-  const ormawaLabels = {
-    dpm: 'DPM',
-    bem: 'BEM',
-    himsisfo: 'Himsisfo',
-    himti: 'Himti'
-  };
 
-  const sortedOrmawas = [...ormawas].sort((a, b) => {
-    const idxA = ormawaOrder.indexOf(a.id);
-    const idxB = ormawaOrder.indexOf(b.id);
-    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-    if (idxA !== -1) return -1;
-    if (idxB !== -1) return 1;
-    return 0;
-  });
-
-  const ormawaFilterOptions = [
-    { value: 'all', label: 'Semua Ormawa Fasilkom' },
-    ...sortedOrmawas.map(o => ({
-      value: o.id,
-      label: ormawaLabels[o.id] || o.shortName || o.name
-    }))
-  ];
 
   // =========================================================================
   // EKSPOR REKAPITULASI KE EXCEL (.XLSX) / CSV & LAPORAN CETAK PDF
@@ -173,20 +153,56 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
     <div className="space-y-6 w-full max-w-full overflow-hidden">
       {/* 1. Header & Quick Action Buttons */}
       <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200/80 shadow-soft w-full max-w-full">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <Wallet className="w-5 h-5" />
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+          <div className="space-y-3.5">
+            {/* Header Icon + Judul */}
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
+                <Wallet className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                    Pengelolaan &amp; Alokasi Anggaran Ormawa
+                  </h2>
+                  <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
+                    2026/2027
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  {activeOrmawaObj ? `Entitas Terpilih: ${activeOrmawaObj.name}` : 'Monitoring pagu, realisasi anggaran & kas seluruh Ormawa'}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                Pengelolaan &amp; Alokasi Anggaran Ormawa
-              </h2>
-            </div>
+
+            {/* Tombol Pemasukan & Pengeluaran Sejajar Kiri di Bawah Icon Dompet */}
+            {selectedOrmawaFilter !== 'all' && (
+              <div className="flex items-center gap-3 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                <button
+                  type="button"
+                  onClick={() => onOpenAddTransaction('pemasukan', selectedOrmawaFilter)}
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95 whitespace-nowrap"
+                  title={`Catat Pemasukan Kas ${activeOrmawaObj?.shortName || ''}`}
+                >
+                  <ArrowDownLeft className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  <span>+ Pemasukan</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onOpenAddTransaction('pengeluaran', selectedOrmawaFilter)}
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer active:scale-95 whitespace-nowrap"
+                  title={`Catat Pengeluaran Kas ${activeOrmawaObj?.shortName || ''}`}
+                >
+                  <ArrowUpRight className="w-3.5 h-3.5 text-blue-100 shrink-0" />
+                  <span>+ Pengeluaran</span>
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Action Buttons: Ekspor Excel (.xlsx), Cetak PDF, Unduh CSV, Atur Anggaran, Input Kas */}
-          <div className="flex items-center gap-2 flex-wrap xl:justify-end">
+          {/* Action Buttons: Ekspor Excel (.xlsx), Cetak PDF, Atur Anggaran */}
+          <div className="flex items-center gap-2 flex-wrap self-start lg:self-auto shrink-0">
             <button
               type="button"
               onClick={handleDownloadExcel}
@@ -210,66 +226,34 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
 
             <button
               type="button"
-              onClick={handleDownloadCSV}
-              className="shrink-0 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95"
-              title="Unduh data tabel dalam format CSV ringan"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-500" />
-              <span>CSV</span>
-            </button>
-
-            <button
-              type="button"
               onClick={onOpenSetPagu}
               className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95"
             >
               <Settings2 className="w-3.5 h-3.5 text-slate-500" />
               <span>Atur Anggaran</span>
             </button>
-
-            <button
-              type="button"
-              onClick={onOpenAddTransaction}
-              className="shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer active:scale-95 whitespace-nowrap"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Input Kas</span>
-            </button>
           </div>
-        </div>
-
-        {/* Filter Ormawa Dropdown */}
-        <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-[11px] font-bold text-slate-500 shrink-0">Filter Entitas:</span>
-            <DropdownSelect
-              value={selectedOrmawaFilter}
-              onChange={(val) => setSelectedOrmawaFilter(val)}
-              options={ormawaFilterOptions}
-              className="flex-1 sm:w-64"
-              triggerClassName="w-full py-1.5 px-3 font-bold text-xs rounded-xl bg-slate-50 border border-slate-200 shadow-2xs flex items-center justify-between"
-            />
-          </div>
-
-          <span className="text-[10px] font-semibold text-slate-500 self-end sm:self-center">
-            Periode Anggaran: 2026/2027
-          </span>
         </div>
       </div>
 
-      {/* 2. 4 Kartu KPI Ringkasan Finansial */}
+      {/* 2. Kartu KPI Ringkasan Finansial (4 kartu untuk Fakultas, 2 kartu jika spesifik Ormawa dipilih) */}
       <AnggaranKpiCards
         totalPaguFakultas={totalPaguFakultas}
         totalRabTerencana={totalRabTerencana}
         totalRealisasiAktual={totalRealisasiAktual}
         sisaSaldoFakultas={sisaSaldoFakultas}
         persentaseSerapanFakultas={persentaseSerapanFakultas}
+        selectedOrmawaFilter={selectedOrmawaFilter}
+        activeOrmawaObj={activeOrmawaObj}
       />
 
       {/* 3. Kartu Alokasi & Serapan Anggaran per Ormawa */}
       <AnggaranOrmawaGrid
         filteredOrmawas={filteredOrmawas}
         onOpenSetPagu={onOpenSetPagu}
+        selectedOrmawaFilter={selectedOrmawaFilter}
+        setSelectedOrmawaFilter={setSelectedOrmawaFilter}
+        onOpenAddTransaction={onOpenAddTransaction}
       />
 
       {/* 4. Tab Sub-Navigasi: "Matriks Anggaran Proker" vs "Riwayat Transaksi Kas" */}
@@ -319,14 +303,6 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
             >
               <Download className="w-3.5 h-3.5 text-slate-500" />
               <span>CSV</span>
-            </button>
-            <button
-              type="button"
-              onClick={onOpenAddTransaction}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Input Pencairan</span>
             </button>
           </div>
         </div>
