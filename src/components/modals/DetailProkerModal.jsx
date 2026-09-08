@@ -4,46 +4,28 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogDescription, 
   DialogFooter 
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { 
   Calendar, 
   MapPin, 
   Users, 
   Clock, 
   FileText, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Building2, 
   User, 
-  Phone, 
-  ShieldCheck, 
-  Download, 
-  Plus, 
-  Trash2, 
-  Edit3,
   Wallet,
-  Coins,
-  ChevronRight,
-  ExternalLink,
-  Receipt,
-  FileCheck,
-  Sparkles,
-  ClipboardList,
-  Save,
-  Printer,
-  X,
-  CheckSquare,
-  Square,
-  ListTodo,
-  AlertCircle,
-  Link2,
-  UploadCloud,
-  FileImage
+  FileCheck
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { formatRupiah, getStatusBadge } from '../../utils/formatters';
+
+// Tab Sub-Components
+import DetailOverviewTab from './detail-proker/DetailOverviewTab';
+import DetailPanitiaTab from './detail-proker/DetailPanitiaTab';
+import DetailRundownTab from './detail-proker/DetailRundownTab';
+import DetailRabTab from './detail-proker/DetailRabTab';
+import DetailLpjTab from './detail-proker/DetailLpjTab';
+import ReceiptPreviewModal from './detail-proker/ReceiptPreviewModal';
 
 export default function DetailProkerModal({ 
   isOpen, 
@@ -105,19 +87,12 @@ export default function DetailProkerModal({
   // Local states for Kepanitiaan
   const [panitiaItems, setPanitiaItems] = useState(defaultPanitia);
   const [isAddingPanitia, setIsAddingPanitia] = useState(false);
-  const [newPanitia, setNewPanitia] = useState({
-    role: '',
-    name: '',
-    division: '',
-    contact: ''
-  });
+  const [newPanitia, setNewPanitia] = useState({ role: '', name: '', division: '', contact: '' });
 
   // Local states for Rundown
   const [rundownItems, setRundownItems] = useState(defaultRundown);
   const [isAddingRundown, setIsAddingRundown] = useState(false);
-  const [newRundownList, setNewRundownList] = useState([
-    { time: '', session: '', pic: '', note: '' }
-  ]);
+  const [newRundownList, setNewRundownList] = useState([{ time: '', session: '', pic: '', note: '' }]);
   const [customDays, setCustomDays] = useState([1]);
   const [selectedDay, setSelectedDay] = useState('all'); // 'all' | 1 | 2 ...
   const [formTargetDay, setFormTargetDay] = useState(1);
@@ -215,23 +190,7 @@ export default function DetailProkerModal({
   const isLPJUploaded = !!proker.lpj?.fileName;
   const isLPJOverdue = !isLPJUploaded && proker.lpj?.deadlineDate && new Date() > new Date(proker.lpj.deadlineDate);
 
-  // Status Badge Helper
-  const getStatusBadge = () => {
-    switch (proker.status) {
-      case 'completed':
-        return { label: 'Proker Selesai', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-      case 'proposal_approved':
-        return { label: 'Proposal Disetujui', color: 'bg-blue-50 text-blue-700 border-blue-200' };
-      case 'proposal_revisi':
-        return { label: 'Perlu Revisi', color: 'bg-amber-50 text-amber-700 border-amber-200' };
-      case 'proposal_pending':
-        return { label: 'Menunggu Review', color: 'bg-amber-50 text-amber-700 border-amber-200' };
-      default:
-        return { label: 'Draft Proker', color: 'bg-slate-100 text-slate-700 border-slate-200' };
-    }
-  };
-
-  const statusBadge = getStatusBadge();
+  const statusBadge = getStatusBadge(proker.status);
 
   // --- Handlers: Deskripsi & Tujuan ---
   const handleSaveDeskripsiTujuan = () => {
@@ -425,1269 +384,198 @@ export default function DetailProkerModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[96vw] sm:max-w-3xl p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xl max-h-[92vh] flex flex-col">
-        {/* Header Proker */}
-        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2 shrink-0">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${ormawa.color?.bg || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
-                {ormawa.shortName}
+        <DialogContent className="w-[96vw] sm:max-w-3xl p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xl max-h-[92vh] flex flex-col">
+          {/* Header Proker */}
+          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2 shrink-0">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${ormawa.color?.bg || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                  {ormawa.shortName}
+                </span>
+                <span className="text-xs text-slate-500 font-medium">Divisi: {proker.divisi || 'BPH'}</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadge.color}`}>
+                  {statusBadge.label}
+                </span>
+              </div>
+
+              <span className="text-xs font-black text-slate-900 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+                Anggaran: {formatRupiah(totalRabCurrent)}
               </span>
-              <span className="text-xs text-slate-500 font-medium">Divisi: {proker.divisi || 'BPH'}</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadge.color}`}>
-                {statusBadge.label}
+            </div>
+
+            <DialogTitle className="text-base sm:text-xl font-black text-slate-900 tracking-tight leading-snug">
+              {proker.title}
+            </DialogTitle>
+
+            {/* Quick Meta Chips */}
+            <div className="flex items-center gap-2 sm:gap-4 text-xs text-slate-600 flex-wrap pt-0.5">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <span>{proker.startDate} {proker.endDate && proker.endDate !== proker.startDate ? `s/d ${proker.endDate}` : ''}</span>
+              </span>
+              <span className="flex items-center gap-1.5 font-medium">
+                <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                <span>{proker.location || 'Kampus Fasilkom'}</span>
+              </span>
+              <span className="flex items-center gap-1.5 font-medium">
+                <Users className="w-3.5 h-3.5 text-slate-400" />
+                <span>{proker.targetPeserta || 0} Target Peserta</span>
+              </span>
+              <span className="flex items-center gap-1.5 font-medium">
+                <User className="w-3.5 h-3.5 text-slate-400" />
+                <span>PJ: {proker.pic || '-'}</span>
               </span>
             </div>
+          </DialogHeader>
 
-            <span className="text-xs font-black text-slate-900 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
-              Anggaran: Rp {totalRabCurrent.toLocaleString('id-ID')}
-            </span>
-          </div>
+          {/* Tab Bar Navigation */}
+          <div className="px-3 sm:px-6 border-b border-slate-200/80 bg-white flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0">
+            {[
+              { id: 'deskripsi', label: 'Deskripsi & Tujuan', icon: FileText },
+              { id: 'panitia', label: 'Kepanitiaan', icon: Users, badge: panitiaItems.length },
+              { id: 'rundown', label: 'Rundown Acara', icon: Clock, badge: rundownItems.length },
+              { id: 'rab', label: 'RAB & Anggaran', icon: Wallet },
+              { id: 'lpj', label: 'LPJ & Proposal', icon: FileCheck, highlight: isLPJOverdue }
+            ].map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
 
-          <DialogTitle className="text-base sm:text-xl font-black text-slate-900 tracking-tight leading-snug">
-            {proker.title}
-          </DialogTitle>
-
-          {/* Quick Meta Chips */}
-          <div className="flex items-center gap-2 sm:gap-4 text-xs text-slate-600 flex-wrap pt-0.5">
-            <span className="flex items-center gap-1.5 font-medium">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              <span>{proker.startDate} {proker.endDate && proker.endDate !== proker.startDate ? `s/d ${proker.endDate}` : ''}</span>
-            </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              <span>{proker.location || 'Kampus Fasilkom'}</span>
-            </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <Users className="w-3.5 h-3.5 text-slate-400" />
-              <span>{proker.targetPeserta || 0} Target Peserta</span>
-            </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <User className="w-3.5 h-3.5 text-slate-400" />
-              <span>PJ: {proker.pic || '-'}</span>
-            </span>
-          </div>
-        </DialogHeader>
-
-        {/* Tab Bar Navigation */}
-        <div className="px-3 sm:px-6 border-b border-slate-200/80 bg-white flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0">
-          {[
-            { id: 'deskripsi', label: 'Deskripsi & Tujuan', icon: FileText },
-            { id: 'panitia', label: 'Kepanitiaan', icon: Users, badge: panitiaItems.length },
-            { id: 'rundown', label: 'Rundown Acara', icon: Clock, badge: rundownItems.length },
-            { id: 'rab', label: 'RAB & Anggaran', icon: Wallet },
-            { id: 'lpj', label: 'LPJ & Proposal', icon: FileCheck, highlight: isLPJOverdue }
-          ].map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2.5 sm:py-3 px-2.5 sm:px-3 text-xs font-bold border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
-                  isActive 
-                    ? 'border-slate-900 text-slate-900' 
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-900' : 'text-slate-400'}`} />
-                <span>{tab.label}</span>
-                {tab.badge !== undefined && (
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    isActive ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {tab.badge}
-                  </span>
-                )}
-                {tab.highlight && (
-                  <span className="w-2 h-2 rounded-full bg-red-500" title="LPJ Terlambat" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Tab Contents */}
-        <div className="p-3.5 sm:p-6 text-xs max-h-[calc(90vh-180px)] overflow-y-auto space-y-4">
-          
-          {/* ========================================================================= */}
-          {/* TAB 1: DESKRIPSI ACARA & TUJUAN ACARA                                     */}
-          {/* ========================================================================= */}
-          {activeTab === 'deskripsi' && (
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
-                <div>
-                  <h4 className="font-extrabold text-xs text-slate-900">Deskripsi &amp; Target Tujuan Acara</h4>
-                  <p className="text-[11px] text-slate-500">Anda dapat mengubah dan menyesuaikan penjelasan serta butir tujuan kegiatan.</p>
-                </div>
-                {!isEditingDeskripsi ? (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingDeskripsi(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer self-start sm:self-auto"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Ubah Deskripsi &amp; Tujuan</span>
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2 self-start sm:self-auto">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDeskripsiText(proker.description || defaultDeskripsi);
-                        setTujuanItems(proker.tujuan || defaultTujuan);
-                        setIsEditingDeskripsi(false);
-                      }}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSaveDeskripsiTujuan}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
-                    >
-                      <Save className="w-3.5 h-3.5" />
-                      <span>Simpan</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Deskripsi Kegiatan */}
-              <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-blue-600" />
-                  <h4 className="font-extrabold text-xs text-slate-900">Deskripsi &amp; Konsep Acara</h4>
-                </div>
-                {!isEditingDeskripsi ? (
-                  <p className="text-slate-700 leading-relaxed text-xs whitespace-pre-line">
-                    {deskripsiText}
-                  </p>
-                ) : (
-                  <textarea
-                    rows={4}
-                    value={deskripsiText}
-                    onChange={(e) => setDeskripsiText(e.target.value)}
-                    placeholder="Tuliskan latar belakang dan gambaran umum program kerja ini..."
-                    className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                  />
-                )}
-              </div>
-
-              {/* Tujuan Acara */}
-              <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-emerald-600" />
-                    <h4 className="font-extrabold text-xs text-slate-900">Tujuan &amp; Output Kegiatan</h4>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-500">
-                    {tujuanItems.length} Butir Tujuan
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  {tujuanItems.map((t, idx) => (
-                    <div key={`tujuan-${idx}`} className="flex items-start justify-between gap-2.5 p-2 rounded-xl bg-white border border-slate-200/60">
-                      <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                        <span className="w-5 h-5 rounded-lg bg-emerald-50 text-emerald-700 font-extrabold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                          {idx + 1}
-                        </span>
-                        <p className="text-xs text-slate-800 font-medium leading-normal">
-                          {t}
-                        </p>
-                      </div>
-                      {isEditingDeskripsi && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteTujuan(idx)}
-                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition shrink-0"
-                          title="Hapus butir tujuan ini"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-
-                  {/* Input Tambah Butir Tujuan Baru saat mode edit */}
-                  {isEditingDeskripsi && (
-                    <div className="pt-2 flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={newTujuanInput}
-                        onChange={(e) => setNewTujuanInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTujuan())}
-                        placeholder="Ketik butir tujuan baru lalu tekan Enter atau klik Tambah..."
-                        className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddTujuan}
-                        className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1 shrink-0 shadow-2xs cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Tambah</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Rincian Teknis Pelaksanaan */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 bg-white rounded-2xl border border-slate-200/80">
-                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Bentuk Acara</span>
-                  <span className="font-bold text-slate-900 text-xs mt-0.5 block">
-                    Tatap Muka (Luring)
-                  </span>
-                </div>
-                <div className="p-3 bg-white rounded-2xl border border-slate-200/80">
-                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Sasaran Peserta</span>
-                  <span className="font-bold text-slate-900 text-xs mt-0.5 block">
-                    Mahasiswa FASILKOM UMB
-                  </span>
-                </div>
-                <div className="p-3 bg-white rounded-2xl border border-slate-200/80">
-                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Penanggung Jawab (PIC)</span>
-                  <span className="font-bold text-slate-900 text-xs mt-0.5 block truncate">
-                    {proker.pic || '-'} ({proker.picContact || 'Kontak BPH'})
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* TAB 2: SUSUNAN KEPANITIAAN                                                */}
-          {/* ========================================================================= */}
-          {activeTab === 'panitia' && (
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
-                <div>
-                  <h4 className="font-extrabold text-xs text-slate-900">Struktur Panitia Pelaksana (OC)</h4>
-                  <p className="text-[11px] text-slate-500">Daftar penanggung jawab dan pembagian divisi panitia kegiatan.</p>
-                </div>
+              return (
                 <button
-                  type="button"
-                  onClick={() => setIsAddingPanitia(!isAddingPanitia)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer self-start sm:self-auto"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Tambah Panitia</span>
-                </button>
-              </div>
-
-              {/* Form Input Tambah Panitia Baru */}
-              {isAddingPanitia && (
-                <form onSubmit={handleAddPanitia} className="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 space-y-3 animate-in fade-in-50">
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-xs text-blue-900">Input Data Panitia Baru</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setIsAddingPanitia(false)}
-                      className="text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Jabatan / Role *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Contoh: Koordinator Acara, Bendahara, dll."
-                        value={newPanitia.role}
-                        onChange={(e) => setNewPanitia({ ...newPanitia, role: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Nama Mahasiswa *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Nama lengkap panitia"
-                        value={newPanitia.name}
-                        onChange={(e) => setNewPanitia({ ...newPanitia, name: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Divisi / Seksi</label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: Divisi Acara, Divisi Logistik"
-                        value={newPanitia.division}
-                        onChange={(e) => setNewPanitia({ ...newPanitia, division: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">No. WhatsApp / Kontak</label>
-                      <input
-                        type="text"
-                        placeholder="0812-xxxx-xxxx"
-                        value={newPanitia.contact}
-                        onChange={(e) => setNewPanitia({ ...newPanitia, contact: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddingPanitia(false)}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs"
-                    >
-                      Simpan Panitia
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {panitiaItems.map((p, idx) => (
-                  <div 
-                    key={`panitia-${idx}`}
-                    className="p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-slate-300 transition flex items-start justify-between gap-2 sm:gap-3 shadow-2xs group"
-                  >
-                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 font-extrabold text-xs">
-                        {p.name ? p.name.charAt(0) : 'P'}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block truncate">
-                          {p.role}
-                        </span>
-                        <h5 className="font-extrabold text-xs text-slate-900 truncate">
-                          {p.name}
-                        </h5>
-                        <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-                          {p.division}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                      <a 
-                        href={`https://wa.me/${p.contact.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg hover:bg-emerald-100 transition"
-                        title="Hubungi via WhatsApp"
-                      >
-                        <Phone className="w-3 h-3" />
-                        <span className="hidden sm:inline">{p.contact}</span>
-                      </a>
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePanitia(idx)}
-                        className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                        title="Hapus panitia ini"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* TAB 3: RUNDOWN ACARA (SUSUNAN JADWAL)                                     */}
-          {/* ========================================================================= */}
-          {activeTab === 'rundown' && (
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
-                <div>
-                  <h4 className="font-extrabold text-xs text-slate-900">Susunan Jadwal &amp; Rundown Kegiatan</h4>
-                  <p className="text-[11px] text-slate-500">Atur urutan sesi jam kegiatan per hari dari pembukaan hingga penutupan.</p>
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap shrink-0">
-                  <button
-                    type="button"
-                    onClick={handlePrintRundown}
-                    className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer"
-                    title="Cetak atau unduh dokumen rundown resmi"
-                  >
-                    <Printer className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Cetak Rundown</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleAddDay}
-                    className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-700 font-bold text-xs shadow-2xs transition cursor-pointer"
-                    title="Tambah hari kegiatan (misal: Hari 2, Hari 3)"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Tambah Hari</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsAddingRundown(!isAddingRundown);
-                      setFormTargetDay(selectedDay === 'all' ? 1 : selectedDay);
-                    }}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Tambah Sesi</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Day Filter Bar */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 border-b border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setSelectedDay('all')}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                    selectedDay === 'all'
-                      ? 'bg-slate-900 text-white shadow-2xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-2.5 sm:py-3 px-2.5 sm:px-3 text-xs font-bold border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+                    isActive 
+                      ? 'border-slate-900 text-slate-900' 
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  <span>Semua Hari</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    selectedDay === 'all' ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {rundownItems.length}
-                  </span>
-                </button>
-
-                {availableDays.map(d => {
-                  const count = rundownItems.filter(r => (Number(r.day) || 1) === d).length;
-                  const isSelected = selectedDay === d;
-                  return (
-                    <div key={`day-pill-${d}`} className="flex items-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDay(d)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                          isSelected
-                            ? 'bg-blue-600 text-white shadow-2xs'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        <Calendar className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
-                        <span>Hari {d}</span>
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                          isSelected ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-700'
-                        }`}>
-                          {count}
-                        </span>
-                      </button>
-                      {availableDays.length > 1 && d > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteDay(d)}
-                          className="text-slate-300 hover:text-rose-500 p-1 transition cursor-pointer"
-                          title={`Hapus Hari ${d}`}
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Form Input Tambah Sesi Rundown Baru */}
-              {isAddingRundown && (
-                <form onSubmit={handleAddRundown} className="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 space-y-3.5 animate-in fade-in-50">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-blue-200/60">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-extrabold text-xs text-blue-900">Input Sesi Rundown Baru</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
-                        {newRundownList.length} Sesi Terbuka
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                      <div className="flex items-center gap-1 bg-white border border-blue-200 px-2 py-1 rounded-lg">
-                        <span className="text-[10px] font-bold text-slate-600">Untuk:</span>
-                        <select
-                          value={formTargetDay}
-                          onChange={(e) => setFormTargetDay(Number(e.target.value))}
-                          className="text-xs font-bold text-blue-700 bg-transparent focus:outline-none cursor-pointer"
-                        >
-                          {availableDays.map(d => (
-                            <option key={`sel-day-${d}`} value={d}>Hari {d}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleAddSessionRow}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition shadow-2xs cursor-pointer"
-                        title="Tambah sesi baru dengan icon plus"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Tambah Sesi</span>
-                      </button>
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          setNewRundownList([{ time: '', session: '', pic: '', note: '' }]);
-                          setIsAddingRundown(false);
-                        }}
-                        className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-white/60 transition cursor-pointer"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* List Blok Input Sesi */}
-                  <div className="space-y-3">
-                    {newRundownList.map((sessionItem, index) => (
-                      <div 
-                        key={`new-session-${index}`}
-                        className="p-3.5 rounded-xl border border-blue-200/90 bg-white shadow-2xs space-y-2.5 relative"
-                      >
-                        <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
-                          <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-md bg-blue-600 text-white font-black text-[10px] flex items-center justify-center">
-                              {index + 1}
-                            </span>
-                            <span className="font-bold text-xs text-slate-800">
-                              Sesi #{index + 1}
-                            </span>
-                          </div>
-                          {newRundownList.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveSessionRow(index)}
-                              className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 px-2 py-1 rounded-lg transition text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                              title="Hapus sesi ini dari form"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                              <span>Hapus Sesi</span>
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                          <div>
-                            <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                              Jam Pelaksanaan *
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="Contoh: 08:00 - 09:00"
-                              value={sessionItem.time}
-                              onChange={(e) => handleSessionChange(index, 'time', e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono"
-                            />
-                          </div>
-                          <div className="sm:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                              Nama Sesi / Agenda *
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="Contoh: Pembukaan & Sambutan Ketua Pelaksana"
-                              value={sessionItem.session}
-                              onChange={(e) => handleSessionChange(index, 'session', e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                              Penanggung Jawab (PJ)
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="Contoh: Sie Acara / MC"
-                              value={sessionItem.pic}
-                              onChange={(e) => handleSessionChange(index, 'pic', e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                            />
-                          </div>
-                          <div className="sm:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                              Catatan / Keterangan Teknis
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="Contoh: Mempersiapkan mic wireless dan proyektor"
-                              value={sessionItem.note}
-                              onChange={(e) => handleSessionChange(index, 'note', e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1 border-t border-blue-200/60">
-                    <span className="text-[11px] text-slate-500">
-                      Total <strong>{newRundownList.length}</strong> sesi yang siap disimpan ke <strong>Hari {formTargetDay}</strong>.
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-900' : 'text-slate-400'}`} />
+                  <span>{tab.label}</span>
+                  {tab.badge !== undefined && (
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isActive ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {tab.badge}
                     </span>
-                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNewRundownList([{ time: '', session: '', pic: '', note: '' }]);
-                          setIsAddingRundown(false);
-                        }}
-                        className="w-full sm:w-auto px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer text-center"
-                      >
-                        Batal
-                      </button>
-                      <button
-                        type="submit"
-                        className="w-full sm:w-auto justify-center px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center gap-1.5 text-center"
-                      >
-                        <Save className="w-3.5 h-3.5" />
-                        <span>Simpan {newRundownList.length > 1 ? `${newRundownList.length} Sesi` : 'Sesi'}</span>
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              )}
-
-              {/* Rundown List per Hari */}
-              <div className="space-y-4">
-                {(selectedDay === 'all' ? availableDays : [selectedDay]).map(dayNum => {
-                  const dayItems = rundownItems.filter(r => (Number(r.day) || 1) === dayNum);
-                  return (
-                    <div key={`rundown-day-group-${dayNum}`} className="space-y-2">
-                      <div className="flex items-center justify-between pb-1 border-b border-slate-200/80">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-xs flex items-center justify-center">
-                            H{dayNum}
-                          </span>
-                          <span className="font-extrabold text-xs text-slate-800">
-                            Jadwal Kegiatan — Hari ke-{dayNum}
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-400">
-                            ({dayItems.length} Sesi)
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFormTargetDay(dayNum);
-                            setIsAddingRundown(true);
-                          }}
-                          className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
-                        >
-                          <Plus className="w-3 h-3" />
-                          <span>Tambah di Hari {dayNum}</span>
-                        </button>
-                      </div>
-
-                      {dayItems.length === 0 ? (
-                        <div className="p-4 rounded-2xl border border-dashed border-slate-200 text-center text-slate-400 text-xs">
-                          Belum ada sesi di Hari {dayNum}. Klik <strong>Tambah di Hari {dayNum}</strong> untuk mengisi.
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {dayItems.map((r, i) => {
-                            const originalIdx = rundownItems.indexOf(r);
-                            return (
-                              <div 
-                                key={`rundown-item-${dayNum}-${i}`}
-                                className="p-3 rounded-2xl border border-slate-200/80 bg-white hover:bg-slate-50/60 transition flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-2xs group"
-                              >
-                                <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                                  <div className="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-800 font-mono font-bold text-[11px] shrink-0 border border-slate-200 flex items-center gap-1">
-                                    <Clock className="w-3 h-3 text-slate-500" />
-                                    <span>{r.time}</span>
-                                  </div>
-                                  <div className="min-w-0">
-                                    <h5 className="font-bold text-xs text-slate-900">{r.session}</h5>
-                                    {r.note && (
-                                      <p className="text-[10px] text-slate-500 mt-0.5">{r.note}</p>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                                  <span className="text-[10px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">
-                                    PJ: {r.pic}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteRundown(originalIdx)}
-                                    className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                                    title="Hapus sesi ini"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* TAB 4: RAB & ANGGARAN                                                     */}
-          {/* ========================================================================= */}
-          {activeTab === 'rab' && (
-            <div className="space-y-4">
-              {/* Ringkasan Finansial */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-2xl">
-                  <span className="text-[10px] font-bold text-blue-700 uppercase block">Total Alokasi RAB</span>
-                  <span className="font-black text-sm text-blue-950 mt-0.5 block">
-                    Rp {totalRabCurrent.toLocaleString('id-ID')}
-                  </span>
-                </div>
-                <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl">
-                  <span className="text-[10px] font-bold text-amber-700 uppercase block">Realisasi Kas Cair</span>
-                  <span className="font-black text-sm text-amber-950 mt-0.5 block">
-                    Rp {realisasiDana.toLocaleString('id-ID')}
-                  </span>
-                </div>
-                <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl">
-                  <span className="text-[10px] font-bold text-emerald-700 uppercase block">Sisa Anggaran</span>
-                  <span className="font-black text-sm text-emerald-950 mt-0.5 block">
-                    Rp {Math.max(0, selisihRab).toLocaleString('id-ID')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Action Tambah Pos RAB */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <h5 className="font-bold text-xs text-slate-900">Rincian Pos Pengeluaran RAB</h5>
-                <button
-                  type="button"
-                  onClick={() => setIsAddingRab(!isAddingRab)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer self-start sm:self-auto"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Tambah Pos RAB</span>
+                  )}
+                  {tab.highlight && (
+                    <span className="w-2 h-2 rounded-full bg-red-500" title="LPJ Terlambat" />
+                  )}
                 </button>
-              </div>
+              );
+            })}
+          </div>
 
-              {/* Form Input Tambah Pos RAB Baru */}
-              {isAddingRab && (
-                <form onSubmit={handleAddRab} className="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 space-y-3 animate-in fade-in-50">
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-xs text-blue-900">Input Pos Anggaran Baru</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setIsAddingRab(false)}
-                      className="text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
+          {/* Tab Contents */}
+          <div className="p-3.5 sm:p-6 text-xs max-h-[calc(90vh-180px)] overflow-y-auto space-y-4">
+            {activeTab === 'deskripsi' && (
+              <DetailOverviewTab
+                proker={proker}
+                isEditingDeskripsi={isEditingDeskripsi}
+                setIsEditingDeskripsi={setIsEditingDeskripsi}
+                deskripsiText={deskripsiText}
+                setDeskripsiText={setDeskripsiText}
+                defaultDeskripsi={defaultDeskripsi}
+                tujuanItems={tujuanItems}
+                setTujuanItems={setTujuanItems}
+                defaultTujuan={defaultTujuan}
+                newTujuanInput={newTujuanInput}
+                setNewTujuanInput={setNewTujuanInput}
+                handleSaveDeskripsiTujuan={handleSaveDeskripsiTujuan}
+                handleDeleteTujuan={handleDeleteTujuan}
+                handleAddTujuan={handleAddTujuan}
+              />
+            )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Nama Pos Anggaran *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Contoh: Konsumsi Snack & Makan"
-                        value={newRab.pos}
-                        onChange={(e) => setNewRab({ ...newRab, pos: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Rincian Kebutuhan</label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: 50 box @ Rp 20.000"
-                        value={newRab.desc}
-                        onChange={(e) => setNewRab({ ...newRab, desc: e.target.value })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Jumlah Biaya (Rp) *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="0"
-                        value={newRab.subtotal ? Number(newRab.subtotal.replace(/\D/g, '')).toLocaleString('id-ID') : ''}
-                        onChange={(e) => setNewRab({ ...newRab, subtotal: e.target.value.replace(/\D/g, '') })}
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                      />
-                    </div>
-                  </div>
+            {activeTab === 'panitia' && (
+              <DetailPanitiaTab
+                panitiaItems={panitiaItems}
+                isAddingPanitia={isAddingPanitia}
+                setIsAddingPanitia={setIsAddingPanitia}
+                newPanitia={newPanitia}
+                setNewPanitia={setNewPanitia}
+                handleAddPanitia={handleAddPanitia}
+                handleDeletePanitia={handleDeletePanitia}
+              />
+            )}
 
-                  {/* Input Tambahan: Link Toko Online / E-Commerce (Opsional) */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                        <Link2 className="w-3.5 h-3.5 text-blue-600" />
-                        <span>Link Toko Online / E-Commerce Barang</span>
-                      </label>
-                      <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                        Opsional
-                      </span>
-                    </div>
-                    <input
-                      type="url"
-                      placeholder="Contoh: https://tokopedia.com/... atau https://shopee.co.id/... (Boleh dikosongkan)"
-                      value={newRab.link}
-                      onChange={(e) => setNewRab({ ...newRab, link: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                    />
-                    <p className="text-[10px] text-slate-500 mt-1">
-                      Tautan produk online memudahkan tim pengawas DPM memverifikasi estimasi harga barang di RAB. Form tetap dapat disimpan meski kolom ini kosong.
-                    </p>
-                  </div>
+            {activeTab === 'rundown' && (
+              <DetailRundownTab
+                rundownItems={rundownItems}
+                isAddingRundown={isAddingRundown}
+                setIsAddingRundown={setIsAddingRundown}
+                newRundownList={newRundownList}
+                setNewRundownList={setNewRundownList}
+                availableDays={availableDays}
+                selectedDay={selectedDay}
+                setSelectedDay={setSelectedDay}
+                formTargetDay={formTargetDay}
+                setFormTargetDay={setFormTargetDay}
+                handleAddDay={handleAddDay}
+                handleDeleteDay={handleDeleteDay}
+                handleAddSessionRow={handleAddSessionRow}
+                handleRemoveSessionRow={handleRemoveSessionRow}
+                handleSessionChange={handleSessionChange}
+                handleAddRundown={handleAddRundown}
+                handleDeleteRundown={handleDeleteRundown}
+                handlePrintRundown={handlePrintRundown}
+              />
+            )}
 
-                  {/* Input Tambahan 2: Placeholder Unggah Bukti Pembayaran / Nota (Opsional) */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                        <Receipt className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Unggah Bukti Pembayaran / Nota / Kuitansi</span>
-                      </label>
-                      <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                        Opsional
-                      </span>
-                    </div>
+            {activeTab === 'rab' && (
+              <DetailRabTab
+                totalRabCurrent={totalRabCurrent}
+                realisasiDana={realisasiDana}
+                selisihRab={selisihRab}
+                rabItems={rabItems}
+                isAddingRab={isAddingRab}
+                setIsAddingRab={setIsAddingRab}
+                newRab={newRab}
+                setNewRab={setNewRab}
+                rabReceiptInputRef={rabReceiptInputRef}
+                handleRabReceiptChange={handleRabReceiptChange}
+                handleRemoveRabReceipt={handleRemoveRabReceipt}
+                handleAddRab={handleAddRab}
+                handleDeleteRab={handleDeleteRab}
+                setPreviewRabReceipt={setPreviewRabReceipt}
+              />
+            )}
 
-                    <input 
-                      type="file" 
-                      ref={rabReceiptInputRef} 
-                      onChange={handleRabReceiptChange} 
-                      accept="image/*,.pdf" 
-                      className="hidden" 
-                    />
+            {activeTab === 'lpj' && (
+              <DetailLpjTab
+                proker={proker}
+                isLPJUploaded={isLPJUploaded}
+                isLPJOverdue={isLPJOverdue}
+                lpjDeadline={lpjDeadline}
+                onAuditLPJ={onAuditLPJ}
+                onReviewProposal={onReviewProposal}
+                toggleProposalRevisionItem={toggleProposalRevisionItem}
+              />
+            )}
+          </div>
 
-                    {!newRab.receiptPhoto ? (
-                      <div 
-                        onClick={() => rabReceiptInputRef.current?.click()}
-                        className="border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-white hover:bg-emerald-50/20 rounded-xl p-3 text-center cursor-pointer transition flex items-center justify-center gap-3 group shadow-2xs"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
-                          <UploadCloud className="w-4 h-4" />
-                        </div>
-                        <div className="text-left">
-                          <span className="text-xs font-bold text-slate-700 block group-hover:text-emerald-700 transition">
-                            Pilih file foto nota / kuitansi / struk belanja
-                          </span>
-                          <span className="text-[10px] text-slate-400 block">
-                            Format JPG, PNG, atau PDF (Maks. 5 MB) • Boleh dikosongkan jika belum ada nota
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-2.5 bg-white border border-emerald-200 rounded-xl flex items-center justify-between gap-3 shadow-2xs">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          {newRab.receiptPhoto.startsWith('data:image') ? (
-                            <img 
-                              src={newRab.receiptPhoto} 
-                              alt="Thumbnail Nota" 
-                              className="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0" 
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200">
-                              <Receipt className="w-4 h-4" />
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <span className="font-bold text-xs text-slate-900 truncate block">
-                              {newRab.receiptName || 'Bukti Pembayaran Terlampir'}
-                            </span>
-                            <span className="text-[10px] text-emerald-600 font-semibold block">
-                              {newRab.receiptSize ? `${newRab.receiptSize} • Siap disimpan` : 'Siap disimpan'}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => rabReceiptInputRef.current?.click()}
-                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition cursor-pointer"
-                          >
-                            Ganti
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleRemoveRabReceipt}
-                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                            title="Hapus nota ini"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddingRab(false)}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer"
-                    >
-                      Simpan Pos RAB
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* Tabel Rincian Pos Pengeluaran RAB */}
-              <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">
-                <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                  <h5 className="font-bold text-xs text-slate-900">Rincian Pos Anggaran Biaya (RAB)</h5>
-                  <span className="text-[10px] font-bold text-slate-500">Standar Baku Keuangan DPM</span>
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {rabItems.map((item, idx) => (
-                    <div key={`rab-item-${idx}`} className="p-3 flex items-center justify-between gap-3 text-xs hover:bg-slate-50/50 group">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-slate-900">{item.pos}</span>
-                          {item.link && (
-                            <a
-                              href={item.link.startsWith('http') ? item.link : `https://${item.link}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 px-2 py-0.5 rounded-md transition shadow-2xs"
-                              title="Buka link toko online barang ini di tab baru"
-                            >
-                              <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                              <span className="truncate max-w-[180px] sm:max-w-xs">Lihat Toko Online</span>
-                            </a>
-                          )}
-                          {item.receiptPhoto && (
-                            <button
-                              type="button"
-                              onClick={() => setPreviewRabReceipt({
-                                photo: item.receiptPhoto,
-                                name: item.receiptName || `Nota - ${item.pos}`,
-                                pos: item.pos,
-                                subtotal: item.subtotal
-                              })}
-                              className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2 py-0.5 rounded-md transition shadow-2xs cursor-pointer"
-                              title="Lihat foto bukti pembayaran / nota belanja"
-                            >
-                              <Receipt className="w-2.5 h-2.5 shrink-0" />
-                              <span>Lihat Bukti Nota</span>
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-0.5">{item.desc}</p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-black text-slate-900 text-xs">
-                          Rp {(item.subtotal || 0).toLocaleString('id-ID')}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteRab(idx)}
-                          className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                          title="Hapus pos RAB ini"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-3 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between font-black text-xs text-slate-900">
-                  <span>TOTAL ESTIMASI RAB</span>
-                  <span className="text-sm text-blue-700">Rp {totalRabCurrent.toLocaleString('id-ID')}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* TAB 5: BERKAS LPJ & PROPOSAL                                              */}
-          {/* ========================================================================= */}
-          {activeTab === 'lpj' && (
-            <div className="space-y-4">
-              {/* Bagian LPJ */}
-              <div className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileCheck className="w-4 h-4 text-emerald-600" />
-                    <h4 className="font-extrabold text-xs text-slate-900">
-                      Laporan Pertanggungjawaban (LPJ)
-                    </h4>
-                  </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                    isLPJUploaded 
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                      : isLPJOverdue 
-                      ? 'bg-red-50 text-red-700 border-red-300' 
-                      : 'bg-amber-50 text-amber-700 border-amber-200'
-                  }`}>
-                    {isLPJUploaded ? 'LPJ Sudah Diunggah' : isLPJOverdue ? 'Terlambat (> H+14)' : 'Menunggu LPJ'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className="p-2.5 bg-white rounded-xl border border-slate-200/60">
-                    <span className="text-[10px] text-slate-400 font-bold block">Tenggat Waktu SLA LPJ:</span>
-                    <span className="font-bold text-slate-800">{lpjDeadline}</span>
-                  </div>
-                  <div className="p-2.5 bg-white rounded-xl border border-slate-200/60">
-                    <span className="text-[10px] text-slate-400 font-bold block">Status Skor Audit DPM:</span>
-                    <span className="font-black text-slate-900">
-                      {proker.lpj?.auditScore ? `${proker.lpj.auditScore} / 100 (Lulus Audit)` : 'Belum Diaudit'}
-                    </span>
-                  </div>
-                </div>
-
-                {proker.lpj?.fileName && (
-                  <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <span className="font-bold text-slate-900 block">{proker.lpj.fileName}</span>
-                        <span className="text-[10px] text-slate-400">Diunggah: {proker.lpj.uploadDate || '-'}</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => alert(`Mengunduh file: ${proker.lpj.fileName}`)}
-                      className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1"
-                    >
-                      <Download className="w-3 h-3" />
-                      <span>Unduh</span>
-                    </button>
-                  </div>
-                )}
-
-                <div className="pt-1 flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={() => onAuditLPJ && onAuditLPJ(proker)}
-                    className="w-full sm:w-auto justify-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer text-center"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>{proker.lpj?.auditScore ? 'Lihat Lembar Audit LPJ' : 'Buka Form Audit LPJ'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Bagian Proposal */}
-              <div className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                    <h4 className="font-extrabold text-xs text-slate-900">
-                      Berkas Proposal Kegiatan
-                    </h4>
-                  </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                    proker.status === 'proposal_revisi' || proker.proposal?.reviewStatus === 'revisi'
-                      ? 'bg-amber-50 text-amber-800 border-amber-300'
-                      : proker.proposal?.reviewStatus === 'approved'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : proker.proposal?.fileName 
-                      ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                      : 'bg-slate-100 text-slate-600 border-slate-200'
-                  }`}>
-                    {proker.status === 'proposal_revisi' || proker.proposal?.reviewStatus === 'revisi'
-                      ? '⚠️ Perlu Revisi DPM'
-                      : proker.proposal?.reviewStatus === 'approved'
-                      ? '✓ Proposal Disetujui (ACC)'
-                      : proker.proposal?.fileName 
-                      ? 'Menunggu Review' 
-                      : 'Belum Ada Berkas'}
-                  </span>
-                </div>
-
-                <div className="p-3 bg-white rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-blue-600 shrink-0" />
-                    <div className="min-w-0">
-                      <span className="font-bold text-slate-900 block truncate text-xs">
-                        {proker.proposal?.fileName || 'Proposal_Kegiatan.pdf'}
-                      </span>
-                      <span className="text-[10px] text-slate-400 block">
-                        {proker.proposal?.uploadDate ? `Diunggah: ${proker.proposal.uploadDate} • ${proker.proposal?.fileSize || '2.4 MB'}` : 'Menunggu pengunggahan berkas sah'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    {proker.proposal?.fileName && (
-                      <button
-                        type="button"
-                        onClick={() => alert(`Mengunduh file: ${proker.proposal.fileName}`)}
-                        className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1 transition"
-                      >
-                        <Download className="w-3 h-3 text-slate-500" />
-                        <span>Unduh</span>
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => onReviewProposal && onReviewProposal(proker)}
-                      className="w-full sm:w-auto justify-center px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shrink-0"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                      <span>{proker.proposal?.fileName ? 'Review & Validasi' : 'Upload Proposal'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Checklist Poin Revisi DPM (Jika Ada) */}
-                {((proker.proposal?.revisionItems && proker.proposal.revisionItems.length > 0) || proker.status === 'proposal_revisi') && (
-                  <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/40 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 font-bold text-xs text-amber-900">
-                        <ListTodo className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Daftar Poin Revisi dari DPM:</span>
-                      </div>
-                      {proker.proposal?.revisionItems?.length > 0 && (
-                        <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100/70 border border-amber-300 px-2 py-0.5 rounded-full">
-                          {proker.proposal.revisionItems.filter(i => i.completed).length} dari {proker.proposal.revisionItems.length} Selesai
-                        </span>
-                      )}
-                    </div>
-
-                    {proker.proposal?.revisionItems && proker.proposal.revisionItems.length > 0 ? (
-                      <div className="space-y-1.5">
-                        {proker.proposal.revisionItems.map((item, idx) => (
-                          <div
-                            key={item.id || idx}
-                            onClick={() => toggleProposalRevisionItem(proker.id, item.id)}
-                            className={`p-2.5 rounded-lg border transition cursor-pointer flex items-start gap-2 select-none ${
-                              item.completed 
-                                ? 'bg-emerald-50/60 border-emerald-200 text-slate-500' 
-                                : 'bg-white border-amber-200/80 text-slate-900 shadow-2xs hover:border-amber-400'
-                            }`}
-                          >
-                            <span className="mt-0.5 shrink-0">
-                              {item.completed ? (
-                                <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
-                              ) : (
-                                <Square className="w-3.5 h-3.5 text-amber-500" />
-                              )}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-xs ${item.completed ? 'line-through text-slate-400 font-normal' : 'font-semibold text-slate-800'}`}>
-                                {item.text}
-                              </p>
-                              <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
-                                <span>Oleh {item.addedBy || 'DPM'}</span>
-                                {item.completed && (
-                                  <span className="text-emerald-700 font-bold">✓ Selesai Diperbaiki</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-amber-800 italic">
-                        Proposal ditandai perlu revisi. DPM belum menambahkan butir spesifik di checklist.
-                      </p>
-                    )}
-
-                    {/* Catatan Umum DPM */}
-                    {proker.proposal?.notes && proker.proposal.notes.length > 0 && (
-                      <div className="pt-2 border-t border-amber-200/60 text-[11px] text-slate-600 space-y-1">
-                        <span className="font-bold text-slate-700 block">Catatan Umum DPM:</span>
-                        {proker.proposal.notes.slice(-2).map((n) => (
-                          <p key={n.id} className="bg-white/80 p-2 rounded-lg border border-amber-100 text-slate-700">
-                            <strong>{n.author}:</strong> "{n.text}"
-                          </p>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-        </div>
-
-        {/* Modal Footer */}
-        <DialogFooter className="px-4 sm:px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between gap-2">
-          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
-            SIWASMA DPM FASILKOM • Rincian Program Kerja
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition shadow-xs cursor-pointer text-center"
-          >
-            Tutup
-          </button>
-        </DialogFooter>
-      </DialogContent>
+          {/* Modal Footer */}
+          <DialogFooter className="px-4 sm:px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between gap-2">
+            <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+              SIWASMA DPM FASILKOM • Rincian Program Kerja
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition shadow-xs cursor-pointer text-center"
+            >
+              Tutup
+            </button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
       {/* Modal Pratinjau Foto Bukti Pembayaran RAB */}
-      {previewRabReceipt && (
-        <Dialog open={!!previewRabReceipt} onOpenChange={() => setPreviewRabReceipt(null)}>
-          <DialogContent className="w-[92vw] sm:max-w-md p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-2xl">
-            <DialogHeader className="pb-2 border-b border-slate-100">
-              <DialogTitle className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-emerald-600" />
-                <span>Bukti Pembayaran: {previewRabReceipt.pos}</span>
-              </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
-                Nominal Biaya: Rp {(previewRabReceipt.subtotal || 0).toLocaleString('id-ID')}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="py-3 flex items-center justify-center">
-              {previewRabReceipt.photo && String(previewRabReceipt.photo).startsWith('data:image') ? (
-                <img 
-                  src={previewRabReceipt.photo} 
-                  alt={previewRabReceipt.name} 
-                  className="max-h-80 w-auto rounded-xl object-contain border border-slate-200 shadow-xs"
-                />
-              ) : (
-                <div className="p-8 text-center bg-slate-50 rounded-xl border border-slate-200 w-full">
-                  <Receipt className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
-                  <p className="text-xs font-bold text-slate-800">{previewRabReceipt.name}</p>
-                  <p className="text-[11px] text-slate-500 mt-1">Dokumen bukti pembayaran terlampir sah</p>
-                </div>
-              )}
-            </div>
-
-            <DialogFooter className="pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setPreviewRabReceipt(null)}
-                className="w-full py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition cursor-pointer text-center"
-              >
-                Tutup Pratinjau
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      <ReceiptPreviewModal
+        previewRabReceipt={previewRabReceipt}
+        onClose={() => setPreviewRabReceipt(null)}
+      />
     </>
   );
 }

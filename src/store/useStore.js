@@ -1,7 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { INITIAL_ORMAWA, INITIAL_PROKER, INITIAL_SP, INITIAL_ACTIVITY_LOGS, INITIAL_BUDGET_TRANSACTIONS } from '../data/initialData';
+import { 
+  INITIAL_ORMAWA, 
+  INITIAL_PROKER, 
+  INITIAL_SP, 
+  INITIAL_ACTIVITY_LOGS, 
+  INITIAL_BUDGET_TRANSACTIONS 
+} from '../data/initialData';
 import { INITIAL_TEMPLATES } from '../data/templatesData';
+import {
+  createLogEntry,
+  calculateLpjDeadline,
+  checkIsDadakan,
+  createDefaultProposal,
+  createDefaultLpj
+} from './storeHelpers';
 
 export const useStore = create(
   persist(
@@ -15,10 +28,10 @@ export const useStore = create(
       budgetTransactions: INITIAL_BUDGET_TRANSACTIONS,
       
       // UI State
-      activeTab: 'dashboard', // 'dashboard' | 'proker' | 'history' | 'anggaran' | 'berkas' | 'template' | 'audit' | 'kalender' | 'sp'
-      selectedOrmawaFilter: 'all', // 'all' | 'dpm' | 'bem' | 'himti' | 'himsisfo'
+      activeTab: 'dashboard',
+      selectedOrmawaFilter: 'all',
       searchQuery: '',
-      currentUserRole: 'dpm', // 'dpm' | 'bem' | 'himti' | 'himsisfo'
+      currentUserRole: 'dpm',
       currentUserName: 'Muhammad Daffa Aulia Syahrul (DPM)',
 
       // Setters
@@ -45,22 +58,9 @@ export const useStore = create(
       // 1. TAMBAH PROKER
       addProker: (newProker) => {
         const id = `proker-${Date.now()}`;
-        
-        // Cek apakah proposal diunggah sekarang
         const todayStr = new Date().toISOString().split('T')[0];
-        let isDadakan = false;
-        if (newProker.proposal?.fileName) {
-          const startDateObj = new Date(newProker.startDate);
-          const uploadDateObj = new Date(todayStr);
-          const diffTime = startDateObj.getTime() - uploadDateObj.getTime();
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          isDadakan = diffDays < 14;
-        }
-
-        // Hitung deadline LPJ (startDate + 14 hari)
-        const eventEndObj = new Date(newProker.endDate || newProker.startDate);
-        eventEndObj.setDate(eventEndObj.getDate() + 14);
-        const lpjDeadline = eventEndObj.toISOString().split('T')[0];
+        const { isDadakan } = checkIsDadakan(newProker.startDate, todayStr, 14);
+        const lpjDeadline = calculateLpjDeadline(newProker.startDate, newProker.endDate, 14);
 
         const prokerItem = {
           id,
@@ -83,54 +83,24 @@ export const useStore = create(
           rundown: newProker.rundown || null,
           rabBreakdown: newProker.rabBreakdown || null,
           status: newProker.proposal?.fileName ? 'proposal_pending' : 'draft',
-          proposal: newProker.proposal?.fileName ? {
-            fileName: newProker.proposal.fileName,
-            fileSize: newProker.proposal.fileSize || '2.5 MB',
-            uploadDate: todayStr,
-            isDadakan,
-            reviewStatus: 'pending',
-            approvedDate: null,
-            approvedBy: null,
-            notes: [],
-            revisionItems: []
-          } : {
-            fileName: null,
-            fileSize: null,
-            uploadDate: null,
-            isDadakan: false,
-            reviewStatus: 'not_uploaded',
-            approvedDate: null,
-            approvedBy: null,
-            notes: [],
-            revisionItems: []
-          },
+          proposal: createDefaultProposal(newProker.proposal, isDadakan, todayStr),
           inspection: null,
-          lpj: {
-            fileName: null,
-            fileSize: null,
-            uploadDate: null,
-            deadlineDate: lpjDeadline,
-            reviewStatus: 'not_uploaded',
-            notes: [],
-            auditScore: null,
-            auditDetails: null
-          },
+          lpj: createDefaultLpj(lpjDeadline),
           otherDocs: newProker.otherDocs || []
         };
 
         const ormawaName = get().ormawas.find(o => o.id === newProker.ormawaId)?.name || 'Ormawa';
 
-        const newLog = {
-          id: `log-${Date.now()}`,
-          timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+        const newLog = createLogEntry({
           ormawaId: newProker.ormawaId,
           type: 'proker_added',
           title: `Program Kerja Baru Ditambahkan: ${newProker.title}`,
           description: `${ormawaName} mendaftarkan program kerja baru "${newProker.title}". Jadwal: ${newProker.startDate}. Status Proposal: ${prokerItem.proposal.fileName ? (isDadakan ? 'Diunggah di Luar Batas Waktu (< H-14)' : 'Diunggah Tepat Waktu (≥ H-14)') : 'Belum Ada Berkas Proposal'}.`,
           actor: get().currentUserName,
           prokerTitle: newProker.title,
-          prokerId: id
-        };
+          prokerId: id,
+          formattedDate: get().getFormattedDate()
+        });
 
         set((state) => ({
           prokers: [prokerItem, ...state.prokers],
@@ -145,17 +115,16 @@ export const useStore = create(
         set((state) => {
           const target = state.prokers.find(p => p.id === prokerId);
           const ormawaName = state.ormawas.find(o => o.id === target?.ormawaId)?.name || 'Ormawa';
-          const newLog = target ? {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = target ? createLogEntry({
             ormawaId: target.ormawaId,
             type: 'proker_deleted',
             title: `Program Kerja Dihapus: ${target.title}`,
             description: `Program kerja "${target.title}" dari ${ormawaName} (${target.divisi}) telah dihapus dari sistem pengawasan oleh ${get().currentUserName}.`,
             actor: get().currentUserName,
             prokerTitle: target.title,
-            prokerId: target.id
-          } : null;
+            prokerId: target.id,
+            formattedDate: get().getFormattedDate()
+          }) : null;
 
           return {
             prokers: state.prokers.filter(p => p.id !== prokerId),
@@ -172,11 +141,7 @@ export const useStore = create(
           const proker = state.prokers.find(p => p.id === prokerId);
           if (!proker) return state;
 
-          const startDateObj = new Date(proker.startDate);
-          const uploadDateObj = new Date(todayStr);
-          const diffTime = startDateObj.getTime() - uploadDateObj.getTime();
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          const isDadakan = diffDays < 14;
+          const { diffDays, isDadakan } = checkIsDadakan(proker.startDate, todayStr, 14);
 
           const updatedProposal = {
             fileName: fileInfo.name || 'Proposal_Kegiatan.pdf',
@@ -191,15 +156,14 @@ export const useStore = create(
           };
 
           const ormawaName = state.ormawas.find(o => o.id === proker.ormawaId)?.name || 'Ormawa';
-          const newLog = {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: 'proposal_uploaded',
             title: `Proposal Diunggah: ${proker.title}`,
             description: `${ormawaName} mengunggah berkas proposal. Selisih ke Hari-H: ${diffDays} hari (${isDadakan ? 'DITANDAI TERLAMBAT < H-14' : 'TEPAT WAKTU ≥ H-14'}).`,
-            actor: get().currentUserName
-          };
+            actor: get().currentUserName,
+            formattedDate: get().getFormattedDate()
+          });
 
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
@@ -242,17 +206,16 @@ export const useStore = create(
             revisionItems: proker.proposal.revisionItems || []
           };
 
-          const newLog = {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: isApproved ? 'proposal_approved' : 'proposal_revisi',
             title: isApproved ? `Proposal Disetujui (ACC): ${proker.title}` : `Catatan Revisi Proposal: ${proker.title}`,
             description: isApproved 
               ? `Ketua DPM resmi menyetujui proposal ${proker.title}. Proker siap berlanjut ke tahap pelaksanaan.`
               : `DPM memberikan catatan revisi: "${noteText || 'Proposal memerlukan revisi butir teknis sebelum disetujui.'}"`,
-            actor: get().currentUserName
-          };
+            actor: get().currentUserName,
+            formattedDate: get().getFormattedDate()
+          });
 
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
@@ -265,7 +228,7 @@ export const useStore = create(
         });
       },
 
-      // ACTION: TAMBAH BUTIR REVISI PROPOSAL (ITEMIZED REVISION)
+      // ACTION: TAMBAH BUTIR REVISI PROPOSAL
       addProposalRevisionItem: (prokerId, text) => {
         if (!text || !text.trim()) return;
         const todayStr = new Date().toISOString().split('T')[0];
@@ -290,17 +253,16 @@ export const useStore = create(
             reviewStatus: 'revisi'
           };
 
-          const newLog = {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: 'proposal_revision_item_added',
             title: `Poin Revisi Proposal Ditambahkan: ${proker.title}`,
             description: `${get().currentUserName} menambahkan butir revisi: "${newItem.text}".`,
             actor: get().currentUserName,
             prokerTitle: proker.title,
-            prokerId: proker.id
-          };
+            prokerId: proker.id,
+            formattedDate: get().getFormattedDate()
+          });
 
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
@@ -313,20 +275,20 @@ export const useStore = create(
         });
       },
 
-      // ACTION: TOGGLE STATUS SELESAI BUTIR REVISI (CHECKLIST)
+      // ACTION: TOGGLE SELESAI BUTIR REVISI
       toggleProposalRevisionItem: (prokerId, itemId) => {
         set((state) => {
           const proker = state.prokers.find(p => p.id === prokerId);
           if (!proker || !proker.proposal || !proker.proposal.revisionItems) return state;
 
-          let toggledItemText = '';
+          let targetItemText = '';
           let isNowCompleted = false;
 
           const updatedRevisionItems = proker.proposal.revisionItems.map(item => {
             if (item.id === itemId) {
-              toggledItemText = item.text;
+              targetItemText = item.text;
               isNowCompleted = !item.completed;
-              return { ...item, completed: !item.completed };
+              return { ...item, completed: isNowCompleted };
             }
             return item;
           });
@@ -336,17 +298,16 @@ export const useStore = create(
             revisionItems: updatedRevisionItems
           };
 
-          const newLog = {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: 'proposal_revision_item_toggled',
-            title: `Butir Revisi Proposal ${isNowCompleted ? 'Diselesaikan' : 'Dibatalkan'}: ${proker.title}`,
-            description: `Butir revisi "${toggledItemText}" ditandai ${isNowCompleted ? 'SELESAI DIPERBAIKI' : 'BELUM SELESAI'} oleh ${get().currentUserName}.`,
+            title: `Status Poin Revisi Diubah: ${proker.title}`,
+            description: `Butir revisi "${targetItemText}" ditandai ${isNowCompleted ? 'SELESAI DIPERBAIKI' : 'BELUM SELESAI'} oleh ${get().currentUserName}.`,
             actor: get().currentUserName,
             prokerTitle: proker.title,
-            prokerId: proker.id
-          };
+            prokerId: proker.id,
+            formattedDate: get().getFormattedDate()
+          });
 
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
@@ -364,23 +325,19 @@ export const useStore = create(
           const proker = state.prokers.find(p => p.id === prokerId);
           if (!proker || !proker.proposal || !proker.proposal.revisionItems) return state;
 
-          const updatedRevisionItems = proker.proposal.revisionItems.filter(item => item.id !== itemId);
-
-          const updatedProposal = {
-            ...proker.proposal,
-            revisionItems: updatedRevisionItems
-          };
-
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
               ...p,
-              proposal: updatedProposal
+              proposal: {
+                ...p.proposal,
+                revisionItems: p.proposal.revisionItems.filter(item => item.id !== itemId)
+              }
             } : p)
           };
         });
       },
 
-      // UPDATE DETAIL LENGKAP PROKER (RUNDOWN, KEPANITIAAN, TUJUAN, DESKRIPSI, RAB)
+      // UPDATE DETAIL LENGKAP PROKER
       updateProkerDetails: (prokerId, updatedData) => {
         set((state) => ({
           prokers: state.prokers.map(p => 
@@ -407,15 +364,14 @@ export const useStore = create(
             inspectionNotes: inspectionData.inspectionNotes || 'Pengawasan hari-H terlaksana dengan baik.'
           };
 
-          const newLog = {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: 'inspection_done',
             title: `Berita Acara Hari-H Diisi: ${proker.title}`,
             description: `Tim DPM telah melakukan pengawasan lapangan. Rundown: ${inspectionObj.rundownAccuracy}. Kepatuhan SOP: ${inspectionObj.sopCompliance}.`,
-            actor: get().currentUserName
-          };
+            actor: get().currentUserName,
+            formattedDate: get().getFormattedDate()
+          });
 
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
@@ -453,15 +409,14 @@ export const useStore = create(
           };
 
           const ormawaName = state.ormawas.find(o => o.id === proker.ormawaId)?.name || 'Ormawa';
-          const newLog = {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: 'lpj_uploaded',
             title: `Berkas LPJ Diunggah: ${proker.title}`,
             description: `${ormawaName} mengunggah berkas LPJ dan nota keuangan. Status waktu: ${isOverdue ? 'MELAMPAUI BATAS WAKTU (> H+14)' : 'MEMENUHI BATAS WAKTU (≤ H+14)'}.`,
-            actor: get().currentUserName
-          };
+            actor: get().currentUserName,
+            formattedDate: get().getFormattedDate()
+          });
 
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
@@ -474,7 +429,7 @@ export const useStore = create(
         });
       },
 
-      // 5.b. UPLOAD DOKUMEN LAINNYA (SURAT, SK, LAMPIRAN)
+      // 5.b. UPLOAD DOKUMEN LAINNYA
       uploadOtherDoc: (prokerId, fileInfo, docTitle = 'Dokumen Lainnya') => {
         const todayStr = new Date().toISOString().split('T')[0];
 
@@ -494,15 +449,14 @@ export const useStore = create(
 
           const existingDocs = proker.otherDocs || [];
           const ormawaName = state.ormawas.find(o => o.id === proker.ormawaId)?.name || 'Ormawa';
-          const newLog = {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: 'doc_uploaded',
             title: `Dokumen Lainnya Diunggah: ${newDoc.fileName}`,
             description: `${ormawaName} mengunggah dokumen administrasi/lampiran untuk kegiatan ${proker.title}.`,
-            actor: get().currentUserName
-          };
+            actor: get().currentUserName,
+            formattedDate: get().getFormattedDate()
+          });
 
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
@@ -518,13 +472,11 @@ export const useStore = create(
       auditLPJ: (prokerId, auditData) => {
         const todayStr = new Date().toISOString().split('T')[0];
 
-        // 5 Parameter Penilaian (Masing-masing 0 - 20, Total 100)
         const rundownScore = Number(auditData.rundownScore) || 20;
         const pesertaScore = Number(auditData.pesertaScore) || 20;
         const anggaranScore = Number(auditData.anggaranScore) || 20;
         const slaScore = Number(auditData.slaScore) || 20;
         const outputScore = Number(auditData.outputScore) || 20;
-
         const totalScore = Math.min(100, Math.max(0, rundownScore + pesertaScore + anggaranScore + slaScore + outputScore));
 
         let predikat = 'A';
@@ -556,15 +508,14 @@ export const useStore = create(
             auditDetails
           };
 
-          const newLog = {
-            id: `log-${Date.now()}`,
-            timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+          const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: 'lpj_approved',
             title: `Audit Selesai: ${proker.title} — Nilai ${totalScore} (${predikat})`,
             description: `DPM resmi mengesahkan LPJ ${proker.title} dengan predikat ${predikat} (Skor: ${totalScore}/100). Catatan: "${auditDetails.catatanDPM}"`,
-            actor: get().currentUserName
-          };
+            actor: get().currentUserName,
+            formattedDate: get().getFormattedDate()
+          });
 
           return {
             prokers: state.prokers.map(p => p.id === prokerId ? {
@@ -592,7 +543,7 @@ export const useStore = create(
           noSurat,
           ormawaId: spPayload.ormawaId,
           ormawaName: get().ormawas.find(o => o.id === spPayload.ormawaId)?.name || 'Ormawa',
-          level: spPayload.level, // 1 | 2 | 3
+          level: spPayload.level,
           title: `Surat Peringatan ${spPayload.level} (SP ${spPayload.level}) — ${spPayload.prokerTitle}`,
           reason: spPayload.reason,
           prokerId: spPayload.prokerId,
@@ -603,15 +554,14 @@ export const useStore = create(
           status: 'active'
         };
 
-        const newLog = {
-          id: `log-${Date.now()}`,
-          timestamp: `${get().getFormattedDate()} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`,
+        const newLog = createLogEntry({
           ormawaId: spPayload.ormawaId,
           type: 'sp_issued',
           title: `Penerbitan ${spItem.title}`,
           description: `Ketua DPM menerbitkan ${spItem.title} dengan No: ${noSurat}. Alasan: ${spPayload.reason}`,
-          actor: get().currentUserName
-        };
+          actor: get().currentUserName,
+          formattedDate: get().getFormattedDate()
+        });
 
         set((state) => ({
           suratPeringatan: [spItem, ...state.suratPeringatan],
@@ -652,12 +602,14 @@ export const useStore = create(
         set((state) => ({
           templates: [templateItem, ...state.templates],
           activityLogs: [
-            {
-              id: `log-${Date.now()}`,
-              timestamp: new Date().toISOString(),
-              text: `Template baru "${templateItem.title}" berhasil ditambahkan ke Bank Template Dokumen.`,
-              type: 'template_added'
-            },
+            createLogEntry({
+              ormawaId: 'dpm',
+              type: 'template_added',
+              title: `Template Ditambahkan: ${templateItem.title}`,
+              description: `Template baru "${templateItem.title}" berhasil ditambahkan ke Bank Template Dokumen.`,
+              actor: get().currentUserName,
+              formattedDate: get().getFormattedDate()
+            }),
             ...state.activityLogs
           ]
         }));
@@ -686,12 +638,14 @@ export const useStore = create(
           return {
             templates: updatedTemplates,
             activityLogs: [
-              {
-                id: `log-${Date.now()}`,
-                timestamp: new Date().toISOString(),
-                text: `Template "${target?.title || 'Dokumen'}" berhasil diperbarui.`,
-                type: 'template_updated'
-              },
+              createLogEntry({
+                ormawaId: 'dpm',
+                type: 'template_updated',
+                title: `Template Diperbarui: ${target?.title || 'Dokumen'}`,
+                description: `Template "${target?.title || 'Dokumen'}" berhasil diperbarui oleh ${get().currentUserName}.`,
+                actor: get().currentUserName,
+                formattedDate: get().getFormattedDate()
+              }),
               ...state.activityLogs
             ]
           };
@@ -716,14 +670,14 @@ export const useStore = create(
           return {
             ormawas: updatedOrmawas,
             activityLogs: [
-              {
-                id: `log-${Date.now()}`,
+              createLogEntry({
+                ormawaId,
+                type: 'budget_updated',
                 title: `Alokasi Anggaran ${targetOrmawa?.shortName || ormawaId} Diperbarui`,
-                desc: `Alokasi anggaran ditetapkan sebesar Rp ${(Number(newPagu) || 0).toLocaleString('id-ID')}`,
-                timestamp: 'Baru saja',
-                time: get().getFormattedDate(),
-                type: 'budget_updated'
-              },
+                description: `Alokasi anggaran ditetapkan sebesar Rp ${(Number(newPagu) || 0).toLocaleString('id-ID')}`,
+                actor: get().currentUserName,
+                formattedDate: get().getFormattedDate()
+              }),
               ...state.activityLogs
             ]
           };
@@ -740,7 +694,7 @@ export const useStore = create(
           id,
           ormawaId: newTx.ormawaId,
           prokerId: newTx.prokerId || null,
-          type: newTx.type || 'termin1', // 'termin1' | 'termin2' | 'operasional' | 'sponsorship' | 'lainnya'
+          type: newTx.type || 'termin1',
           category: newTx.category || 'Dana Kemahasiswaan Fakultas',
           title: newTx.title || 'Pencairan Anggaran',
           nominal,
@@ -756,7 +710,6 @@ export const useStore = create(
         set((state) => {
           const updatedTransactions = [txItem, ...(state.budgetTransactions || [])];
           
-          // Sinkronisasi serapan anggaran ormawa terkait
           const updatedOrmawas = state.ormawas.map(o => {
             if (o.id === newTx.ormawaId) {
               const isExpense = ['termin1', 'termin2', 'operasional', 'lainnya'].includes(txItem.type);
@@ -769,7 +722,6 @@ export const useStore = create(
             return o;
           });
 
-          // Jika ada proker terkait dan transaksi pencairan, sinkronkan realisasiDana proker
           let updatedProkers = state.prokers;
           if (newTx.prokerId) {
             updatedProkers = state.prokers.map(p => {
@@ -790,14 +742,14 @@ export const useStore = create(
             ormawas: updatedOrmawas,
             prokers: updatedProkers,
             activityLogs: [
-              {
-                id: `log-${Date.now()}`,
+              createLogEntry({
+                ormawaId: newTx.ormawaId,
+                type: 'transaction_added',
                 title: `Transaksi Anggaran ${ormawa?.shortName || ''} Dicatat`,
-                desc: `${txItem.title}: Rp ${nominal.toLocaleString('id-ID')} (${txItem.category})`,
-                timestamp: 'Baru saja',
-                time: get().getFormattedDate(),
-                type: 'transaction_added'
-              },
+                description: `${txItem.title}: Rp ${nominal.toLocaleString('id-ID')} (${txItem.category})`,
+                actor: get().currentUserName,
+                formattedDate: get().getFormattedDate()
+              }),
               ...state.activityLogs
             ]
           };

@@ -1,26 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useStore } from './store/useStore';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import DashboardView from './components/dashboard/DashboardView';
 import ProkerView from './components/proker/ProkerView';
-import HistoryView from './components/history/HistoryView';
-import BerkasView from './components/berkas/BerkasView';
-import AuditView from './components/audit/AuditView';
-import KalenderView from './components/kalender/KalenderView';
-import SuratPeringatanView from './components/sp/SuratPeringatanView';
-import TemplateView from './components/template/TemplateView';
-import AnggaranView from './components/anggaran/AnggaranView';
 
-// Modals
-import AddProkerModal from './components/modals/AddProkerModal';
-import ReviewProposalModal from './components/modals/ReviewProposalModal';
-import AuditLPJModal from './components/modals/AuditLPJModal';
-import IssueSPModal from './components/modals/IssueSPModal';
-import PrintDocModal from './components/modals/PrintDocModal';
-import SetPaguModal from './components/modals/SetPaguModal';
-import AddTransactionModal from './components/modals/AddTransactionModal';
-import DetailProkerModal from './components/modals/DetailProkerModal';
+// Secondary views loaded on-demand
+const HistoryView = lazy(() => import('./components/history/HistoryView'));
+const BerkasView = lazy(() => import('./components/berkas/BerkasView'));
+const AuditView = lazy(() => import('./components/audit/AuditView'));
+const KalenderView = lazy(() => import('./components/kalender/KalenderView'));
+const SuratPeringatanView = lazy(() => import('./components/sp/SuratPeringatanView'));
+const TemplateView = lazy(() => import('./components/template/TemplateView'));
+const AnggaranView = lazy(() => import('./components/anggaran/AnggaranView'));
+
+// Modals loaded on-demand
+const AddProkerModal = lazy(() => import('./components/modals/AddProkerModal'));
+const ReviewProposalModal = lazy(() => import('./components/modals/ReviewProposalModal'));
+const AuditLPJModal = lazy(() => import('./components/modals/AuditLPJModal'));
+const IssueSPModal = lazy(() => import('./components/modals/IssueSPModal'));
+const PrintDocModal = lazy(() => import('./components/modals/PrintDocModal'));
+const SetPaguModal = lazy(() => import('./components/modals/SetPaguModal'));
+const AddTransactionModal = lazy(() => import('./components/modals/AddTransactionModal'));
+const DetailProkerModal = lazy(() => import('./components/modals/DetailProkerModal'));
+
+function ViewLoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-[300px] w-full">
+      <div className="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+    </div>
+  );
+}
 
 export default function App() {
   const { activeTab } = useStore();
@@ -71,131 +81,151 @@ export default function App() {
         />
 
         <main className="flex-1 p-3.5 sm:p-5 lg:p-7 xl:p-8 max-w-[1440px] w-full mx-auto overflow-x-hidden">
-          {activeTab === 'dashboard' && (
-            <DashboardView 
-              onOpenAddProker={() => handleOpenAddProker('')}
-              onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-              onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-            />
-          )}
+          <Suspense fallback={<ViewLoadingFallback />}>
+            {activeTab === 'dashboard' && (
+              <DashboardView 
+                onOpenAddProker={() => handleOpenAddProker('')}
+                onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+              />
+            )}
 
-          {activeTab === 'proker' && (
-            <ProkerView 
-              onOpenAddProker={() => handleOpenAddProker('')}
-              onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-              onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
-              onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-              onPrintDoc={(docData) => setPrintDocData(docData)}
-            />
-          )}
+            {activeTab === 'proker' && (
+              <ProkerView 
+                onOpenAddProker={() => handleOpenAddProker('')}
+                onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
+                onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                onPrintDoc={(docData) => setPrintDocData(docData)}
+              />
+            )}
 
-          {activeTab === 'history' && (
-            <HistoryView 
-              onOpenAddProker={() => handleOpenAddProker('')}
-            />
-          )}
+            {activeTab === 'history' && (
+              <HistoryView 
+                onOpenAddProker={() => handleOpenAddProker('')}
+              />
+            )}
 
-          {activeTab === 'anggaran' && (
-            <AnggaranView 
-              onOpenSetPagu={() => setIsSetPaguOpen(true)}
-              onOpenAddTransaction={() => setIsAddTransactionOpen(true)}
-              onPrintDoc={(docData) => setPrintDocData(docData)}
-            />
-          )}
+            {activeTab === 'anggaran' && (
+              <AnggaranView 
+                onOpenSetPagu={() => setIsSetPaguOpen(true)}
+                onOpenAddTransaction={() => setIsAddTransactionOpen(true)}
+                onPrintDoc={(docData) => setPrintDocData(docData)}
+              />
+            )}
 
-          {activeTab === 'berkas' && (
-            <BerkasView 
-              onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-              onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-            />
-          )}
+            {activeTab === 'berkas' && (
+              <BerkasView 
+                onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+              />
+            )}
 
-          {activeTab === 'template' && (
-            <TemplateView />
-          )}
+            {activeTab === 'template' && (
+              <TemplateView />
+            )}
 
-          {activeTab === 'audit' && (
-            <AuditView 
-              onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-              onPrintDoc={(docData) => setPrintDocData(docData)}
-            />
-          )}
+            {activeTab === 'audit' && (
+              <AuditView 
+                onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                onPrintDoc={(docData) => setPrintDocData(docData)}
+              />
+            )}
 
-          {activeTab === 'kalender' && (
-            <KalenderView 
-              onOpenAddProker={(date) => handleOpenAddProker(date || calendarSelectedDate)}
-              onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-              onDateChange={setCalendarSelectedDate}
-            />
-          )}
+            {activeTab === 'kalender' && (
+              <KalenderView 
+                onOpenAddProker={(date) => handleOpenAddProker(date || calendarSelectedDate)}
+                onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                onDateChange={setCalendarSelectedDate}
+              />
+            )}
 
-          {activeTab === 'sp' && (
-            <SuratPeringatanView 
-              onOpenIssueSP={() => setIsIssueSPOpen(true)}
-              onPrintDoc={(docData) => setPrintDocData(docData)}
-            />
-          )}
+            {activeTab === 'sp' && (
+              <SuratPeringatanView 
+                onOpenIssueSP={() => setIsIssueSPOpen(true)}
+                onPrintDoc={(docData) => setPrintDocData(docData)}
+              />
+            )}
+          </Suspense>
         </main>
       </div>
 
-      <AddProkerModal 
-        isOpen={isAddProkerOpen} 
-        onClose={() => {
-          setIsAddProkerOpen(false);
-          setInitialProkerDate('');
-        }}
-        initialDate={initialProkerDate}
-      />
+      <Suspense fallback={null}>
+        {isAddProkerOpen && (
+          <AddProkerModal 
+            isOpen={isAddProkerOpen} 
+            onClose={() => {
+              setIsAddProkerOpen(false);
+              setInitialProkerDate('');
+            }}
+            initialDate={initialProkerDate}
+          />
+        )}
 
-      <ReviewProposalModal 
-        isOpen={!!selectedProkerForReview} 
-        onClose={() => setSelectedProkerForReview(null)}
-        proker={selectedProkerForReview}
-      />
+        {!!selectedProkerForReview && (
+          <ReviewProposalModal 
+            isOpen={!!selectedProkerForReview} 
+            onClose={() => setSelectedProkerForReview(null)}
+            proker={selectedProkerForReview}
+          />
+        )}
 
-      <AuditLPJModal 
-        isOpen={!!selectedProkerForAudit} 
-        onClose={() => setSelectedProkerForAudit(null)}
-        proker={selectedProkerForAudit}
-      />
+        {!!selectedProkerForAudit && (
+          <AuditLPJModal 
+            isOpen={!!selectedProkerForAudit} 
+            onClose={() => setSelectedProkerForAudit(null)}
+            proker={selectedProkerForAudit}
+          />
+        )}
 
-      <IssueSPModal 
-        isOpen={isIssueSPOpen} 
-        onClose={() => setIsIssueSPOpen(false)}
-      />
+        {isIssueSPOpen && (
+          <IssueSPModal 
+            isOpen={isIssueSPOpen} 
+            onClose={() => setIsIssueSPOpen(false)}
+          />
+        )}
 
-      <PrintDocModal 
-        isOpen={!!printDocData} 
-        onClose={() => setPrintDocData(null)}
-        documentData={printDocData}
-      />
+        {!!printDocData && (
+          <PrintDocModal 
+            isOpen={!!printDocData} 
+            onClose={() => setPrintDocData(null)}
+            documentData={printDocData}
+          />
+        )}
 
-      <SetPaguModal 
-        isOpen={isSetPaguOpen}
-        onClose={() => setIsSetPaguOpen(false)}
-      />
+        {isSetPaguOpen && (
+          <SetPaguModal 
+            isOpen={isSetPaguOpen}
+            onClose={() => setIsSetPaguOpen(false)}
+          />
+        )}
 
-      <AddTransactionModal 
-        isOpen={isAddTransactionOpen}
-        onClose={() => setIsAddTransactionOpen(false)}
-      />
+        {isAddTransactionOpen && (
+          <AddTransactionModal 
+            isOpen={isAddTransactionOpen}
+            onClose={() => setIsAddTransactionOpen(false)}
+          />
+        )}
 
-      <DetailProkerModal 
-        isOpen={!!selectedProkerForDetail}
-        onClose={() => setSelectedProkerForDetail(null)}
-        proker={selectedProkerForDetail}
-        onAuditLPJ={(proker) => {
-          setSelectedProkerForDetail(null);
-          setSelectedProkerForAudit(proker);
-        }}
-        onReviewProposal={(proker) => {
-          setSelectedProkerForDetail(null);
-          setSelectedProkerForReview(proker);
-        }}
-        onPrintRundown={(docData) => {
-          setPrintDocData(docData);
-        }}
-      />
+        {!!selectedProkerForDetail && (
+          <DetailProkerModal 
+            isOpen={!!selectedProkerForDetail}
+            onClose={() => setSelectedProkerForDetail(null)}
+            proker={selectedProkerForDetail}
+            onAuditLPJ={(proker) => {
+              setSelectedProkerForDetail(null);
+              setSelectedProkerForAudit(proker);
+            }}
+            onReviewProposal={(proker) => {
+              setSelectedProkerForDetail(null);
+              setSelectedProkerForReview(proker);
+            }}
+            onPrintRundown={(docData) => {
+              setPrintDocData(docData);
+            }}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }
