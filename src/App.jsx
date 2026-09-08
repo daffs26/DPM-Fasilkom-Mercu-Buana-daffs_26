@@ -4,6 +4,8 @@ import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import DashboardView from './components/dashboard/DashboardView';
 import ProkerView from './components/proker/ProkerView';
+import LoginView from './components/auth/LoginView';
+import RegisterView from './components/auth/RegisterView';
 
 // Secondary views loaded on-demand
 const HistoryView = lazy(() => import('./components/history/HistoryView'));
@@ -33,7 +35,8 @@ function ViewLoadingFallback() {
 }
 
 export default function App() {
-  const { activeTab } = useStore();
+  const { activeTab, currentUser } = useStore();
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
 
   // Modal States
   const [isAddProkerOpen, setIsAddProkerOpen] = useState(false);
@@ -60,6 +63,13 @@ export default function App() {
     setInitialProkerDate(typeof date === 'string' ? date : '');
     setIsAddProkerOpen(true);
   };
+
+  if (!currentUser) {
+    if (authMode === 'register') {
+      return <RegisterView onSwitchToLogin={() => setAuthMode('login')} />;
+    }
+    return <LoginView onSwitchToRegister={() => setAuthMode('register')} />;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#F8FAFC] text-slate-900 font-sans selection:bg-slate-900 selection:text-amber-400">

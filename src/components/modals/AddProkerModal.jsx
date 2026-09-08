@@ -14,9 +14,9 @@ import DatePickerDropdown from '@/components/ui/date-picker-dropdown';
 import { X, UploadCloud, AlertTriangle, Calendar, Users, DollarSign, MapPin, CheckCircle2, Sparkles } from 'lucide-react';
 
 export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
-  const { ormawas, prokers, addProker } = useStore();
+  const { ormawas, prokers, addProker, currentUser } = useStore();
 
-  const [ormawaId, setOrmawaId] = useState('bem');
+  const [ormawaId, setOrmawaId] = useState(currentUser?.ormawaId !== 'dpm' ? currentUser?.ormawaId : 'bem');
   const [title, setTitle] = useState('');
   const [divisi, setDivisi] = useState('');
   const [pic, setPic] = useState('');
@@ -150,12 +150,15 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
               1. Pilih Ormawa Penyelenggara:
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {ormawas.map((o) => {
+              {ormawas
+                .filter(o => currentUser?.ormawaId === 'dpm' || o.id === currentUser?.ormawaId)
+                .map((o) => {
                 const isSelected = ormawaId === o.id;
                 return (
                   <button
                     key={o.id}
                     type="button"
+                    disabled={currentUser?.ormawaId !== 'dpm'}
                     onClick={() => setOrmawaId(o.id)}
                     className={`p-3 rounded-2xl border flex flex-col items-center text-center gap-1.5 transition ${
                       isSelected
@@ -167,7 +170,7 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
                           ? 'border-blue-950 bg-blue-950 text-white shadow-md'
                           : 'border-[#785E43] bg-[#9A7B56] text-white shadow-md'
                         : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                    }`}
+                    } ${currentUser?.ormawaId !== 'dpm' ? 'opacity-100 cursor-default' : ''}`}
                   >
                     <div className="w-8 h-8 p-0.5 rounded-xl bg-white shadow-xs flex items-center justify-center">
                       <img src={o.logo} alt={o.name} className="w-full h-full object-contain" />

@@ -101,3 +101,18 @@ export const INITIAL_SP = [];
 export const INITIAL_ACTIVITY_LOGS = [];
 
 export const INITIAL_BUDGET_TRANSACTIONS = [];
+
+export const INITIAL_USERS = [
+  {
+    id: 'user-dpm-ketua',
+    name: 'Muhammad Daffa Aulia Syahrul',
+    nim: '41822010000',
+    ormawaId: 'dpm',
+    role: 'ketua', // ketua, wakil, sekre, bendahara
+    username: 'admin',
+    password: '123', // Demo purpose
+    status: 'approved'
+  }
+];
+
+export const INITIAL_PENDING_USERS = [];

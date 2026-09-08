@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useStore } from '../../store/useStore';
 import { 
   LayoutDashboard, 
@@ -12,34 +12,44 @@ import {
   ShieldAlert,
   RotateCcw,
   ScrollText,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
-import DropdownSelect from '@/components/ui/dropdown-select';
-
-const ROLE_OPTIONS = [
-  { value: 'dpm', label: 'DPM' },
-  { value: 'bem', label: 'BEM' },
-  { value: 'himti', label: 'HiMTI' },
-  { value: 'himsisfo', label: 'HIMSISFO' }
-];
-
 export default function Sidebar({ isOpen, onClose }) {
-  const { 
+  const {
     activeTab, 
     setActiveTab, 
     prokers, 
     suratPeringatan,
     activityLogs = [],
-    currentUserRole,
-    setCurrentUserRole,
-    resetToDefaultData
+    currentUser,
+    logout,
+    resetToDefaultData,
+    lastReadHistoryCount = 0,
+    markHistoryAsRead
   } = useStore();
 
   // Hitung badge
   const pendingProposalCount = prokers.filter(p => p.status === 'proposal_pending').length;
   const overdueLPJCount = prokers.filter(p => p.status === 'lpj_overdue').length;
   const activeSPCount = suratPeringatan.filter(s => s.status === 'active').length;
-  const prokerLogsCount = activityLogs.filter(l => l.type === 'proker_added' || l.type === 'proker_deleted').length;
+  const totalProkerLogs = activityLogs.filter(l => l.type === 'proker_added' || l.type === 'proker_deleted').length;
+  const unreadProkerLogsCount = Math.max(0, totalProkerLogs - (lastReadHistoryCount || 0));
+
+  // Ketika pengguna membuka tab Histori Proker, otomatis tandai notifikasi sebagai sudah dibaca
+  useEffect(() => {
+    if (activeTab === 'history' && unreadProkerLogsCount > 0) {
+      markHistoryAsRead?.();
+    }
+  }, [activeTab, unreadProkerLogsCount, markHistoryAsRead]);
+
+  const handleSelectTab = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId === 'history') {
+      markHistoryAsRead?.();
+    }
+    onClose?.();
+  };
 
   const menuItems = [
     {
@@ -58,7 +68,7 @@ export default function Sidebar({ isOpen, onClose }) {
       id: 'history',
       label: 'Histori Proker',
       icon: History,
-      badge: prokerLogsCount > 0 ? { text: `${prokerLogsCount}`, color: 'bg-blue-100 text-blue-800' } : null
+      badge: unreadProkerLogsCount > 0 ? { text: `${unreadProkerLogsCount}`, color: 'bg-blue-100 text-blue-800' } : null
     },
     {
       id: 'anggaran',
@@ -98,6 +108,34 @@ export default function Sidebar({ isOpen, onClose }) {
     }
   ];
 
+  // Filter menu items based on role
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!currentUser) return false;
+    
+    // DPM has full access (Ketua/Wakil) or partial (Sekre, Bendahara)
+    if (currentUser.ormawaId === 'dpm') {
+      if (currentUser.role === 'ketua' || currentUser.role === 'wakil') return true;
+      if (currentUser.role === 'sekre') {
+        return ['dashboard', 'berkas', 'template', 'kalender', 'proker', 'history'].includes(item.id);
+      }
+      if (currentUser.role === 'bendahara') {
+        return ['dashboard', 'anggaran', 'history'].includes(item.id);
+      }
+    } else {
+      // BEM/HIMSISFO/HIMTI
+      if (currentUser.role === 'ketua' || currentUser.role === 'wakil') {
+        return ['dashboard', 'proker', 'history', 'berkas', 'kalender', 'template'].includes(item.id);
+      }
+      if (currentUser.role === 'sekre') {
+        return ['dashboard', 'proker', 'history', 'berkas', 'template', 'kalender'].includes(item.id);
+      }
+      if (currentUser.role === 'bendahara') {
+        return ['dashboard', 'anggaran', 'history'].includes(item.id);
+      }
+    }
+    return true; // fallback
+  });
+
   return (
     <>
       {/* Desktop sidebar — always visible, sticky, in document flow */}
@@ -124,13 +162,13 @@ export default function Sidebar({ isOpen, onClose }) {
             <p className="px-3 text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-2">
             Menu Legislatif & Pengawasan
           </p>
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => { setActiveTab(item.id); onClose?.(); }}
+                onClick={() => handleSelectTab(item.id)}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
                   isActive
                     ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100/80 shadow-2xs'
@@ -170,48 +208,34 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* User Role & Reset Controls */}
       <div className="p-3.5 border-t border-slate-100 bg-slate-50/60 space-y-2.5 shrink-0">
-        {/* Role Switcher */}
-        <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-            Simulasi Hak Akses (Role):
-          </label>
-          <DropdownSelect
-            value={currentUserRole === 'ketua_dpm' || currentUserRole === 'komisi_pengawas' ? 'dpm' : currentUserRole}
-            onChange={(val) => setCurrentUserRole(val)}
-            options={ROLE_OPTIONS}
-            placement="top"
-            triggerClassName="bg-white text-xs font-semibold py-2 px-2.5 rounded-xl border-slate-200"
-          />
-        </div>
-
         {/* User Card */}
-        {(() => {
-          const roleMap = {
-            dpm: { initials: 'MD', name: 'Muhammad Daffa A.', ormawa: 'DPM FASILKOM UMB' },
-            ketua_dpm: { initials: 'MD', name: 'Muhammad Daffa A.', ormawa: 'DPM FASILKOM UMB' },
-            komisi_pengawas: { initials: 'MD', name: 'Muhammad Daffa A.', ormawa: 'DPM FASILKOM UMB' },
-            bem: { initials: 'RP', name: 'Rafi Pratama', ormawa: 'BEM FASILKOM UMB' },
-            himti: { initials: 'AR', name: 'Aldi Renaldi', ormawa: 'HiMTI - UMB' },
-            himsisfo: { initials: 'HS', name: 'Perwakilan Ormawa', ormawa: 'HIMSISFO' }
-          };
-          const currentConfig = roleMap[currentUserRole] || roleMap.dpm;
-
-          return (
-            <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
-                {currentConfig.initials}
-              </div>
-              <div className="overflow-hidden flex-1">
-                <p className="text-xs font-bold text-slate-900 truncate">
-                  {currentConfig.name}
-                </p>
-                <p className="text-[10px] text-blue-700 font-semibold truncate">
-                  {currentConfig.ormawa}
-                </p>
-              </div>
+        {currentUser && (
+          <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+            <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+              {currentUser.name.substring(0, 2).toUpperCase()}
             </div>
-          );
-        })()}
+            <div className="overflow-hidden flex-1">
+              <p className="text-xs font-bold text-slate-900 truncate">
+                {currentUser.name}
+              </p>
+              <p className="text-[10px] text-blue-700 font-semibold truncate capitalize">
+                {currentUser.role} {currentUser.ormawaId.toUpperCase()}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => {
+            if (window.confirm('Yakin ingin keluar?')) {
+              logout();
+            }
+          }}
+          className="w-full flex items-center justify-center gap-1.5 text-[11px] text-red-500 hover:text-red-700 py-1 font-medium transition bg-red-50 hover:bg-red-100 rounded-lg"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Keluar Sistem</span>
+        </button>
 
         <button
           onClick={() => {
@@ -264,7 +288,7 @@ export default function Sidebar({ isOpen, onClose }) {
               return (
                 <button
                   key={item.id}
-                  onClick={() => { setActiveTab(item.id); onClose?.(); }}
+                  onClick={() => handleSelectTab(item.id)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
                     isActive
                       ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100/80 shadow-2xs'
@@ -304,46 +328,33 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* User Role & Reset Controls */}
         <div className="p-3.5 border-t border-slate-100 bg-slate-50/60 space-y-2.5 shrink-0">
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-              Simulasi Hak Akses (Role):
-            </label>
-            <DropdownSelect
-              value={currentUserRole === 'ketua_dpm' || currentUserRole === 'komisi_pengawas' ? 'dpm' : currentUserRole}
-              onChange={(val) => setCurrentUserRole(val)}
-              options={ROLE_OPTIONS}
-              placement="top"
-              triggerClassName="bg-white text-xs font-semibold py-2 px-2.5 rounded-xl border-slate-200"
-            />
-          </div>
-
-          {(() => {
-            const roleMap = {
-              dpm: { initials: 'MD', name: 'Muhammad Daffa A.', ormawa: 'DPM FASILKOM UMB' },
-              ketua_dpm: { initials: 'MD', name: 'Muhammad Daffa A.', ormawa: 'DPM FASILKOM UMB' },
-              komisi_pengawas: { initials: 'MD', name: 'Muhammad Daffa A.', ormawa: 'DPM FASILKOM UMB' },
-              bem: { initials: 'RP', name: 'Rafi Pratama', ormawa: 'BEM FASILKOM UMB' },
-              himti: { initials: 'AR', name: 'Aldi Renaldi', ormawa: 'HiMTI - UMB' },
-              himsisfo: { initials: 'HS', name: 'Perwakilan Ormawa', ormawa: 'HIMSISFO' }
-            };
-            const currentConfig = roleMap[currentUserRole] || roleMap.dpm;
-
-            return (
-              <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
-                  {currentConfig.initials}
-                </div>
-                <div className="overflow-hidden flex-1">
-                  <p className="text-xs font-bold text-slate-900 truncate">
-                    {currentConfig.name}
-                  </p>
-                  <p className="text-[10px] text-blue-700 font-semibold truncate">
-                    {currentConfig.ormawa}
-                  </p>
-                </div>
+          {currentUser && (
+            <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                {currentUser.name.substring(0, 2).toUpperCase()}
               </div>
-            );
-          })()}
+              <div className="overflow-hidden flex-1">
+                <p className="text-xs font-bold text-slate-900 truncate">
+                  {currentUser.name}
+                </p>
+                <p className="text-[10px] text-blue-700 font-semibold truncate capitalize">
+                  {currentUser.role} {currentUser.ormawaId.toUpperCase()}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => {
+              if (window.confirm('Yakin ingin keluar?')) {
+                logout();
+              }
+            }}
+            className="w-full flex items-center justify-center gap-1.5 text-[11px] text-red-500 hover:text-red-700 py-1.5 font-medium transition bg-red-50 hover:bg-red-100 rounded-lg"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Keluar Sistem</span>
+          </button>
 
           <button
             onClick={() => {

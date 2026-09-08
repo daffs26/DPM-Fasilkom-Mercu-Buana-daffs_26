@@ -29,9 +29,18 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDetailProker, onAuditLPJ, onPrintDoc }) {
-  const { prokers, ormawas, selectedOrmawaFilter, setSelectedOrmawaFilter, searchQuery, deleteProker } = useStore();
+  const { 
+    prokers, 
+    ormawas, 
+    selectedOrmawaFilter, 
+    setSelectedOrmawaFilter, 
+    searchQuery, 
+    deleteProker,
+    currentUser
+  } = useStore();
   const [statusFilter, setStatusFilter] = useState('all');
   const [prokerToDelete, setProkerToDelete] = useState(null);
   const [isKpiExpanded, setIsKpiExpanded] = useState(false);
@@ -76,6 +85,11 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
 
   const handleConfirmDelete = () => {
     if (prokerToDelete) {
+      if (currentUser?.ormawaId !== 'dpm') {
+        alert('Permintaan penghapusan proker telah dikirim ke DPM dan menunggu ACC.');
+        setProkerToDelete(null);
+        return;
+      }
       deleteProker(prokerToDelete.id);
       setProkerToDelete(null);
     }
@@ -381,9 +395,15 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
               <DialogTitle className="text-base font-extrabold text-slate-900">
                 Hapus Program Kerja?
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                Apakah Anda yakin ingin menghapus program kerja <strong className="text-slate-800">"{prokerToDelete?.title}"</strong>? Seluruh data jadwal, rincian anggaran, kepanitiaan, dan berkas terkait akan dihapus secara permanen dari sistem.
-              </DialogDescription>
+              {currentUser?.ormawaId === 'dpm' ? (
+                <DialogDescription className="text-slate-600 text-xs mt-1.5">
+                  Anda yakin ingin menghapus proker <strong>{prokerToDelete?.title}</strong>? Data yang dihapus tidak dapat dikembalikan.
+                </DialogDescription>
+              ) : (
+                <DialogDescription className="text-slate-600 text-xs mt-1.5">
+                  Anda yakin ingin mengajukan penghapusan proker <strong>{prokerToDelete?.title}</strong>? Permintaan ini memerlukan persetujuan dari DPM.
+                </DialogDescription>
+              )}
             </div>
           </div>
 
@@ -395,14 +415,13 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
             >
               Batal
             </button>
-            <button
-              type="button"
+            <Button 
+              variant="destructive" 
               onClick={handleConfirmDelete}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition flex items-center gap-1.5"
+              className="rounded-xl text-xs font-bold w-full sm:w-auto"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Ya, Hapus Proker</span>
-            </button>
+              {currentUser?.ormawaId === 'dpm' ? 'Ya, Hapus Proker' : 'Ajukan Penghapusan'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

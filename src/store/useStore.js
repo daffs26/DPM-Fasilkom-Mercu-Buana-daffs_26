@@ -5,7 +5,9 @@ import {
   INITIAL_PROKER, 
   INITIAL_SP, 
   INITIAL_ACTIVITY_LOGS, 
-  INITIAL_BUDGET_TRANSACTIONS 
+  INITIAL_BUDGET_TRANSACTIONS,
+  INITIAL_USERS,
+  INITIAL_PENDING_USERS
 } from '../data/initialData';
 import { INITIAL_TEMPLATES } from '../data/templatesData';
 import {
@@ -27,23 +29,75 @@ export const useStore = create(
       templates: INITIAL_TEMPLATES,
       budgetTransactions: INITIAL_BUDGET_TRANSACTIONS,
       
+      // Auth State
+      users: INITIAL_USERS,
+      pendingAccounts: INITIAL_PENDING_USERS,
+      currentUser: null, // null means not logged in
+      
       // UI State
       activeTab: 'dashboard',
       selectedOrmawaFilter: 'all',
       searchQuery: '',
-      currentUserRole: 'dpm',
-      currentUserName: 'Muhammad Daffa Aulia Syahrul (DPM)',
 
       // Setters
       setActiveTab: (tab) => set({ activeTab: tab }),
       setSelectedOrmawaFilter: (filter) => set({ selectedOrmawaFilter: filter }),
       setSearchQuery: (query) => set({ searchQuery: query }),
-      setCurrentUserRole: (role) => {
-        let name = 'Muhammad Daffa Aulia Syahrul (DPM)';
-        if (role === 'bem') name = 'Rafi Pratama (BEM)';
-        if (role === 'himti') name = 'Aldi Renaldi (HiMTI)';
-        if (role === 'himsisfo') name = 'Perwakilan HIMSISFO';
-        set({ currentUserRole: role, currentUserName: name });
+
+      // Auth Methods
+      login: (username, password) => {
+        const user = get().users.find(u => u.username === username && u.password === password && u.status === 'approved');
+        if (user) {
+          set({ currentUser: user });
+          return { success: true };
+        }
+        return { success: false, message: 'Username atau password salah, atau akun belum di-ACC DPM.' };
+      },
+
+      logout: () => {
+        set({ currentUser: null, activeTab: 'dashboard' });
+      },
+
+      register: (name, nim, ormawaId, role, username, password) => {
+        const exists = get().users.find(u => u.username === username) || get().pendingAccounts.find(u => u.username === username);
+        if (exists) {
+          return { success: false, message: 'Username sudah digunakan.' };
+        }
+        
+        const newAccount = {
+          id: `user-${Date.now()}`,
+          name,
+          nim,
+          ormawaId,
+          role,
+          username,
+          password,
+          status: 'pending'
+        };
+        
+        set((state) => ({
+          pendingAccounts: [newAccount, ...state.pendingAccounts]
+        }));
+        
+        return { success: true };
+      },
+
+      approveAccount: (userId) => {
+        set((state) => {
+          const account = state.pendingAccounts.find(a => a.id === userId);
+          if (!account) return state;
+          
+          return {
+            pendingAccounts: state.pendingAccounts.filter(a => a.id !== userId),
+            users: [...state.users, { ...account, status: 'approved' }]
+          };
+        });
+      },
+
+      rejectAccount: (userId) => {
+        set((state) => ({
+          pendingAccounts: state.pendingAccounts.filter(a => a.id !== userId)
+        }));
       },
 
       // Helper: Format tanggal lokal
@@ -96,7 +150,7 @@ export const useStore = create(
           type: 'proker_added',
           title: `Program Kerja Baru Ditambahkan: ${newProker.title}`,
           description: `${ormawaName} mendaftarkan program kerja baru "${newProker.title}". Jadwal: ${newProker.startDate}. Status Proposal: ${prokerItem.proposal.fileName ? (isDadakan ? 'Diunggah di Luar Batas Waktu (< H-14)' : 'Diunggah Tepat Waktu (≥ H-14)') : 'Belum Ada Berkas Proposal'}.`,
-          actor: get().currentUserName,
+          actor: (get().currentUser?.name || 'Sistem'),
           prokerTitle: newProker.title,
           prokerId: id,
           formattedDate: get().getFormattedDate()
@@ -119,8 +173,8 @@ export const useStore = create(
             ormawaId: target.ormawaId,
             type: 'proker_deleted',
             title: `Program Kerja Dihapus: ${target.title}`,
-            description: `Program kerja "${target.title}" dari ${ormawaName} (${target.divisi}) telah dihapus dari sistem pengawasan oleh ${get().currentUserName}.`,
-            actor: get().currentUserName,
+            description: `Program kerja "${target.title}" dari ${ormawaName} (${target.divisi}) telah dihapus dari sistem pengawasan oleh ${(get().currentUser?.name || 'Sistem')}.`,
+            actor: (get().currentUser?.name || 'Sistem'),
             prokerTitle: target.title,
             prokerId: target.id,
             formattedDate: get().getFormattedDate()
@@ -161,7 +215,7 @@ export const useStore = create(
             type: 'proposal_uploaded',
             title: `Proposal Diunggah: ${proker.title}`,
             description: `${ormawaName} mengunggah berkas proposal. Selisih ke Hari-H: ${diffDays} hari (${isDadakan ? 'DITANDAI TERLAMBAT < H-14' : 'TEPAT WAKTU ≥ H-14'}).`,
-            actor: get().currentUserName,
+            actor: (get().currentUser?.name || 'Sistem'),
             formattedDate: get().getFormattedDate()
           });
 
@@ -186,7 +240,7 @@ export const useStore = create(
 
           const newNote = noteText ? {
             id: Date.now(),
-            author: get().currentUserName,
+            author: (get().currentUser?.name || 'Sistem'),
             text: noteText,
             date: todayStr
           } : null;
@@ -201,7 +255,7 @@ export const useStore = create(
             ...proker.proposal,
             reviewStatus: isApproved ? 'approved' : 'revisi',
             approvedDate: isApproved ? todayStr : null,
-            approvedBy: isApproved ? get().currentUserName : null,
+            approvedBy: isApproved ? (get().currentUser?.name || 'Sistem') : null,
             notes: updatedNotes,
             revisionItems: proker.proposal.revisionItems || []
           };
@@ -213,7 +267,7 @@ export const useStore = create(
             description: isApproved 
               ? `Ketua DPM resmi menyetujui proposal ${proker.title}. Proker siap berlanjut ke tahap pelaksanaan.`
               : `DPM memberikan catatan revisi: "${noteText || 'Proposal memerlukan revisi butir teknis sebelum disetujui.'}"`,
-            actor: get().currentUserName,
+            actor: (get().currentUser?.name || 'Sistem'),
             formattedDate: get().getFormattedDate()
           });
 
@@ -236,7 +290,7 @@ export const useStore = create(
           id: `rev-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
           text: text.trim(),
           completed: false,
-          addedBy: get().currentUserName,
+          addedBy: (get().currentUser?.name || 'Sistem'),
           date: todayStr
         };
 
@@ -257,8 +311,8 @@ export const useStore = create(
             ormawaId: proker.ormawaId,
             type: 'proposal_revision_item_added',
             title: `Poin Revisi Proposal Ditambahkan: ${proker.title}`,
-            description: `${get().currentUserName} menambahkan butir revisi: "${newItem.text}".`,
-            actor: get().currentUserName,
+            description: `${(get().currentUser?.name || 'Sistem')} menambahkan butir revisi: "${newItem.text}".`,
+            actor: (get().currentUser?.name || 'Sistem'),
             prokerTitle: proker.title,
             prokerId: proker.id,
             formattedDate: get().getFormattedDate()
@@ -302,8 +356,8 @@ export const useStore = create(
             ormawaId: proker.ormawaId,
             type: 'proposal_revision_item_toggled',
             title: `Status Poin Revisi Diubah: ${proker.title}`,
-            description: `Butir revisi "${targetItemText}" ditandai ${isNowCompleted ? 'SELESAI DIPERBAIKI' : 'BELUM SELESAI'} oleh ${get().currentUserName}.`,
-            actor: get().currentUserName,
+            description: `Butir revisi "${targetItemText}" ditandai ${isNowCompleted ? 'SELESAI DIPERBAIKI' : 'BELUM SELESAI'} oleh ${(get().currentUser?.name || 'Sistem')}.`,
+            actor: (get().currentUser?.name || 'Sistem'),
             prokerTitle: proker.title,
             prokerId: proker.id,
             formattedDate: get().getFormattedDate()
@@ -356,7 +410,7 @@ export const useStore = create(
 
           const inspectionObj = {
             inspected: true,
-            inspectorName: get().currentUserName,
+            inspectorName: (get().currentUser?.name || 'Sistem'),
             inspectionDate: todayStr,
             rundownAccuracy: inspectionData.rundownAccuracy || 'On-Time',
             sopCompliance: inspectionData.sopCompliance || 'Sangat Patuh',
@@ -369,7 +423,7 @@ export const useStore = create(
             type: 'inspection_done',
             title: `Berita Acara Hari-H Diisi: ${proker.title}`,
             description: `Tim DPM telah melakukan pengawasan lapangan. Rundown: ${inspectionObj.rundownAccuracy}. Kepatuhan SOP: ${inspectionObj.sopCompliance}.`,
-            actor: get().currentUserName,
+            actor: (get().currentUser?.name || 'Sistem'),
             formattedDate: get().getFormattedDate()
           });
 
@@ -414,7 +468,7 @@ export const useStore = create(
             type: 'lpj_uploaded',
             title: `Berkas LPJ Diunggah: ${proker.title}`,
             description: `${ormawaName} mengunggah berkas LPJ dan nota keuangan. Status waktu: ${isOverdue ? 'MELAMPAUI BATAS WAKTU (> H+14)' : 'MEMENUHI BATAS WAKTU (≤ H+14)'}.`,
-            actor: get().currentUserName,
+            actor: (get().currentUser?.name || 'Sistem'),
             formattedDate: get().getFormattedDate()
           });
 
@@ -454,7 +508,7 @@ export const useStore = create(
             type: 'doc_uploaded',
             title: `Dokumen Lainnya Diunggah: ${newDoc.fileName}`,
             description: `${ormawaName} mengunggah dokumen administrasi/lampiran untuk kegiatan ${proker.title}.`,
-            actor: get().currentUserName,
+            actor: (get().currentUser?.name || 'Sistem'),
             formattedDate: get().getFormattedDate()
           });
 
@@ -493,7 +547,7 @@ export const useStore = create(
           totalScore,
           predikat,
           catatanDPM: auditData.catatanDPM || 'Pelaksanaan kegiatan telah diaudit dan disahkan oleh DPM Fasilkom UMB.',
-          auditedBy: get().currentUserName,
+          auditedBy: (get().currentUser?.name || 'Sistem'),
           auditDate: todayStr
         };
 
@@ -513,7 +567,7 @@ export const useStore = create(
             type: 'lpj_approved',
             title: `Audit Selesai: ${proker.title} — Nilai ${totalScore} (${predikat})`,
             description: `DPM resmi mengesahkan LPJ ${proker.title} dengan predikat ${predikat} (Skor: ${totalScore}/100). Catatan: "${auditDetails.catatanDPM}"`,
-            actor: get().currentUserName,
+            actor: (get().currentUser?.name || 'Sistem'),
             formattedDate: get().getFormattedDate()
           });
 
@@ -559,7 +613,7 @@ export const useStore = create(
           type: 'sp_issued',
           title: `Penerbitan ${spItem.title}`,
           description: `Ketua DPM menerbitkan ${spItem.title} dengan No: ${noSurat}. Alasan: ${spPayload.reason}`,
-          actor: get().currentUserName,
+          actor: (get().currentUser?.name || 'Sistem'),
           formattedDate: get().getFormattedDate()
         });
 
@@ -592,7 +646,7 @@ export const useStore = create(
           updatedAt: new Date().toISOString().split('T')[0],
           isOfficial: false,
           isCustom: true,
-          author: newTemplate.author || get().currentUserName,
+          author: newTemplate.author || (get().currentUser?.name || 'Sistem'),
           description: newTemplate.description || '',
           tags: newTemplate.tags || ['Custom', 'Template Baru'],
           fields: newTemplate.fields || ['[Nama Ormawa]', '[Tanggal]', '[Nama Proker]'],
@@ -607,7 +661,7 @@ export const useStore = create(
               type: 'template_added',
               title: `Template Ditambahkan: ${templateItem.title}`,
               description: `Template baru "${templateItem.title}" berhasil ditambahkan ke Bank Template Dokumen.`,
-              actor: get().currentUserName,
+              actor: (get().currentUser?.name || 'Sistem'),
               formattedDate: get().getFormattedDate()
             }),
             ...state.activityLogs
@@ -642,8 +696,8 @@ export const useStore = create(
                 ormawaId: 'dpm',
                 type: 'template_updated',
                 title: `Template Diperbarui: ${target?.title || 'Dokumen'}`,
-                description: `Template "${target?.title || 'Dokumen'}" berhasil diperbarui oleh ${get().currentUserName}.`,
-                actor: get().currentUserName,
+                description: `Template "${target?.title || 'Dokumen'}" berhasil diperbarui oleh ${(get().currentUser?.name || 'Sistem')}.`,
+                actor: (get().currentUser?.name || 'Sistem'),
                 formattedDate: get().getFormattedDate()
               }),
               ...state.activityLogs
@@ -675,7 +729,7 @@ export const useStore = create(
                 type: 'budget_updated',
                 title: `Alokasi Anggaran ${targetOrmawa?.shortName || ormawaId} Diperbarui`,
                 description: `Alokasi anggaran ditetapkan sebesar Rp ${(Number(newPagu) || 0).toLocaleString('id-ID')}`,
-                actor: get().currentUserName,
+                actor: (get().currentUser?.name || 'Sistem'),
                 formattedDate: get().getFormattedDate()
               }),
               ...state.activityLogs
@@ -700,7 +754,7 @@ export const useStore = create(
           title: newTx.title || (newTx.txMode === 'pemasukan' ? 'Pemasukan Kas' : 'Pencairan Anggaran'),
           nominal,
           date: newTx.date || todayStr,
-          pic: newTx.pic || get().currentUserName,
+          pic: newTx.pic || (get().currentUser?.name || 'Sistem'),
           receiptNumber: newTx.receiptNumber || `KW-${Date.now().toString().slice(-6)}`,
           receiptPhoto: newTx.receiptPhoto || null,
           receiptPhotoName: newTx.receiptPhotoName || null,
@@ -749,7 +803,7 @@ export const useStore = create(
                 type: 'transaction_added',
                 title: `${txItem.txMode === 'pemasukan' ? 'Pemasukan Kas' : 'Pengeluaran Kas'} ${ormawa?.shortName || ''} Dicatat`,
                 description: `${txItem.title}: Rp ${nominal.toLocaleString('id-ID')} (${txItem.category})`,
-                actor: get().currentUserName,
+                actor: (get().currentUser?.name || 'Sistem'),
                 formattedDate: get().getFormattedDate()
               }),
               ...state.activityLogs
@@ -799,6 +853,13 @@ export const useStore = create(
         });
       },
 
+      // Tracking read status for Histori Proker notification badge
+      lastReadHistoryCount: 0,
+      markHistoryAsRead: () => {
+        const count = get().activityLogs.filter(l => l.type === 'proker_added' || l.type === 'proker_deleted').length;
+        set({ lastReadHistoryCount: count });
+      },
+
       // Reset data
       resetToDefaultData: () => {
         set({
@@ -807,7 +868,8 @@ export const useStore = create(
           suratPeringatan: INITIAL_SP,
           activityLogs: INITIAL_ACTIVITY_LOGS,
           templates: INITIAL_TEMPLATES,
-          budgetTransactions: INITIAL_BUDGET_TRANSACTIONS
+          budgetTransactions: INITIAL_BUDGET_TRANSACTIONS,
+          lastReadHistoryCount: 0
         });
       }
     }),
@@ -819,7 +881,8 @@ export const useStore = create(
         suratPeringatan: state.suratPeringatan,
         activityLogs: state.activityLogs,
         templates: state.templates,
-        budgetTransactions: state.budgetTransactions
+        budgetTransactions: state.budgetTransactions,
+        lastReadHistoryCount: state.lastReadHistoryCount
       }),
       merge: (persistedState, currentState) => ({
         ...currentState,
