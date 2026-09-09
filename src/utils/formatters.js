@@ -1,6 +1,6 @@
 /**
  * Shared utility formatters and status badge resolvers
- * for SIWASMA DPM FASILKOM UMB
+ * for AUDITMAWA DPM FASILKOM UMB
  */
 
 export function formatRupiah(num) {

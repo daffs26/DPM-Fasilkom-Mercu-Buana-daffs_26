@@ -1,9 +1,9 @@
-## Dashboard DPM FASILKOM UNIVERSITAS MERCU BUANA
+# AUDITMAWA — DPM FASILKOM UNIVERSITAS MERCU BUANA
 
-**Sistem Informasi Pengawasan, Akuntabilitas, dan Transparansi Ormawa**  
+**Sistem Informasi Pengawasan, Akuntabilitas, dan Audit Ormawa**  
 Dewan Perwakilan Mahasiswa Fakultas Ilmu Komputer (DPM FASILKOM) — Universitas Mercu Buana.
 
-SIWASMA adalah platform web modern berbasis React dan Vite yang dirancang untuk mendigitalkan proses pengawasan legislatif mahasiswa, pengelolaan berkas, audit proposal & LPJ, transparansi alokasi anggaran, serta pencatatan jejak riwayat program kerja 4 Organisasi Mahasiswa Fasilkom UMB:
+AUDITMAWA adalah platform web modern berbasis React dan Vite yang dirancang untuk mendigitalkan proses pengawasan legislatif mahasiswa, pengelolaan berkas, audit proposal & LPJ, transparansi alokasi anggaran, serta pencatatan jejak riwayat program kerja 4 Organisasi Mahasiswa Fasilkom UMB:
 1. **DPM FASILKOM UMB** (Dewan Perwakilan Mahasiswa)
 2. **BEM FASILKOM UMB** (Badan Eksekutif Mahasiswa)
 3. **HiMTI - UMB** (Himpunan Mahasiswa Teknik Informatika)

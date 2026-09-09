@@ -98,7 +98,7 @@ export default function ProfileModal({ isOpen, onClose }) {
             <span>Profil Pengurus &amp; Keamanan</span>
           </DialogTitle>
           <DialogDescription className="text-[11px] text-slate-500">
-            Kelola data diri pengurus serta keamanan akun SIWASMA DPM FASILKOM.
+            Kelola data diri pengurus serta keamanan akun AUDITMAWA DPM FASILKOM.
           </DialogDescription>
         </DialogHeader>
 

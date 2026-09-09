@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { 
   INITIAL_ORMAWA, 
   INITIAL_PROKER, 
@@ -1424,7 +1424,26 @@ export const useStore = create(
       }
     }),
     {
-      name: 'siwasma-dpm-fasilkom-storage-v3',
+      name: 'auditmawa-dpm-fasilkom-storage-v1',
+      storage: createJSONStorage(() => ({
+        getItem: (key) => {
+          if (typeof window === 'undefined') return null;
+          const val = localStorage.getItem(key);
+          if (val) return val;
+          const legacy = localStorage.getItem('siwasma-dpm-fasilkom-storage-v3');
+          if (legacy) {
+            localStorage.setItem(key, legacy);
+            return legacy;
+          }
+          return null;
+        },
+        setItem: (key, val) => {
+          if (typeof window !== 'undefined') localStorage.setItem(key, val);
+        },
+        removeItem: (key) => {
+          if (typeof window !== 'undefined') localStorage.removeItem(key);
+        }
+      })),
       partialize: (state) => ({
         ormawas: state.ormawas,
         prokers: state.prokers,

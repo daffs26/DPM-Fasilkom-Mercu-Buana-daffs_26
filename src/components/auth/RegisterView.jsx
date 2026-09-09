@@ -263,7 +263,7 @@ export default function RegisterView({ onSwitchToLogin }) {
                 <div className="w-full border-t border-slate-200"></div>
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-slate-400 font-medium">SIWASMA FASILKOM UMB</span>
+                <span className="bg-white px-3 text-slate-400 font-medium">AUDITMAWA FASILKOM UMB</span>
               </div>
             </div>
             

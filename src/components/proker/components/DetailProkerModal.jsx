@@ -560,7 +560,7 @@ export default function DetailProkerModal({
           {/* Modal Footer */}
           <DialogFooter className="px-4 sm:px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between gap-2">
             <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
-              SIWASMA DPM FASILKOM • Rincian Program Kerja
+              AUDITMAWA DPM FASILKOM • Rincian Program Kerja
             </span>
             <button
               type="button"

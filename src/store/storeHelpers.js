@@ -1,6 +1,6 @@
 /**
  * Helper functions and factory generators for Zustand useStore
- * SIWASMA DPM FASILKOM UMB
+ * AUDITMAWA DPM FASILKOM UMB
  */
 
 export function createLogEntry({

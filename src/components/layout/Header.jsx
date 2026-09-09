@@ -160,7 +160,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
             <button onClick={onToggleSidebar} className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition shrink-0 -ml-1">
               <Menu className="w-5 h-5" />
             </button>
-            <h2 className="text-sm font-extrabold text-slate-900 tracking-normal">SIWASMA</h2>
+            <h2 className="text-sm font-extrabold text-slate-900 tracking-normal">AUDITMAWA</h2>
           </div>
           <div className="flex items-center gap-2">
             {currentUser?.ormawaId === 'dpm' && (

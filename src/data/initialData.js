@@ -1,4 +1,4 @@
-// Data Awal SIWASMA DPM FASILKOM UNIVERSITAS MERCU BUANA
+// Data Awal AUDITMAWA DPM FASILKOM UNIVERSITAS MERCU BUANA
 // Sesuai Instruksi: Tanpa Data Dummy Angka/Skor/Proker, Bersih untuk Digunakan Secara Nyata
 // Serta Menggunakan Terminologi Formal Legislatif Kampus
 
