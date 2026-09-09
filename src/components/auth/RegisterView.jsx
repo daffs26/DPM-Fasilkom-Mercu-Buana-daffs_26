@@ -86,11 +86,11 @@ export default function RegisterView({ onSwitchToLogin }) {
             </div>
 
             <div className="relative z-10 mt-auto pt-16">
-              <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">You can easily</p>
+              <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">Sistem Informasi Pengawasan</p>
               <h2 className="text-2xl lg:text-3xl font-extrabold leading-tight tracking-tight text-white">
-                Get access your personal<br />
-                hub for clarity and<br />
-                productivity
+                Pusat Kendali &<br />
+                Pengawasan Ormawa<br />
+                Fasilkom UMB
               </h2>
             </div>
           </div>
@@ -149,11 +149,11 @@ export default function RegisterView({ onSwitchToLogin }) {
           </div>
 
           <div className="relative z-10 mt-auto pt-16">
-            <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">You can easily</p>
+            <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">Sistem Informasi Pengawasan</p>
             <h2 className="text-2xl lg:text-3xl font-extrabold leading-tight tracking-tight text-white">
-              Get access your personal<br />
-              hub for clarity and<br />
-              productivity
+              Pusat Kendali &<br />
+              Pengawasan Ormawa<br />
+              Fasilkom UMB
             </h2>
           </div>
         </div>
@@ -169,7 +169,7 @@ export default function RegisterView({ onSwitchToLogin }) {
           </div>
 
           <div className="mb-5 shrink-0">
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5">Create an account</h1>
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5">Buat Akun Pengurus</h1>
             <p className="text-slate-500 text-sm leading-relaxed">
               Daftarkan akun pengurus ormawa untuk mulai mengelola proker & administrasi.
             </p>
@@ -227,23 +227,23 @@ export default function RegisterView({ onSwitchToLogin }) {
             <div className="h-px bg-slate-100 my-2"></div>
 
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-800 block">Username Login</label>
+              <label className="text-sm font-semibold text-slate-800 block">Username</label>
               <Input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-blue-600 focus-visible:border-blue-600 text-sm placeholder:text-slate-400 shadow-sm"
-                placeholder="Username tanpa spasi"
+                placeholder="Contoh: budi.fasilkom"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-800 block">Password</label>
+              <label className="text-sm font-semibold text-slate-800 block">Kata Sandi</label>
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-11 rounded-xl bg-white border-slate-200 focus-visible:ring-blue-600 focus-visible:border-blue-600 text-sm placeholder:text-slate-400 shadow-sm"
-                placeholder="Buat password"
+                placeholder="Buat kata sandi akun"
               />
             </div>
 
@@ -267,13 +267,13 @@ export default function RegisterView({ onSwitchToLogin }) {
             </div>
             
             <p className="text-sm text-slate-500 font-medium">
-              Already have an account?{' '}
+              Sudah memiliki akun?{' '}
               <button 
                 type="button" 
                 onClick={onSwitchToLogin}
-                className="text-blue-600 font-bold hover:text-blue-700 hover:underline transition-colors"
+                className="text-blue-600 font-bold hover:text-blue-700 hover:underline transition-colors cursor-pointer"
               >
-                Sign in
+                Masuk di sini
               </button>
             </p>
           </div>

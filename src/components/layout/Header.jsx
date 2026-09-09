@@ -274,7 +274,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                   )}
                   <button onClick={() => { if (window.confirm('Yakin ingin keluar?')) logout(); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition">
                     <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
+                    <span>Keluar Akun</span>
                   </button>
                 </div>
               )}
@@ -436,7 +436,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                   )}
                   <button onClick={() => { if (window.confirm('Yakin ingin keluar?')) logout(); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer">
                     <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
+                    <span>Keluar Akun</span>
                   </button>
                 </div>
               )}

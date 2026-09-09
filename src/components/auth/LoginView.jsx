@@ -69,11 +69,11 @@ export default function LoginView({ onSwitchToRegister }) {
 
           {/* Bottom Left Text */}
           <div className="relative z-10 mt-auto pt-16">
-            <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">You can easily</p>
+            <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">Sistem Informasi Pengawasan</p>
             <h2 className="text-2xl lg:text-3xl font-extrabold leading-tight tracking-tight text-white">
-              Get access your personal<br />
-              hub for clarity and<br />
-              productivity
+              Pusat Kendali &<br />
+              Pengawasan Ormawa<br />
+              Fasilkom UMB
             </h2>
           </div>
         </div>
@@ -89,9 +89,9 @@ export default function LoginView({ onSwitchToRegister }) {
           </div>
 
           <div className="mb-6">
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Login to account</h1>
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Masuk ke Akun</h1>
             <p className="text-slate-500 text-sm leading-relaxed">
-              Access your dashboard, proker records, and administration in one central platform.
+              Akses dasbor pengawasan, pemantauan proker, dan administrasi ormawa dalam satu platform terpadu.
             </p>
           </div>
 
@@ -104,18 +104,18 @@ export default function LoginView({ onSwitchToRegister }) {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-800 block">Your username</label>
+              <label className="text-sm font-semibold text-slate-800 block">Username</label>
               <Input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="h-12 rounded-xl bg-white border-slate-200 focus-visible:ring-blue-600 focus-visible:border-blue-600 text-sm placeholder:text-slate-400 shadow-sm"
-                placeholder="Enter your username"
+                placeholder="Masukkan username Anda"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-800 block">Password</label>
+              <label className="text-sm font-semibold text-slate-800 block">Kata Sandi</label>
               <div className="relative">
                 <Input
                   type="password"
@@ -135,10 +135,10 @@ export default function LoginView({ onSwitchToRegister }) {
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Verifying...</span>
+                  <span>Memverifikasi...</span>
                 </div>
               ) : (
-                <span>Get Started</span>
+                <span>Masuk ke Sistem</span>
               )}
             </Button>
           </form>
@@ -151,7 +151,7 @@ export default function LoginView({ onSwitchToRegister }) {
                 Akses Demo 1-Klik
               </span>
               <span className="text-[10px] font-bold text-amber-700 bg-amber-100/70 border border-amber-300 px-2 py-0.5 rounded-full">
-                Testing Mode
+                Mode Uji Coba
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -255,13 +255,13 @@ export default function LoginView({ onSwitchToRegister }) {
             </div>
             
             <p className="text-sm text-slate-500 font-medium">
-              Don't have an account?{' '}
+              Belum memiliki akun?{' '}
               <button 
                 type="button" 
                 onClick={onSwitchToRegister}
-                className="text-blue-600 font-bold hover:text-blue-700 hover:underline transition-colors"
+                className="text-blue-600 font-bold hover:text-blue-700 hover:underline transition-colors cursor-pointer"
               >
-                Sign up
+                Daftar sekarang
               </button>
             </p>
           </div>

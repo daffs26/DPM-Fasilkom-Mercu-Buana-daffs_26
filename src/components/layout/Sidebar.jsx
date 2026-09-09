@@ -191,12 +191,12 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Standar Pengawasan Box (Slide 3 Feature Style) */}
         <div className="px-3.5 py-2">
-          <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-slate-800">
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/25 to-slate-50 border border-blue-100/80 shadow-2xs text-slate-800">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100/80 shadow-2xs">
                 <ShieldAlert className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-slate-900 tracking-tight">Standar Pengawasan</span>
+              <span className="text-xs font-bold text-slate-900 tracking-tight">Standar Pengawasan DPM</span>
             </div>
             <div className="space-y-1.5 text-[11px] text-slate-600 leading-snug font-normal">
               <div className="flex items-start gap-1.5">
@@ -317,7 +317,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
           {/* Standar Pengawasan Box */}
           <div className="px-3.5 py-2">
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-slate-800">
+            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/25 to-slate-50 border border-blue-100/80 shadow-2xs text-slate-800">
               <div className="flex items-center gap-2.5 mb-2">
                 <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
                   <ShieldAlert className="w-4 h-4" />
