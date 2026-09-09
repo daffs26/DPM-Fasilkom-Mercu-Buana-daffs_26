@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../../store/useStore';
-import UploadBerkasModal from '../modals/UploadBerkasModal';
+import UploadBerkasModal from './components/UploadBerkasModal';
 import { 
   Folder, 
   FolderOpen, 
@@ -22,7 +22,9 @@ import {
 } from 'lucide-react';
 
 export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
-  const { prokers, ormawas, selectedOrmawaFilter, setSelectedOrmawaFilter, searchQuery, setActiveTab } = useStore();
+  const { prokers, ormawas, selectedOrmawaFilter, setSelectedOrmawaFilter, searchQuery, setActiveTab, currentUser } = useStore();
+  const isDpm = currentUser?.ormawaId === 'dpm';
+  const visibleOrmawas = isDpm ? ormawas : ormawas.filter(o => o.id === currentUser?.ormawaId);
   
   const [selectedFolder, setSelectedFolder] = useState('all'); // 'all' | 'proposal' | 'lpj' | 'other'
   const [selectedFileItem, setSelectedFileItem] = useState(null);
@@ -155,7 +157,7 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
             Folder per Ormawa
           </span>
           <div className="space-y-1">
-            {ormawas.map(o => {
+            {visibleOrmawas.map(o => {
               const count = allFiles.filter(f => f.ormawaId === o.id).length;
               const isSelected = selectedOrmawaFilter === o.id;
 

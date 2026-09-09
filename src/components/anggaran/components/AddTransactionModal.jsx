@@ -20,7 +20,7 @@ import {
   Coins
 } from 'lucide-react';
 import DropdownSelect from '@/components/ui/dropdown-select';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 
 export default function AddTransactionModal({ 
   isOpen, 

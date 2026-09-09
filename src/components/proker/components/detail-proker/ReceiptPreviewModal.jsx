@@ -8,7 +8,7 @@ import {
   DialogFooter 
 } from '@/components/ui/dialog';
 import { Receipt } from 'lucide-react';
-import { formatRupiah } from '../../../utils/formatters';
+import { formatRupiah } from '@/utils/formatters';
 
 export default function ReceiptPreviewModal({ previewRabReceipt, onClose }) {
   if (!previewRabReceipt) return null;

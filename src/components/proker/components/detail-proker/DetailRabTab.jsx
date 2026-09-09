@@ -8,7 +8,7 @@ import {
   Trash2, 
   ExternalLink 
 } from 'lucide-react';
-import { formatRupiah } from '../../../utils/formatters';
+import { formatRupiah } from '@/utils/formatters';
 
 export default function DetailRabTab({
   totalRabCurrent,

@@ -15,20 +15,27 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
     selectedOrmawaFilter, 
     setSelectedOrmawaFilter,
     activityLogs, 
-    suratPeringatan 
+    suratPeringatan,
+    currentUser 
   } = useStore();
 
+  const isDpm = currentUser?.ormawaId === 'dpm';
+  // Jika BEM/HIMTI/HIMSISFO, kunci filter ke ormawa sendiri
+  const effectiveOrmawaFilter = isDpm ? selectedOrmawaFilter : (currentUser?.ormawaId || 'bem');
+
   // Filter proker berdasarkan ormawa yang aktif
-  const filteredProkers = selectedOrmawaFilter === 'all'
+  const filteredProkers = effectiveOrmawaFilter === 'all'
     ? prokers
-    : prokers.filter(p => p.ormawaId === selectedOrmawaFilter);
+    : prokers.filter(p => p.ormawaId === effectiveOrmawaFilter);
 
   // Metrik Kalkulasi
   const totalProkers = filteredProkers.length;
   const pendingProposal = filteredProkers.filter(p => p.status === 'proposal_pending').length;
   const completedProkers = filteredProkers.filter(p => p.status === 'completed').length;
   const overdueLPJ = filteredProkers.filter(p => p.status === 'lpj_overdue').length;
-  const activeSPCount = suratPeringatan.filter(s => s.status === 'active').length;
+  const activeSPCount = isDpm 
+    ? suratPeringatan.filter(s => s.status === 'active').length
+    : suratPeringatan.filter(s => s.ormawaId === effectiveOrmawaFilter && s.status === 'active').length;
 
   // Hitung Skor Rata-rata Kepatuhan
   const prokersWithAudit = filteredProkers.filter(p => p.lpj?.auditScore);
@@ -48,7 +55,7 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
   const onTimePercentage = totalWithProposal > 0 ? Math.round((onTimeProposalCount / totalWithProposal) * 100) : null;
 
   // Hitung Serapan Anggaran
-  const activeOrmawa = selectedOrmawaFilter === 'all' ? null : ormawas.find(o => o.id === selectedOrmawaFilter);
+  const activeOrmawa = effectiveOrmawaFilter === 'all' ? null : ormawas.find(o => o.id === effectiveOrmawaFilter);
   const totalPagu = activeOrmawa 
     ? activeOrmawa.paguAnggaran 
     : ormawas.reduce((acc, o) => acc + o.paguAnggaran, 0);
@@ -97,7 +104,8 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
       {/* 2. MIDDLE ROW: SCORECARD ORMAWA & SERAPAN ANGGARAN */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DashboardScorecard
-          selectedOrmawaFilter={selectedOrmawaFilter}
+          isDpm={isDpm}
+          selectedOrmawaFilter={effectiveOrmawaFilter}
           setSelectedOrmawaFilter={setSelectedOrmawaFilter}
           ormawas={ormawas}
           prokers={prokers}

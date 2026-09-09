@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, UploadCloud, CheckCircle2, FileText, AlertTriangle } from 'lucide-react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import DropdownSelect from '@/components/ui/dropdown-select';
 
 const CATEGORY_OPTIONS = [

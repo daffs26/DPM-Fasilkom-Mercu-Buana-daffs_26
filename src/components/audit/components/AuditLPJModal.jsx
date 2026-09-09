@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { X, Award, UploadCloud, CheckCircle2, AlertTriangle, FileText, DollarSign, Clock, Users } from 'lucide-react';
 
 export default function AuditLPJModal({ isOpen, onClose, proker }) {

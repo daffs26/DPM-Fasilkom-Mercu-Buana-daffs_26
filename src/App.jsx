@@ -17,14 +17,14 @@ const TemplateView = lazy(() => import('./components/template/TemplateView'));
 const AnggaranView = lazy(() => import('./components/anggaran/AnggaranView'));
 
 // Modals loaded on-demand
-const AddProkerModal = lazy(() => import('./components/modals/AddProkerModal'));
-const ReviewProposalModal = lazy(() => import('./components/modals/ReviewProposalModal'));
-const AuditLPJModal = lazy(() => import('./components/modals/AuditLPJModal'));
-const IssueSPModal = lazy(() => import('./components/modals/IssueSPModal'));
-const PrintDocModal = lazy(() => import('./components/modals/PrintDocModal'));
-const SetPaguModal = lazy(() => import('./components/modals/SetPaguModal'));
-const AddTransactionModal = lazy(() => import('./components/modals/AddTransactionModal'));
-const DetailProkerModal = lazy(() => import('./components/modals/DetailProkerModal'));
+const AddProkerModal = lazy(() => import('./components/proker/components/AddProkerModal'));
+const ReviewProposalModal = lazy(() => import('./components/proker/components/ReviewProposalModal'));
+const DetailProkerModal = lazy(() => import('./components/proker/components/DetailProkerModal'));
+const AuditLPJModal = lazy(() => import('./components/audit/components/AuditLPJModal'));
+const IssueSPModal = lazy(() => import('./components/sp/components/IssueSPModal'));
+const PrintDocModal = lazy(() => import('./components/print/PrintDocModal'));
+const SetPaguModal = lazy(() => import('./components/anggaran/components/SetPaguModal'));
+const AddTransactionModal = lazy(() => import('./components/anggaran/components/AddTransactionModal'));
 
 function ViewLoadingFallback() {
   return (

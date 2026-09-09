@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Coins, CheckCircle2, Building2 } from 'lucide-react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 
 export default function SetPaguModal({ isOpen, onClose }) {
   const { ormawas, updateOrmawaPagu } = useStore();

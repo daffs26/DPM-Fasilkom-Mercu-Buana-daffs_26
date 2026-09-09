@@ -14,8 +14,8 @@ import {
   Clock,
   ExternalLink
 } from 'lucide-react';
-import SPClarificationModal from '../modals/SPClarificationModal';
-import ReviewSPClarificationModal from '../modals/ReviewSPClarificationModal';
+import SPClarificationModal from './components/SPClarificationModal';
+import ReviewSPClarificationModal from './components/ReviewSPClarificationModal';
 
 export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
   const { suratPeringatan, ormawas, resolveSP, currentUser } = useStore();

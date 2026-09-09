@@ -5,7 +5,16 @@ import AuditOrmawaReport from './components/AuditOrmawaReport';
 import AuditProkerTable from './components/AuditProkerTable';
 
 export default function AuditView({ onAuditLPJ, onPrintDoc }) {
-  const { ormawas, prokers } = useStore();
+  const { ormawas, prokers, currentUser } = useStore();
+  const isDpm = currentUser?.ormawaId === 'dpm';
+
+  const displayedProkers = isDpm 
+    ? prokers 
+    : prokers.filter(p => p.ormawaId === currentUser?.ormawaId);
+
+  const displayedOrmawas = isDpm 
+    ? ormawas 
+    : ormawas.filter(o => o.id === currentUser?.ormawaId);
 
   return (
     <div className="space-y-6">
@@ -13,12 +22,12 @@ export default function AuditView({ onAuditLPJ, onPrintDoc }) {
       <AuditParameterStandards />
 
       {/* 2. RAPOR KINERJA & AKREDITASI INTERNAL ORMAWA */}
-      <AuditOrmawaReport ormawas={ormawas} prokers={prokers} />
+      <AuditOrmawaReport ormawas={ormawas} prokers={prokers} currentUser={currentUser} />
 
       {/* 3. DAFTAR HASIL AUDIT PROKER RIIL */}
       <AuditProkerTable 
-        prokers={prokers} 
-        ormawas={ormawas} 
+        prokers={displayedProkers} 
+        ormawas={displayedOrmawas} 
         onAuditLPJ={onAuditLPJ} 
         onPrintDoc={onPrintDoc} 
       />

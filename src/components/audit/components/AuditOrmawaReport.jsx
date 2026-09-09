@@ -1,20 +1,27 @@
 import React from 'react';
 
-export default function AuditOrmawaReport({ ormawas, prokers }) {
+export default function AuditOrmawaReport({ ormawas, prokers, currentUser }) {
+  const isDpm = currentUser?.ormawaId === 'dpm';
+  const displayedOrmawas = isDpm 
+    ? ormawas 
+    : ormawas.filter(o => o.id === currentUser?.ormawaId);
+
   return (
     <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200/80 shadow-soft w-full max-w-full overflow-hidden">
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <div>
           <h3 className="font-bold text-slate-900 text-sm">
-            Rapor Kinerja &amp; Akreditasi Ormawa Fasilkom
+            {isDpm ? 'Rapor Kinerja & Akreditasi Ormawa Fasilkom' : `Rapor Kinerja & Akreditasi: ${displayedOrmawas[0]?.shortName || 'Ormawa'}`}
           </h3>
           <p className="text-xs text-slate-600 mt-0.5">
-            Akumulasi performa ormawa berdasarkan seluruh audit kegiatan periode berjalan
+            {isDpm 
+              ? 'Akumulasi performa ormawa berdasarkan seluruh audit kegiatan periode berjalan'
+              : `Akumulasi performa internal ${displayedOrmawas[0]?.name || 'Ormawa'} berdasarkan seluruh audit kegiatan periode berjalan`}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mt-5">
+      <div className={`grid gap-4 sm:gap-5 mt-5 ${isDpm ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-2xl'}`}>
         {ormawas.map((o) => {
           const oProkers = prokers.filter(p => p.ormawaId === o.id);
           const auditedProkers = oProkers.filter(p => p.lpj?.auditScore);

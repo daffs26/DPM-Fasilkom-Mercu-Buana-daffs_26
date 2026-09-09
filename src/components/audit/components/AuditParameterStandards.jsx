@@ -47,7 +47,7 @@ const AUDIT_PARAMETERS = [
     title: 'Kepatuhan SLA Berkas',
     bobot: '20 Poin',
     pct: '20%',
-    desc: 'Proposal masuk ≥ H-14 dan berkas LPJ diserahkan selambatnya ≤ H+14.',
+    desc: 'Proposal diajukan minimal 14 hari sebelum acara (H-14), dan LPJ diserahkan maksimal 14 hari setelah acara (H+14).',
     icon: FileCheck,
     iconColor: 'text-indigo-600',
     iconBg: 'bg-indigo-50 border-indigo-200'
@@ -129,15 +129,14 @@ export default function AuditParameterStandards() {
                 >
                   <Icon className={`w-3.5 h-3.5 ${param.iconColor}`} />
                   <span>{param.title}</span>
-                  <span className="text-[9px] px-1 py-0.2 bg-white border border-slate-200 rounded font-mono text-slate-500">
-                    20p
+                  <span className="text-[9px] px-1.5 py-0.5 bg-white border border-slate-200 rounded font-mono text-slate-500">
+                    20%
                   </span>
                 </div>
               );
             })}
           </div>
-          <div className="text-[11px] font-extrabold text-slate-800 bg-amber-50/80 border border-amber-200 px-2.5 py-1 rounded-xl flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+          <div className="text-[11px] font-extrabold text-slate-800 bg-amber-50/80 border border-amber-200 px-3.5 py-1 rounded-xl flex items-center gap-1">
             <span>Total: 100 Poin</span>
           </div>
         </div>
@@ -168,7 +167,7 @@ export default function AuditParameterStandards() {
                   </p>
                 </div>
                 <div className="pt-2 mt-2.5 border-t border-slate-200/60 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                  <span>Pilar #{param.no}</span>
+                  <span>Pilar {param.no}</span>
                   <span className="font-bold text-slate-600">Bobot {param.pct}</span>
                 </div>
               </div>

@@ -45,14 +45,22 @@ export const useStore = create(
 
       // Setters
       setActiveTab: (tab) => set({ activeTab: tab }),
-      setSelectedOrmawaFilter: (filter) => set({ selectedOrmawaFilter: filter }),
+      setSelectedOrmawaFilter: (filter) => {
+        const user = get().currentUser;
+        if (user && user.ormawaId !== 'dpm') {
+          set({ selectedOrmawaFilter: user.ormawaId });
+        } else {
+          set({ selectedOrmawaFilter: filter });
+        }
+      },
       setSearchQuery: (query) => set({ searchQuery: query }),
 
       // Auth Methods
       login: (username, password) => {
         const user = get().users.find(u => u.username === username && u.password === password && u.status === 'approved');
         if (user) {
-          set({ currentUser: user });
+          const initialFilter = user.ormawaId === 'dpm' ? 'all' : user.ormawaId;
+          set({ currentUser: user, selectedOrmawaFilter: initialFilter });
           return { success: true };
         }
         return { success: false, message: 'Username atau password salah, atau akun belum di-ACC DPM.' };
@@ -62,14 +70,15 @@ export const useStore = create(
       directLogin: (username) => {
         const user = get().users.find(u => u.username === username && u.status === 'approved');
         if (user) {
-          set({ currentUser: user });
+          const initialFilter = user.ormawaId === 'dpm' ? 'all' : user.ormawaId;
+          set({ currentUser: user, selectedOrmawaFilter: initialFilter });
           return { success: true };
         }
         return { success: false, message: `Akun demo ${username} tidak ditemukan.` };
       },
 
       logout: () => {
-        set({ currentUser: null, activeTab: 'dashboard' });
+        set({ currentUser: null, activeTab: 'dashboard', selectedOrmawaFilter: 'all' });
       },
 
       updateUserProfile: (userId, updatedData) => {

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
-import TemplatePreviewModal from '../modals/TemplatePreviewModal';
-import UploadTemplateModal from '../modals/UploadTemplateModal';
+import TemplatePreviewModal from './components/TemplatePreviewModal';
+import UploadTemplateModal from './components/UploadTemplateModal';
 import { TEMPLATE_CATEGORIES } from '../../data/templatesData';
 import { 
   FileText, 
@@ -144,7 +144,7 @@ export default function TemplateView() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition shrink-0 flex items-center gap-2 ${
                   isSelected
-                    ? 'bg-slate-900 text-white shadow-xs'
+                    ? 'bg-blue-700 text-white shadow-xs'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
                 }`}
               >

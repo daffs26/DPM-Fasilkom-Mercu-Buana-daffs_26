@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 export default function DashboardScorecard({
+  isDpm = true,
   selectedOrmawaFilter,
   setSelectedOrmawaFilter,
   ormawas,
@@ -24,9 +25,9 @@ export default function DashboardScorecard({
 }) {
   return (
     <Card className="lg:col-span-2 rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft flex flex-col justify-between">
-      {selectedOrmawaFilter === 'all' ? (
+      {selectedOrmawaFilter === 'all' && isDpm ? (
         <>
-          {/* TAMPILAN 1: OVERVIEW 4 ORMAWA */}
+          {/* TAMPILAN 1: OVERVIEW 4 ORMAWA (HANYA DPM) */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
             <div>
               <h3 className="font-extrabold text-slate-900 text-sm tracking-normal">
@@ -107,7 +108,7 @@ export default function DashboardScorecard({
           </div>
         </>
       ) : (
-        /* TAMPILAN 2: SPOTLIGHT KHUSUS ORMAWA TERPILIH */
+        /* TAMPILAN 2: SPOTLIGHT KHUSUS ORMAWA SENDIRI (ORMAWA) ATAU ORMAWA TERPILIH (DPM) */
         <>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -125,6 +126,17 @@ export default function DashboardScorecard({
                 </p>
               </div>
             </div>
+
+            {/* Tombol kembali ke overview 4 ormawa khusus untuk DPM */}
+            {isDpm && (
+              <button
+                type="button"
+                onClick={() => setSelectedOrmawaFilter('all')}
+                className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shrink-0"
+              >
+                <span>&larr; Semua Ormawa</span>
+              </button>
+            )}
           </div>
 
           {/* Grid Komparatif Khusus Ormawa Terpilih */}

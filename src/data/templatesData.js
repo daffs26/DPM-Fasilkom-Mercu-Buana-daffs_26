@@ -171,7 +171,7 @@ NIM. [NIM_KETUA]                         NIM. [NIM_SPONSOR]`
   },
   {
     id: 'tpl-peminjaman-ruangan',
-    title: 'Surat & Formulir Izin Peminjaman Ruangan / Lab',
+    title: 'Surat & Formulir Izin Peminjaman Ruangan',
     category: 'Sarana & Peminjaman Ruangan',
     categorySlug: 'ruangan',
     format: 'DOCX',
@@ -226,7 +226,7 @@ Kepala Subbagian Umum & Sarpras Kampus Meruya UMB
   },
   {
     id: 'tpl-lpj-standar-dpm',
-    title: 'Format Baku Laporan Pertanggungjawaban (LPJ) Ormawa',
+    title: 'Format Laporan Pertanggung jawaban (LPJ) Ormawa',
     category: 'LPJ & Keuangan',
     categorySlug: 'lpj',
     format: 'DOCX',

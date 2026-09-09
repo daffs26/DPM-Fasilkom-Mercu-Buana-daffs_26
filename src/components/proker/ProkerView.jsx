@@ -31,9 +31,9 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import RequestDeleteProkerModal from '../modals/RequestDeleteProkerModal';
-import SubmitRevisionModal from '../modals/SubmitRevisionModal';
-import ManageDeletionRequestsModal from '../modals/ManageDeletionRequestsModal';
+import RequestDeleteProkerModal from './components/RequestDeleteProkerModal';
+import SubmitRevisionModal from './components/SubmitRevisionModal';
+import ManageDeletionRequestsModal from './components/ManageDeletionRequestsModal';
 
 export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDetailProker, onAuditLPJ, onPrintDoc }) {
   const { 

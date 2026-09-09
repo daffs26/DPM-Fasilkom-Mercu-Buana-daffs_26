@@ -16,8 +16,8 @@ import {
   Wallet,
   FileCheck
 } from 'lucide-react';
-import { useStore } from '../../store/useStore';
-import { formatRupiah, getStatusBadge } from '../../utils/formatters';
+import { useStore } from '@/store/useStore';
+import { formatRupiah, getStatusBadge } from '@/utils/formatters';
 
 // Tab Sub-Components
 import DetailOverviewTab from './detail-proker/DetailOverviewTab';

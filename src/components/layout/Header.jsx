@@ -33,8 +33,8 @@ import {
   KeyRound,
   FileText
 } from 'lucide-react';
-import ProfileModal from '../modals/ProfileModal';
-import ManageDeletionRequestsModal from '../modals/ManageDeletionRequestsModal';
+import ProfileModal from './components/ProfileModal';
+import ManageDeletionRequestsModal from '../proker/components/ManageDeletionRequestsModal';
 
 export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar }) {
   const { 
