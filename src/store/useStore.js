@@ -1399,6 +1399,12 @@ export const useStore = create(
         set({ lastReadHistoryCount: count });
       },
 
+      // Tracking seen status for Template Dokumen notification badge
+      hasSeenTemplateTab: false,
+      markTemplateTabAsSeen: () => {
+        set({ hasSeenTemplateTab: true });
+      },
+
       // Reset data
       resetToDefaultData: () => {
         set({
@@ -1412,7 +1418,8 @@ export const useStore = create(
           notifications: [],
           users: INITIAL_USERS,
           pendingAccounts: INITIAL_PENDING_USERS,
-          lastReadHistoryCount: 0
+          lastReadHistoryCount: 0,
+          hasSeenTemplateTab: false
         });
       }
     }),
@@ -1430,7 +1437,8 @@ export const useStore = create(
         users: state.users,
         pendingAccounts: state.pendingAccounts,
         currentUser: state.currentUser,
-        lastReadHistoryCount: state.lastReadHistoryCount
+        lastReadHistoryCount: state.lastReadHistoryCount,
+        hasSeenTemplateTab: state.hasSeenTemplateTab
       }),
       merge: (persistedState, currentState) => ({
         ...currentState,

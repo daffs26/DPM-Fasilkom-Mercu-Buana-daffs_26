@@ -27,8 +27,10 @@ export default function Sidebar({ isOpen, onClose }) {
     logout,
     resetToDefaultData,
     lastReadHistoryCount = 0,
-    markHistoryAsRead
-  } = useStore(useShallow(state => ({ activeTab: state.activeTab, setActiveTab: state.setActiveTab, prokers: state.prokers, suratPeringatan: state.suratPeringatan, activityLogs: state.activityLogs, currentUser: state.currentUser, logout: state.logout, resetToDefaultData: state.resetToDefaultData, lastReadHistoryCount: state.lastReadHistoryCount, markHistoryAsRead: state.markHistoryAsRead })));
+    markHistoryAsRead,
+    hasSeenTemplateTab = false,
+    markTemplateTabAsSeen
+  } = useStore(useShallow(state => ({ activeTab: state.activeTab, setActiveTab: state.setActiveTab, prokers: state.prokers, suratPeringatan: state.suratPeringatan, activityLogs: state.activityLogs, currentUser: state.currentUser, logout: state.logout, resetToDefaultData: state.resetToDefaultData, lastReadHistoryCount: state.lastReadHistoryCount, markHistoryAsRead: state.markHistoryAsRead, hasSeenTemplateTab: state.hasSeenTemplateTab, markTemplateTabAsSeen: state.markTemplateTabAsSeen })));
 
   // Hitung badge
   const pendingProposalCount = prokers.filter(p => p.status === 'proposal_pending').length;
@@ -42,12 +44,18 @@ export default function Sidebar({ isOpen, onClose }) {
     if (activeTab === 'history' && unreadProkerLogsCount > 0) {
       markHistoryAsRead?.();
     }
-  }, [activeTab, unreadProkerLogsCount, markHistoryAsRead]);
+    if (activeTab === 'template' && !hasSeenTemplateTab) {
+      markTemplateTabAsSeen?.();
+    }
+  }, [activeTab, unreadProkerLogsCount, markHistoryAsRead, hasSeenTemplateTab, markTemplateTabAsSeen]);
 
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
     if (tabId === 'history') {
       markHistoryAsRead?.();
+    }
+    if (tabId === 'template') {
+      markTemplateTabAsSeen?.();
     }
     onClose?.();
   };
@@ -87,7 +95,7 @@ export default function Sidebar({ isOpen, onClose }) {
       id: 'template',
       label: 'Template Dokumen',
       icon: ScrollText,
-      badge: { text: 'Baru', color: 'bg-blue-100 text-blue-800' }
+      badge: !hasSeenTemplateTab ? { text: 'Baru', color: 'bg-blue-100 text-blue-800' } : null
     },
     {
       id: 'audit',
