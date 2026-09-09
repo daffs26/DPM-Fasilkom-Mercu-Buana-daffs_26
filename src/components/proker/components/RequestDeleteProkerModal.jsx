@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Dialog, 
   DialogContent, 
@@ -21,7 +22,7 @@ const REASON_CATEGORIES = [
 ];
 
 export default function RequestDeleteProkerModal({ isOpen, onClose, proker }) {
-  const { requestProkerDeletion, currentUser } = useStore();
+  const { requestProkerDeletion, currentUser } = useStore(useShallow(state => ({ requestProkerDeletion: state.requestProkerDeletion, currentUser: state.currentUser })));
   const [reasonCategory, setReasonCategory] = useState(REASON_CATEGORIES[0]);
   const [reasonDetails, setReasonDetails] = useState('');
   const [loading, setLoading] = useState(false);

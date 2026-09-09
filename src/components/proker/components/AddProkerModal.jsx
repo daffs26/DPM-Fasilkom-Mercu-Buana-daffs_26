@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Dialog, 
   DialogContent, 
@@ -27,7 +28,7 @@ import {
 } from 'lucide-react';
 
 export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
-  const { ormawas, prokers, addProker, currentUser } = useStore();
+  const { ormawas, prokers, addProker, currentUser } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, addProker: state.addProker, currentUser: state.currentUser })));
 
   const [ormawaId, setOrmawaId] = useState(currentUser?.ormawaId !== 'dpm' ? currentUser?.ormawaId : 'bem');
   const [title, setTitle] = useState('');

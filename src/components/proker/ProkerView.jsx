@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Plus, 
   Search, 
@@ -45,7 +46,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     deleteProker,
     deletionRequests,
     currentUser
-  } = useStore();
+  } = useStore(useShallow(state => ({ prokers: state.prokers, ormawas: state.ormawas, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, searchQuery: state.searchQuery, deleteProker: state.deleteProker, deletionRequests: state.deletionRequests, currentUser: state.currentUser })));
   const [statusFilter, setStatusFilter] = useState('all');
   const [prokerToDelete, setProkerToDelete] = useState(null);
   const [prokerToRequestDelete, setProkerToRequestDelete] = useState(null);

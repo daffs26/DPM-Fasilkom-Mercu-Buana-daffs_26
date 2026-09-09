@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import TemplatePreviewModal from './components/TemplatePreviewModal';
 import UploadTemplateModal from './components/UploadTemplateModal';
 import { TEMPLATE_CATEGORIES } from '../../data/templatesData';
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function TemplateView() {
-  const { templates, deleteTemplate, incrementTemplateDownload, searchQuery, setSearchQuery } = useStore();
+  const { templates, deleteTemplate, incrementTemplateDownload, searchQuery, setSearchQuery } = useStore(useShallow(state => ({ templates: state.templates, deleteTemplate: state.deleteTemplate, incrementTemplateDownload: state.incrementTemplateDownload, searchQuery: state.searchQuery, setSearchQuery: state.setSearchQuery })));
 
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [localSearch, setLocalSearch] = useState('');

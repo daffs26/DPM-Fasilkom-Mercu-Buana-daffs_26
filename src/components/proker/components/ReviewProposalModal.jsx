@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   X, 
   FileText, 
@@ -30,7 +31,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
     toggleProposalRevisionItem, 
     deleteProposalRevisionItem,
     currentUserName 
-  } = useStore();
+  } = useStore(useShallow(state => ({ reviewProposal: state.reviewProposal, addProposalRevisionItem: state.addProposalRevisionItem, toggleProposalRevisionItem: state.toggleProposalRevisionItem, deleteProposalRevisionItem: state.deleteProposalRevisionItem, currentUserName: state.currentUserName })));
 
   const [noteText, setNoteText] = useState('');
   const [newRevisionInput, setNewRevisionInput] = useState('');

@@ -21,9 +21,10 @@ import {
   UploadCloud
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function TemplatePreviewModal({ isOpen, onClose, template }) {
-  const { templates, updateTemplate, incrementTemplateDownload } = useStore();
+  const { templates, updateTemplate, incrementTemplateDownload } = useStore(useShallow(state => ({ templates: state.templates, updateTemplate: state.updateTemplate, incrementTemplateDownload: state.incrementTemplateDownload })));
   
   // Ambil data template paling mutakhir dari store berdasarkan ID
   const activeTemplate = templates.find(t => t.id === template?.id) || template;

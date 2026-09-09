@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   LayoutDashboard, 
   Layers, 
@@ -27,7 +28,7 @@ export default function Sidebar({ isOpen, onClose }) {
     resetToDefaultData,
     lastReadHistoryCount = 0,
     markHistoryAsRead
-  } = useStore();
+  } = useStore(useShallow(state => ({ activeTab: state.activeTab, setActiveTab: state.setActiveTab, prokers: state.prokers, suratPeringatan: state.suratPeringatan, activityLogs: state.activityLogs, currentUser: state.currentUser, logout: state.logout, resetToDefaultData: state.resetToDefaultData, lastReadHistoryCount: state.lastReadHistoryCount, markHistoryAsRead: state.markHistoryAsRead })));
 
   // Hitung badge
   const pendingProposalCount = prokers.filter(p => p.status === 'proposal_pending').length;

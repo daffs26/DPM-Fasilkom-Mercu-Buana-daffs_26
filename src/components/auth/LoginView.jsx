@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function LoginView({ onSwitchToRegister }) {
-  const { login } = useStore();
+  const { login } = useStore(useShallow(state => ({ login: state.login })));
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

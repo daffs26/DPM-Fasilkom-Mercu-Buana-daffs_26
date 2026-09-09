@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Calendar as CalendarIcon, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { getHoliday } from '../../data/holidays';
 import KalenderGrid from './components/KalenderGrid';
@@ -23,7 +24,7 @@ const WEEKDAY_NAMES = [
 const SUPPORTED_YEARS = [2026, 2027, 2028];
 
 export default function KalenderView({ onOpenAddProker, onReviewProposal, onDateChange }) {
-  const { prokers, ormawas } = useStore();
+  const { prokers, ormawas } = useStore(useShallow(state => ({ prokers: state.prokers, ormawas: state.ormawas })));
 
   const today = new Date();
   const todayISO = today.toISOString().split('T')[0];

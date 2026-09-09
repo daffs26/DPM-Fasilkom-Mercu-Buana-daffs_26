@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function AuditOrmawaReport({ ormawas, prokers, currentUser }) {
+const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, prokers, currentUser }) {
   const isDpm = currentUser?.ormawaId === 'dpm';
   const displayedOrmawas = isDpm 
     ? ormawas 
@@ -119,4 +119,6 @@ export default function AuditOrmawaReport({ ormawas, prokers, currentUser }) {
       </div>
     </div>
   );
-}
+});
+
+export default AuditOrmawaReport;

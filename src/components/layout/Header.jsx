@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +56,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
     deletionRequests,
     markNotificationAsRead,
     markAllNotificationsAsRead
-  } = useStore();
+  } = useStore(useShallow(state => ({ ormawas: state.ormawas, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, searchQuery: state.searchQuery, setSearchQuery: state.setSearchQuery, prokers: state.prokers, activeTab: state.activeTab, setActiveTab: state.setActiveTab, currentUser: state.currentUser, logout: state.logout, pendingAccounts: state.pendingAccounts, approveAccount: state.approveAccount, rejectAccount: state.rejectAccount, notifications: state.notifications, deletionRequests: state.deletionRequests, markNotificationAsRead: state.markNotificationAsRead, markAllNotificationsAsRead: state.markAllNotificationsAsRead })));
 
   const [isOrmawaDropdownOpen, setIsOrmawaDropdownOpen] = useState(false);
   const [isDesktopOrmawaOpen, setIsDesktopOrmawaOpen] = useState(false);

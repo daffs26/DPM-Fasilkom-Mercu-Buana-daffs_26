@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Dialog, 
   DialogContent, 
@@ -23,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function UploadBerkasModal({ isOpen, onClose, defaultOrmawaId = 'bem' }) {
-  const { ormawas, prokers, uploadProposal, uploadLPJ, uploadOtherDoc, addProker } = useStore();
+  const { ormawas, prokers, uploadProposal, uploadLPJ, uploadOtherDoc, addProker } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, uploadProposal: state.uploadProposal, uploadLPJ: state.uploadLPJ, uploadOtherDoc: state.uploadOtherDoc, addProker: state.addProker })));
 
   const [ormawaId, setOrmawaId] = useState(defaultOrmawaId);
   const [docCategory, setDocCategory] = useState('proposal'); // 'proposal' | 'lpj' | 'other'

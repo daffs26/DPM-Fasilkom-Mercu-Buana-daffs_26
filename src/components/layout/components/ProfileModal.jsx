@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Dialog, 
   DialogContent, 
@@ -24,7 +25,7 @@ import {
 } from 'lucide-react';
 
 export default function ProfileModal({ isOpen, onClose }) {
-  const { currentUser, updateUserProfile, changeUserPassword, ormawas } = useStore();
+  const { currentUser, updateUserProfile, changeUserPassword, ormawas } = useStore(useShallow(state => ({ currentUser: state.currentUser, updateUserProfile: state.updateUserProfile, changeUserPassword: state.changeUserPassword, ormawas: state.ormawas })));
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password'
 
   // Profile Form States

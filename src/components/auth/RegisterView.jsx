@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { User, Lock, Building2, BadgeCheck, ArrowLeft, Send } from 'lucide-react';
 import DropdownSelect from '@/components/ui/dropdown-select';
 
 export default function RegisterView({ onSwitchToLogin }) {
-  const { ormawas, register } = useStore();
+  const { ormawas, register } = useStore(useShallow(state => ({ ormawas: state.ormawas, register: state.register })));
   
   const [name, setName] = useState('');
   const [nim, setNim] = useState('');

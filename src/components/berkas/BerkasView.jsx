@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import UploadBerkasModal from './components/UploadBerkasModal';
 import { 
   Folder, 
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
-  const { prokers, ormawas, selectedOrmawaFilter, setSelectedOrmawaFilter, searchQuery, setActiveTab, currentUser } = useStore();
+  const { prokers, ormawas, selectedOrmawaFilter, setSelectedOrmawaFilter, searchQuery, setActiveTab, currentUser } = useStore(useShallow(state => ({ prokers: state.prokers, ormawas: state.ormawas, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, searchQuery: state.searchQuery, setActiveTab: state.setActiveTab, currentUser: state.currentUser })));
   const isDpm = currentUser?.ormawaId === 'dpm';
   const visibleOrmawas = isDpm ? ormawas : ormawas.filter(o => o.id === currentUser?.ormawaId);
   

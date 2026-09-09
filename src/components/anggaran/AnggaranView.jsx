@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Wallet, 
   Plus, 
@@ -28,7 +29,7 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
     selectedOrmawaFilter,
     setSelectedOrmawaFilter,
     currentUserName
-  } = useStore();
+  } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, budgetTransactions: state.budgetTransactions, deleteBudgetTransaction: state.deleteBudgetTransaction, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, currentUserName: state.currentUserName })));
 
   const activeOrmawaObj = ormawas.find(o => o.id === selectedOrmawaFilter);
 

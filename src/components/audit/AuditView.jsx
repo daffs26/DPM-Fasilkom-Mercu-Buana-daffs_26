@@ -1,11 +1,12 @@
 import React from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import AuditParameterStandards from './components/AuditParameterStandards';
 import AuditOrmawaReport from './components/AuditOrmawaReport';
 import AuditProkerTable from './components/AuditProkerTable';
 
 export default function AuditView({ onAuditLPJ, onPrintDoc }) {
-  const { ormawas, prokers, currentUser } = useStore();
+  const { ormawas, prokers, currentUser } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, currentUser: state.currentUser })));
   const isDpm = currentUser?.ormawaId === 'dpm';
 
   const displayedProkers = isDpm 

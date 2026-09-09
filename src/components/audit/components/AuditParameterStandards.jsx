@@ -64,7 +64,7 @@ const AUDIT_PARAMETERS = [
   }
 ];
 
-export default function AuditParameterStandards() {
+const AuditParameterStandards = React.memo(function AuditParameterStandards() {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
@@ -177,4 +177,6 @@ export default function AuditParameterStandards() {
       )}
     </div>
   );
-}
+});
+
+export default AuditParameterStandards;

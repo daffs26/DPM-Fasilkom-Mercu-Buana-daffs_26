@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { X, Award, UploadCloud, CheckCircle2, AlertTriangle, FileText, DollarSign, Clock, Users } from 'lucide-react';
 
 export default function AuditLPJModal({ isOpen, onClose, proker }) {
-  const { auditLPJ, uploadLPJ, currentUserName } = useStore();
+  const { auditLPJ, uploadLPJ, currentUserName } = useStore(useShallow(state => ({ auditLPJ: state.auditLPJ, uploadLPJ: state.uploadLPJ, currentUserName: state.currentUserName })));
 
   const [lpjFile, setLpjFile] = useState(null);
   const [realisasiDana, setRealisasiDana] = useState(proker?.realisasiDana || proker?.rab || 0);

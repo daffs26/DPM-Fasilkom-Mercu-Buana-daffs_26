@@ -8,7 +8,7 @@ import {
   AlertOctagon 
 } from 'lucide-react';
 
-export default function DashboardScorecard({
+const DashboardScorecard = React.memo(function DashboardScorecard({
   isDpm = true,
   selectedOrmawaFilter,
   setSelectedOrmawaFilter,
@@ -237,4 +237,6 @@ export default function DashboardScorecard({
       )}
     </Card>
   );
-}
+});
+
+export default DashboardScorecard;

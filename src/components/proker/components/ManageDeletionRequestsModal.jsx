@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Dialog, 
   DialogContent, 
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function ManageDeletionRequestsModal({ isOpen, onClose }) {
-  const { deletionRequests, approveProkerDeletion, rejectProkerDeletion, ormawas } = useStore();
+  const { deletionRequests, approveProkerDeletion, rejectProkerDeletion, ormawas } = useStore(useShallow(state => ({ deletionRequests: state.deletionRequests, approveProkerDeletion: state.approveProkerDeletion, rejectProkerDeletion: state.rejectProkerDeletion, ormawas: state.ormawas })));
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [reviewNote, setReviewNote] = useState('');
   const [actionType, setActionType] = useState(null); // 'approve' | 'reject'

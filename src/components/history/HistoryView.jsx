@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Plus, 
   Trash2, 
@@ -12,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export default function HistoryView() {
-  const { activityLogs = [], ormawas = [], selectedOrmawaFilter, setSelectedOrmawaFilter } = useStore();
+  const { activityLogs = [], ormawas = [], selectedOrmawaFilter, setSelectedOrmawaFilter } = useStore(useShallow(state => ({ activityLogs: state.activityLogs, ormawas: state.ormawas, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter })));
   const [typeFilter, setTypeFilter] = useState('all'); // 'all' | 'added' | 'deleted'
   const [searchQuery, setSearchQuery] = useState('');
 

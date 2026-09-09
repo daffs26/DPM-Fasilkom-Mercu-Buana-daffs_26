@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Dialog, 
   DialogContent, 
@@ -23,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function SubmitRevisionModal({ isOpen, onClose, proker, docType = 'proposal' }) {
-  const { submitProposalRevision, submitLpjRevision, toggleProposalRevisionItem } = useStore();
+  const { submitProposalRevision, submitLpjRevision, toggleProposalRevisionItem } = useStore(useShallow(state => ({ submitProposalRevision: state.submitProposalRevision, submitLpjRevision: state.submitLpjRevision, toggleProposalRevisionItem: state.toggleProposalRevisionItem })));
   const [file, setFile] = useState(null);
   const [changelogNotes, setChangelogNotes] = useState('');
   const [loading, setLoading] = useState(false);

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { X, AlertOctagon, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import DropdownSelect from '@/components/ui/dropdown-select';
 
 export default function IssueSPModal({ isOpen, onClose }) {
-  const { ormawas, prokers, issueSP } = useStore();
+  const { ormawas, prokers, issueSP } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, issueSP: state.issueSP })));
 
   const [ormawaId, setOrmawaId] = useState('bem');
   const [prokerId, setProkerId] = useState('');

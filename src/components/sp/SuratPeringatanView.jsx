@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   AlertOctagon, 
   Plus, 
@@ -18,7 +19,7 @@ import SPClarificationModal from './components/SPClarificationModal';
 import ReviewSPClarificationModal from './components/ReviewSPClarificationModal';
 
 export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
-  const { suratPeringatan, ormawas, resolveSP, currentUser } = useStore();
+  const { suratPeringatan, ormawas, resolveSP, currentUser } = useStore(useShallow(state => ({ suratPeringatan: state.suratPeringatan, ormawas: state.ormawas, resolveSP: state.resolveSP, currentUser: state.currentUser })));
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedSpForClarification, setSelectedSpForClarification] = useState(null);
   const [selectedSpForReview, setSelectedSpForReview] = useState(null);

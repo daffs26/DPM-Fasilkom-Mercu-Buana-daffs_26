@@ -17,6 +17,7 @@ import {
   FileCheck
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { formatRupiah, getStatusBadge } from '@/utils/formatters';
 
 // Tab Sub-Components
@@ -35,7 +36,7 @@ export default function DetailProkerModal({
   onReviewProposal,
   onPrintRundown
 }) {
-  const { ormawas, updateProkerDetails, toggleProposalRevisionItem } = useStore();
+  const { ormawas, updateProkerDetails, toggleProposalRevisionItem } = useStore(useShallow(state => ({ ormawas: state.ormawas, updateProkerDetails: state.updateProkerDetails, toggleProposalRevisionItem: state.toggleProposalRevisionItem })));
   const [activeTab, setActiveTab] = useState('deskripsi'); // 'deskripsi' | 'panitia' | 'rundown' | 'rab' | 'lpj'
 
   // Default values

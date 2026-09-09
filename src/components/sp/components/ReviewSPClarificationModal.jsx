@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Dialog, 
   DialogContent, 
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function ReviewSPClarificationModal({ isOpen, onClose, sp }) {
-  const { reviewSPClarification } = useStore();
+  const { reviewSPClarification } = useStore(useShallow(state => ({ reviewSPClarification: state.reviewSPClarification })));
   const [reviewNotes, setReviewNotes] = useState('');
   const [decision, setDecision] = useState('approved'); // 'approved' | 'rejected'
   const [loading, setLoading] = useState(false);

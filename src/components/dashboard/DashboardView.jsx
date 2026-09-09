@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 
 // Modular Dashboard Sub-Components
 import DashboardKpiSummary from './components/DashboardKpiSummary';
@@ -17,7 +18,7 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
     activityLogs, 
     suratPeringatan,
     currentUser 
-  } = useStore();
+  } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, activityLogs: state.activityLogs, suratPeringatan: state.suratPeringatan, currentUser: state.currentUser })));
 
   const isDpm = currentUser?.ormawaId === 'dpm';
   // Jika BEM/HIMTI/HIMSISFO, kunci filter ke ormawa sendiri

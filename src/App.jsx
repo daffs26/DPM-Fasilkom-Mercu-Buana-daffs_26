@@ -1,5 +1,6 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { useStore } from './store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import DashboardView from './components/dashboard/DashboardView';
@@ -65,7 +66,7 @@ function ViewLoadingFallback({ tab }) {
 }
 
 export default function App() {
-  const { activeTab, currentUser } = useStore();
+  const { activeTab, currentUser } = useStore(useShallow(state => ({ activeTab: state.activeTab, currentUser: state.currentUser })));
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
 
   // Modal States

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import DropdownSelect from '@/components/ui/dropdown-select';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function AddTransactionModal({ 
   isOpen, 
@@ -28,7 +29,7 @@ export default function AddTransactionModal({
   initialMode = 'pengeluaran', 
   initialOrmawa = '' 
 }) {
-  const { ormawas, prokers, addBudgetTransaction, currentUserName } = useStore();
+  const { ormawas, prokers, addBudgetTransaction, currentUserName } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, addBudgetTransaction: state.addBudgetTransaction, currentUserName: state.currentUserName })));
 
   const [mode, setMode] = useState(initialMode); // 'pemasukan' | 'pengeluaran'
   const [selectedOrmawa, setSelectedOrmawa] = useState(initialOrmawa || ormawas[0]?.id || 'dpm');

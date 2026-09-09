@@ -10,9 +10,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Coins, CheckCircle2, Building2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function SetPaguModal({ isOpen, onClose }) {
-  const { ormawas, updateOrmawaPagu } = useStore();
+  const { ormawas, updateOrmawaPagu } = useStore(useShallow(state => ({ ormawas: state.ormawas, updateOrmawaPagu: state.updateOrmawaPagu })));
 
   // Local state for each ormawa pagu input
   const [paguValues, setPaguValues] = useState({});

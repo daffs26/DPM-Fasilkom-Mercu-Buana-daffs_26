@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, UploadCloud, CheckCircle2, FileText, AlertTriangle } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import DropdownSelect from '@/components/ui/dropdown-select';
 
 const CATEGORY_OPTIONS = [
@@ -29,7 +30,7 @@ const FORMAT_OPTIONS = [
 ];
 
 export default function UploadTemplateModal({ isOpen, onClose }) {
-  const { addTemplate, currentUserName } = useStore();
+  const { addTemplate, currentUserName } = useStore(useShallow(state => ({ addTemplate: state.addTemplate, currentUserName: state.currentUserName })));
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Perizinan & Dispensasi');

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { 
   Dialog, 
   DialogContent, 
@@ -21,7 +22,7 @@ import {
 } from 'lucide-react';
 
 export default function SPClarificationModal({ isOpen, onClose, sp }) {
-  const { submitSPClarification, currentUser } = useStore();
+  const { submitSPClarification, currentUser } = useStore(useShallow(state => ({ submitSPClarification: state.submitSPClarification, currentUser: state.currentUser })));
   const [text, setText] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [file, setFile] = useState(null);
