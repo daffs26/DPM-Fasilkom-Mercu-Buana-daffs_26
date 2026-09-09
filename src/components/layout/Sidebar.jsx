@@ -198,10 +198,16 @@ export default function Sidebar({ isOpen, onClose }) {
               </div>
               <span className="text-xs font-bold text-slate-900 tracking-tight">Standar Pengawasan</span>
             </div>
-            <p className="text-[11px] text-slate-600 leading-relaxed font-normal">
-              • Proposal masuk <strong className="text-slate-900 font-semibold">≥ H-14</strong><br/>
-              • LPJ maksimal <strong className="text-slate-900 font-semibold">≤ H+14</strong>
-            </p>
+            <div className="space-y-1.5 text-[11px] text-slate-600 leading-snug font-normal">
+              <div className="flex items-start gap-1.5">
+                <span className="text-blue-500 font-bold shrink-0 mt-0.5">•</span>
+                <span>Proposal diajukan <strong className="text-slate-900 font-semibold">minimal 14 hari sebelum acara</strong> (H-14)</span>
+              </div>
+              <div className="flex items-start gap-1.5">
+                <span className="text-blue-500 font-bold shrink-0 mt-0.5">•</span>
+                <span>LPJ diserahkan <strong className="text-slate-900 font-semibold">maksimal 14 hari setelah acara</strong> (H+14)</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -318,10 +324,16 @@ export default function Sidebar({ isOpen, onClose }) {
                 </div>
                 <span className="text-xs font-bold text-slate-900 tracking-tight">Standar Pengawasan</span>
               </div>
-              <p className="text-[11px] text-slate-600 leading-relaxed font-normal">
-                • Proposal masuk <strong className="text-slate-900 font-semibold">≥ H-14</strong><br/>
-                • LPJ maksimal <strong className="text-slate-900 font-semibold">≤ H+14</strong>
-              </p>
+              <div className="space-y-1.5 text-[11px] text-slate-600 leading-snug font-normal">
+                <div className="flex items-start gap-1.5">
+                  <span className="text-blue-500 font-bold shrink-0 mt-0.5">•</span>
+                  <span>Proposal diajukan <strong className="text-slate-900 font-semibold">minimal 14 hari sebelum acara</strong> (H-14)</span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-blue-500 font-bold shrink-0 mt-0.5">•</span>
+                  <span>LPJ diserahkan <strong className="text-slate-900 font-semibold">maksimal 14 hari setelah acara</strong> (H+14)</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

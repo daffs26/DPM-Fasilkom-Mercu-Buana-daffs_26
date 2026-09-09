@@ -100,7 +100,7 @@ export default function DashboardScorecard({
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2 text-slate-700 text-[11px]">
               <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
-              <span><strong>Standar Batas Waktu:</strong> Proposal minimal <strong>≥ H-14</strong> • LPJ maksimal <strong>≤ H+14</strong></span>
+              <span><strong>Standar Batas Waktu:</strong> Proposal minimal <strong>14 hari sebelum acara (H-14)</strong> • LPJ maksimal <strong>14 hari setelah acara (H+14)</strong></span>
             </div>
             <span className="text-slate-500 text-[10px] font-semibold hidden sm:inline">
               Klik kartu ormawa untuk fokus
