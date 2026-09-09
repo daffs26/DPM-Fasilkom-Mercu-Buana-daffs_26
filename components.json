@@ -3,6 +3,7 @@
   "style": "default",
   "rsc": false,
   "tsx": false,
+  "typescript": false,
   "tailwind": {
     "config": "tailwind.config.js",
     "css": "src/index.css",

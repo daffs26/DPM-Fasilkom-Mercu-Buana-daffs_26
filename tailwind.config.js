@@ -1,3 +1,4 @@
+// AUDITMAWA - Tailwind CSS Design Tokens & Styling Configuration
 import animate from 'tailwindcss-animate'
 
 /** @type {import('tailwindcss').Config} */
