@@ -4,7 +4,14 @@ import { useShallow } from 'zustand/react/shallow';
 import { X, Award, UploadCloud, CheckCircle2, AlertTriangle, FileText, DollarSign, Clock, Users } from 'lucide-react';
 
 export default function AuditLPJModal({ isOpen, onClose, proker }) {
-  const { auditLPJ, uploadLPJ, currentUserName } = useStore(useShallow(state => ({ auditLPJ: state.auditLPJ, uploadLPJ: state.uploadLPJ, currentUserName: state.currentUserName })));
+  const { auditLPJ, uploadLPJ, currentUserName, currentUser } = useStore(useShallow(state => ({ 
+    auditLPJ: state.auditLPJ, 
+    uploadLPJ: state.uploadLPJ, 
+    currentUserName: state.currentUserName,
+    currentUser: state.currentUser
+  })));
+
+  const isGuest = currentUser?.role === 'guest';
 
   const [lpjFile, setLpjFile] = useState(null);
   const [realisasiDana, setRealisasiDana] = useState(proker?.realisasiDana || proker?.rab || 0);
@@ -132,11 +139,13 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
               </div>
 
               <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between">
-                <label className="text-slate-700 hover:text-slate-900 font-bold cursor-pointer inline-flex items-center gap-1 text-[11px]">
-                  <UploadCloud className="w-3.5 h-3.5" />
-                  <span>{lpj?.fileName ? 'Ganti File LPJ' : 'Unggah File LPJ'}</span>
-                  <input type="file" accept=".pdf" onChange={handleUploadNewLPJ} className="hidden" />
-                </label>
+                {!isGuest && (
+                  <label className="text-slate-700 hover:text-slate-900 font-bold cursor-pointer inline-flex items-center gap-1 text-[11px]">
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    <span>{lpj?.fileName ? 'Ganti File LPJ' : 'Unggah File LPJ'}</span>
+                    <input type="file" accept=".pdf" onChange={handleUploadNewLPJ} className="hidden" />
+                  </label>
+                )}
                 {lpj?.fileName && (
                   <button 
                     onClick={() => alert(`Mengunduh file: ${lpj.fileName}`)}
@@ -161,13 +170,19 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-700">Realisasi (Rp):</span>
-                <input
-                  type="number"
-                  value={realisasiDana}
-                  onChange={(e) => setRealisasiDana(Number(e.target.value))}
-                  className="w-40 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                />
+                <span className="text-xs font-bold text-slate-700">Realisasi:</span>
+                {isGuest ? (
+                  <span className="font-extrabold text-slate-900 text-xs">
+                    Rp {Number(realisasiDana).toLocaleString('id-ID')}
+                  </span>
+                ) : (
+                  <input
+                    type="number"
+                    value={realisasiDana}
+                    onChange={(e) => setRealisasiDana(Number(e.target.value))}
+                    className="w-40 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  />
+                )}
               </div>
             </div>
             {realisasiDana > proker.rab && (
@@ -215,7 +230,8 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
                   max="20"
                   value={rundownScore}
                   onChange={(e) => setRundownScore(Number(e.target.value))}
-                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  disabled={isGuest}
+                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer disabled:opacity-50"
                 />
                 <p className="text-[10px] text-slate-600 mt-0.5">
                   Penilaian ketepatan waktu pembukaan, transisi sesi, dan ketiadaan pergeseran rundown berlebih.
@@ -236,7 +252,8 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
                   max="20"
                   value={pesertaScore}
                   onChange={(e) => setPesertaScore(Number(e.target.value))}
-                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  disabled={isGuest}
+                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer disabled:opacity-50"
                 />
               </div>
 
@@ -254,7 +271,8 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
                   max="20"
                   value={anggaranScore}
                   onChange={(e) => setAnggaranScore(Number(e.target.value))}
-                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  disabled={isGuest}
+                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer disabled:opacity-50"
                 />
               </div>
 
@@ -272,7 +290,8 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
                   max="20"
                   value={slaScore}
                   onChange={(e) => setSlaScore(Number(e.target.value))}
-                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  disabled={isGuest}
+                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer disabled:opacity-50"
                 />
               </div>
 
@@ -290,7 +309,8 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
                   max="20"
                   value={outputScore}
                   onChange={(e) => setOutputScore(Number(e.target.value))}
-                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  disabled={isGuest}
+                  className="w-full accent-slate-900 h-1.5 bg-slate-200 rounded-lg cursor-pointer disabled:opacity-50"
                 />
               </div>
             </div>
@@ -305,8 +325,10 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
               rows={3}
               value={catatanDPM}
               onChange={(e) => setCatatanDPM(e.target.value)}
-              placeholder=""
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+              readOnly={isGuest}
+              disabled={isGuest}
+              placeholder={isGuest ? 'Tidak ada catatan DPM.' : ''}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 disabled:opacity-80"
             />
           </div>
         </div>
@@ -318,16 +340,18 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
             onClick={onClose}
             className="w-full sm:w-auto px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition text-center cursor-pointer"
           >
-            Batal
+            Tutup
           </button>
-          <button
-            type="button"
-            onClick={handleSaveAudit}
-            className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs hover:shadow transition active:scale-95 text-center cursor-pointer"
-          >
-            <CheckCircle2 className="w-4 h-4 text-white" />
-            <span>Sahkan Hasil Audit &amp; LPJ</span>
-          </button>
+          {!isGuest && (
+            <button
+              type="button"
+              onClick={handleSaveAudit}
+              className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs hover:shadow transition active:scale-95 text-center cursor-pointer"
+            >
+              <CheckCircle2 className="w-4 h-4 text-white" />
+              <span>Sahkan Hasil Audit &amp; LPJ</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

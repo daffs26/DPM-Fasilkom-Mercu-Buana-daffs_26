@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import DropdownSelect from '@/components/ui/dropdown-select';
 import { Award, Printer, ChevronDown, ChevronUp } from 'lucide-react';
+import useStore from '@/store/useStore';
 
 export default function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = currentUser?.role === 'guest';
   const [selectedParam, setSelectedParam] = useState('all');
   const [collapsedCards, setCollapsedCards] = useState({});
 
@@ -21,7 +24,9 @@ export default function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrint
             Rekapitulasi Audit Seluruh Program Kerja
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Klik "Input Audit" untuk mengisi 5 parameter penilaian DPM
+            {isGuest 
+              ? 'Transparansi parameter dan skor penilaian DPM'
+              : 'Klik "Input Audit" untuk mengisi 5 parameter penilaian DPM'}
           </p>
         </div>
 
@@ -180,20 +185,35 @@ export default function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrint
 
                       {(selectedParam === 'all' || selectedParam === 'aksi') && (
                         <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
-                          <button
-                            onClick={() => onAuditLPJ(p)}
-                            className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition text-center"
-                          >
-                            {audit ? 'Ubah Penilaian' : 'Input Audit'}
-                          </button>
-                          {audit && (
-                            <button
-                              onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
-                              className="p-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition shrink-0"
-                              title="Cetak Berita Acara Audit"
-                            >
-                              <Printer className="w-4 h-4" />
-                            </button>
+                          {isGuest ? (
+                            audit ? (
+                              <button
+                                onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
+                                className="flex-1 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center justify-center gap-1.5 transition"
+                              >
+                                <Printer className="w-4 h-4" /> Cetak Berita Acara
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-slate-400 italic py-1">Belum Ada Berita Acara</span>
+                            )
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => onAuditLPJ(p)}
+                                className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition text-center"
+                              >
+                                {audit ? 'Ubah Penilaian' : 'Input Audit'}
+                              </button>
+                              {audit && (
+                                <button
+                                  onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
+                                  className="p-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition shrink-0"
+                                  title="Cetak Berita Acara Audit"
+                                >
+                                  <Printer className="w-4 h-4" />
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
@@ -216,7 +236,7 @@ export default function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrint
               <th className="pb-3 pr-4 whitespace-nowrap">Waktu Rundown</th>
               <th className="pb-3 pr-4 whitespace-nowrap">SLA LPJ</th>
               <th className="pb-3 pr-4 whitespace-nowrap">Total Skor Audit</th>
-              <th className="pb-3 text-right whitespace-nowrap">Aksi DPM</th>
+              <th className="pb-3 text-right whitespace-nowrap">{isGuest ? 'Dokumen Audit' : 'Aksi DPM'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -296,23 +316,37 @@ export default function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrint
                     </td>
 
                     <td className="py-3.5 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => onAuditLPJ(p)}
-                          className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition"
-                        >
-                          {audit ? 'Ubah Penilaian' : 'Input Audit'}
-                        </button>
-                        {audit && (
+                      {isGuest ? (
+                        audit ? (
                           <button
                             onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
-                            className="p-1.5 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition"
+                            className="px-3 py-1.5 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center gap-1.5 transition shadow-2xs"
                             title="Cetak Berita Acara Audit"
                           >
-                            <Printer className="w-4 h-4" />
+                            <Printer className="w-3.5 h-3.5" /> Cetak Berita Acara
                           </button>
-                        )}
-                      </div>
+                        ) : (
+                          <span className="text-slate-400 italic text-[11px]">Belum Ada Berita Acara</span>
+                        )
+                      ) : (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => onAuditLPJ(p)}
+                            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition"
+                          >
+                            {audit ? 'Ubah Penilaian' : 'Input Audit'}
+                          </button>
+                          {audit && (
+                            <button
+                              onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
+                              className="p-1.5 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition"
+                              title="Cetak Berita Acara Audit"
+                            >
+                              <Printer className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );

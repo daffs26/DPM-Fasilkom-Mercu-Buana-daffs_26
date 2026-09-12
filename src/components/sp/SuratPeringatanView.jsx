@@ -35,7 +35,8 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
     return suratPeringatan;
   }, [suratPeringatan, filterStatus]);
 
-  const isDpm = currentUser?.ormawaId === 'dpm';
+  const isGuest = currentUser?.role === 'guest';
+  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
 
   return (
     <div className="space-y-6">
@@ -159,7 +160,7 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
           const isClarification = sp.status === 'clarification_submitted';
           const isResolved = sp.status === 'resolved';
 
-          const canClarify = !isResolved && (!isDpm || currentUser?.ormawaId === sp.ormawaId);
+          const canClarify = !isGuest && !isResolved && (!isDpm || currentUser?.ormawaId === sp.ormawaId);
 
           return (
             <div

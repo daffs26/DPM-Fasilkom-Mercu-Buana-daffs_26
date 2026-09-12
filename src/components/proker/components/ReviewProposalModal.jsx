@@ -30,8 +30,18 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
     addProposalRevisionItem, 
     toggleProposalRevisionItem, 
     deleteProposalRevisionItem,
-    currentUserName 
-  } = useStore(useShallow(state => ({ reviewProposal: state.reviewProposal, addProposalRevisionItem: state.addProposalRevisionItem, toggleProposalRevisionItem: state.toggleProposalRevisionItem, deleteProposalRevisionItem: state.deleteProposalRevisionItem, currentUserName: state.currentUserName })));
+    currentUserName,
+    currentUser
+  } = useStore(useShallow(state => ({ 
+    reviewProposal: state.reviewProposal, 
+    addProposalRevisionItem: state.addProposalRevisionItem, 
+    toggleProposalRevisionItem: state.toggleProposalRevisionItem, 
+    deleteProposalRevisionItem: state.deleteProposalRevisionItem, 
+    currentUserName: state.currentUserName,
+    currentUser: state.currentUser
+  })));
+
+  const isGuest = currentUser?.role === 'guest';
 
   const [noteText, setNoteText] = useState('');
   const [newRevisionInput, setNewRevisionInput] = useState('');
@@ -223,14 +233,16 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => deleteProposalRevisionItem(proker.id, item.id)}
-                      className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition shrink-0 cursor-pointer"
-                      title="Hapus butir revisi ini"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {!isGuest && (
+                      <button
+                        type="button"
+                        onClick={() => deleteProposalRevisionItem(proker.id, item.id)}
+                        className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition shrink-0 cursor-pointer"
+                        title="Hapus butir revisi ini"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -241,64 +253,70 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
             )}
 
             {/* Form Input Tambah Poin Baru */}
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleAddRevisionItem();
-              }}
-              className="flex items-center gap-2 pt-1"
-            >
-              <input
-                type="text"
-                value={newRevisionInput}
-                onChange={(e) => setNewRevisionInput(e.target.value)}
-                placeholder="Tulis butir revisi baru (mis: Perbaiki rincian konsumsi di RAB)..."
-                className="flex-1 bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-              <button
-                type="submit"
-                disabled={!newRevisionInput.trim()}
-                className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Poin</span>
-              </button>
-            </form>
-
-            {/* Quick Chips Preset */}
-            <div className="space-y-1.5 pt-1">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-800">
-                <Sparkles className="w-3 h-3 text-amber-600" />
-                <span>Rekomendasi Poin Revisi Cepat:</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {COMMON_REVISION_PRESETS.map((preset, idx) => (
+            {!isGuest && (
+              <>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleAddRevisionItem();
+                  }}
+                  className="flex items-center gap-2 pt-1"
+                >
+                  <input
+                    type="text"
+                    value={newRevisionInput}
+                    onChange={(e) => setNewRevisionInput(e.target.value)}
+                    placeholder="Tulis butir revisi baru (mis: Perbaiki rincian konsumsi di RAB)..."
+                    className="flex-1 bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
                   <button
-                    key={`preset-${idx}`}
-                    type="button"
-                    onClick={() => handleAddRevisionItem(preset)}
-                    className="text-[10px] font-semibold bg-white hover:bg-amber-100/60 border border-amber-200 text-slate-700 hover:text-amber-900 px-2.5 py-1 rounded-lg transition cursor-pointer text-left"
+                    type="submit"
+                    disabled={!newRevisionInput.trim()}
+                    className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-xs transition flex items-center gap-1 shrink-0 cursor-pointer"
                   >
-                    + {preset}
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tambah Poin</span>
                   </button>
-                ))}
-              </div>
-            </div>
+                </form>
+
+                {/* Quick Chips Preset */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-800">
+                    <Sparkles className="w-3 h-3 text-amber-600" />
+                    <span>Rekomendasi Poin Revisi Cepat:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {COMMON_REVISION_PRESETS.map((preset, idx) => (
+                      <button
+                        key={`preset-${idx}`}
+                        type="button"
+                        onClick={() => handleAddRevisionItem(preset)}
+                        className="text-[10px] font-semibold bg-white hover:bg-amber-100/60 border border-amber-200 text-slate-700 hover:text-amber-900 px-2.5 py-1 rounded-lg transition cursor-pointer text-left"
+                      >
+                        + {preset}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Form Input Catatan Tambahan / Arahan Umum DPM */}
-          <div>
-            <label className="font-bold text-slate-800 block mb-1.5">
-              Catatan &amp; Arahan Umum DPM (Opsional):
-            </label>
-            <textarea
-              rows={2}
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Tambahkan pesan pengantar atau batas waktu perbaikan untuk pengurus ormawa..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
-            />
-          </div>
+          {!isGuest && (
+            <div>
+              <label className="font-bold text-slate-800 block mb-1.5">
+                Catatan &amp; Arahan Umum DPM (Opsional):
+              </label>
+              <textarea
+                rows={2}
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Tambahkan pesan pengantar atau batas waktu perbaikan untuk pengurus ormawa..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+          )}
 
           {/* Riwayat Catatan Review Lama */}
           {proposal?.notes && proposal.notes.length > 0 && (
@@ -331,28 +349,29 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
             Tutup
           </button>
           
-          <div className="w-full sm:w-auto flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleAction('revisi')}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
-            >
-              <AlertCircle className="w-4 h-4" />
-              <span>Minta Revisi Proposal</span>
-            </button>
+          {!isGuest && (
+            <div className="w-full sm:w-auto flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleAction('revisi')}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
+              >
+                <AlertCircle className="w-4 h-4" />
+                <span>Minta Revisi Proposal</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => handleAction('approved')}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition cursor-pointer active:scale-95"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Setujui (ACC Ketua DPM)</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => handleAction('approved')}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition cursor-pointer active:scale-95"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Setujui (ACC Ketua DPM)</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

@@ -28,8 +28,11 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
     deleteBudgetTransaction,
     selectedOrmawaFilter,
     setSelectedOrmawaFilter,
-    currentUserName
-  } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, budgetTransactions: state.budgetTransactions, deleteBudgetTransaction: state.deleteBudgetTransaction, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, currentUserName: state.currentUserName })));
+    currentUserName,
+    currentUser
+  } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, budgetTransactions: state.budgetTransactions, deleteBudgetTransaction: state.deleteBudgetTransaction, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, currentUserName: state.currentUserName, currentUser: state.currentUser })));
+
+  const isGuest = currentUser?.role === 'guest';
 
   const activeOrmawaObj = ormawas.find(o => o.id === selectedOrmawaFilter);
 
@@ -177,7 +180,7 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
             </div>
 
             {/* Tombol Pemasukan & Pengeluaran Sejajar Kiri di Bawah Icon Dompet */}
-            {selectedOrmawaFilter !== 'all' && (
+            {selectedOrmawaFilter !== 'all' && !isGuest && (
               <div className="flex items-center gap-3 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
                 <button
                   type="button"
@@ -225,14 +228,16 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
               <span>Cetak PDF</span>
             </button>
 
-            <button
-              type="button"
-              onClick={onOpenSetPagu}
-              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95"
-            >
-              <Settings2 className="w-3.5 h-3.5 text-slate-500" />
-              <span>Atur Anggaran</span>
-            </button>
+            {!isGuest && (
+              <button
+                type="button"
+                onClick={onOpenSetPagu}
+                className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95"
+              >
+                <Settings2 className="w-3.5 h-3.5 text-slate-500" />
+                <span>Atur Anggaran</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -251,10 +256,10 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
       {/* 3. Kartu Alokasi & Serapan Anggaran per Ormawa */}
       <AnggaranOrmawaGrid
         filteredOrmawas={filteredOrmawas}
-        onOpenSetPagu={onOpenSetPagu}
+        onOpenSetPagu={isGuest ? null : onOpenSetPagu}
         selectedOrmawaFilter={selectedOrmawaFilter}
         setSelectedOrmawaFilter={setSelectedOrmawaFilter}
-        onOpenAddTransaction={onOpenAddTransaction}
+        onOpenAddTransaction={isGuest ? null : onOpenAddTransaction}
       />
 
       {/* 4. Tab Sub-Navigasi: "Matriks Anggaran Proker" vs "Riwayat Transaksi Kas" */}

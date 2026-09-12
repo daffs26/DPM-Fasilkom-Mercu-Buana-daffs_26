@@ -1,4 +1,5 @@
 import React from 'react';
+import { useStore } from '@/store/useStore';
 import { 
   Clock, 
   Calendar, 
@@ -28,6 +29,8 @@ export default function DetailRundownTab({
   handleDeleteRundown,
   handlePrintRundown
 }) {
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = currentUser?.role === 'guest';
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
@@ -45,26 +48,30 @@ export default function DetailRundownTab({
             <Printer className="w-3.5 h-3.5 text-blue-600" />
             <span>Cetak Rundown</span>
           </button>
-          <button
-            type="button"
-            onClick={handleAddDay}
-            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-700 font-bold text-xs shadow-2xs transition cursor-pointer"
-            title="Tambah hari kegiatan (misal: Hari 2, Hari 3)"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Tambah Hari</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setIsAddingRundown(!isAddingRundown);
-              setFormTargetDay(selectedDay === 'all' ? 1 : selectedDay);
-            }}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Tambah Sesi</span>
-          </button>
+          {!isGuest && (
+            <>
+              <button
+                type="button"
+                onClick={handleAddDay}
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-700 font-bold text-xs shadow-2xs transition cursor-pointer"
+                title="Tambah hari kegiatan (misal: Hari 2, Hari 3)"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tambah Hari</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddingRundown(!isAddingRundown);
+                  setFormTargetDay(selectedDay === 'all' ? 1 : selectedDay);
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tambah Sesi</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -284,16 +291,18 @@ export default function DetailRundownTab({
                     ({dayItems.length} Sesi Terdaftar)
                   </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormTargetDay(dayNum);
-                    setIsAddingRundown(true);
-                  }}
-                  className="text-[11px] font-bold text-blue-700 hover:underline cursor-pointer"
-                >
-                  + Tambah di Hari {dayNum}
-                </button>
+                {!isGuest && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormTargetDay(dayNum);
+                      setIsAddingRundown(true);
+                    }}
+                    className="text-[11px] font-bold text-blue-700 hover:underline cursor-pointer"
+                  >
+                    + Tambah di Hari {dayNum}
+                  </button>
+                )}
               </div>
 
               {dayItems.length === 0 ? (
@@ -326,14 +335,16 @@ export default function DetailRundownTab({
                           <span className="text-[10px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">
                             PJ: {r.pic}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteRundown(originalIdx)}
-                            className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                            title="Hapus sesi ini"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {!isGuest && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteRundown(originalIdx)}
+                              className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                              title="Hapus sesi ini"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       </div>
                     );

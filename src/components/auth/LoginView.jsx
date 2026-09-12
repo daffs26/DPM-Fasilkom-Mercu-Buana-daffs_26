@@ -3,10 +3,10 @@ import { useStore } from '../../store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
+import { Lock, User, AlertCircle, ArrowRight, Globe } from 'lucide-react';
 
-export default function LoginView({ onSwitchToRegister }) {
-  const { login } = useStore(useShallow(state => ({ login: state.login })));
+export default function LoginView({ onSwitchToRegister, notice, onClearNotice }) {
+  const { login, loginAsGuest } = useStore(useShallow(state => ({ login: state.login, loginAsGuest: state.loginAsGuest })));
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,6 +15,7 @@ export default function LoginView({ onSwitchToRegister }) {
   const handleLogin = (e) => {
     e.preventDefault();
     setError('');
+    onClearNotice?.();
     
     if (!username || !password) {
       setError('Mohon isi username dan password');
@@ -95,6 +96,13 @@ export default function LoginView({ onSwitchToRegister }) {
               Akses dasbor pengawasan, pemantauan proker, dan administrasi ormawa dalam satu platform terpadu.
             </p>
           </div>
+
+          {notice && (
+            <div className="mb-5 p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5 text-amber-900 text-xs">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="flex-1 font-medium leading-snug">{notice}</div>
+            </div>
+          )}
 
           {error && (
             <div className="mb-5 p-3.5 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2.5">
@@ -242,6 +250,27 @@ export default function LoginView({ onSwitchToRegister }) {
             </div>
             <p className="text-[10px] text-slate-400 text-center mt-2 italic">
               *Akses instan ini akan dihapus otomatis setelah integrasi database.
+            </p>
+          </div>
+
+          {/* Akses Tamu Publik (Mode Transparansi Ormawa) */}
+          <div className="mt-3.5">
+            <button
+              type="button"
+              onClick={() => {
+                setLoading(true);
+                setTimeout(() => {
+                  loginAsGuest();
+                  setLoading(false);
+                }, 200);
+              }}
+              className="w-full py-2.5 px-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100/80 text-blue-800 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group cursor-pointer hover:border-blue-300"
+            >
+              <Globe className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
+              <span>Eksplorasi Transparansi (Masuk sebagai Tamu Publik)</span>
+            </button>
+            <p className="text-[10px] text-slate-400 text-center mt-1">
+              Akses terbuka untuk mahasiswa & umum memantau akuntabilitas tanpa login.
             </p>
           </div>
 

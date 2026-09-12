@@ -1,4 +1,5 @@
 import React from 'react';
+import { useStore } from '@/store/useStore';
 import { 
   Plus, 
   X, 
@@ -26,6 +27,8 @@ export default function DetailRabTab({
   handleDeleteRab,
   setPreviewRabReceipt
 }) {
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = currentUser?.role === 'guest';
   return (
     <div className="space-y-4">
       {/* Ringkasan Finansial */}
@@ -53,18 +56,20 @@ export default function DetailRabTab({
       {/* Action Tambah Pos RAB */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <h5 className="font-bold text-xs text-slate-900">Rincian Pos Pengeluaran RAB</h5>
-        <button
-          type="button"
-          onClick={() => setIsAddingRab(!isAddingRab)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer self-start sm:self-auto"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Tambah Pos RAB</span>
-        </button>
+        {!isGuest && (
+          <button
+            type="button"
+            onClick={() => setIsAddingRab(!isAddingRab)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer self-start sm:self-auto"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Tambah Pos RAB</span>
+          </button>
+        )}
       </div>
 
       {/* Form Input Tambah Pos RAB Baru */}
-      {isAddingRab && (
+      {isAddingRab && !isGuest && (
         <form onSubmit={handleAddRab} className="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 space-y-3 animate-in fade-in-50">
           <div className="flex items-center justify-between">
             <span className="font-extrabold text-xs text-blue-900">Input Pos Anggaran Baru</span>
@@ -282,14 +287,16 @@ export default function DetailRabTab({
                 <span className="font-black text-slate-900 text-xs">
                   {formatRupiah(item.subtotal)}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteRab(idx)}
-                  className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                  title="Hapus pos RAB ini"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                {!isGuest && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteRab(idx)}
+                    className="p-1 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                    title="Hapus pos RAB ini"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           ))}

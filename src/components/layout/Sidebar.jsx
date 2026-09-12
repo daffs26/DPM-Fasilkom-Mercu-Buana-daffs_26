@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { 
@@ -17,6 +18,10 @@ import {
   LogOut
 } from 'lucide-react';
 export default function Sidebar({ isOpen, onClose }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPathTab = location.pathname.replace(/^\//, '') || 'dashboard';
+
   const {
     activeTab, 
     setActiveTab, 
@@ -41,13 +46,13 @@ export default function Sidebar({ isOpen, onClose }) {
 
   // Ketika pengguna membuka tab Histori Proker, otomatis tandai notifikasi sebagai sudah dibaca
   useEffect(() => {
-    if (activeTab === 'history' && unreadProkerLogsCount > 0) {
+    if ((activeTab === 'history' || currentPathTab === 'history') && unreadProkerLogsCount > 0) {
       markHistoryAsRead?.();
     }
-    if (activeTab === 'template' && !hasSeenTemplateTab) {
+    if ((activeTab === 'template' || currentPathTab === 'template') && !hasSeenTemplateTab) {
       markTemplateTabAsSeen?.();
     }
-  }, [activeTab, unreadProkerLogsCount, markHistoryAsRead, hasSeenTemplateTab, markTemplateTabAsSeen]);
+  }, [activeTab, currentPathTab, unreadProkerLogsCount, markHistoryAsRead, hasSeenTemplateTab, markTemplateTabAsSeen]);
 
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
@@ -57,6 +62,7 @@ export default function Sidebar({ isOpen, onClose }) {
     if (tabId === 'template') {
       markTemplateTabAsSeen?.();
     }
+    navigate(`/${tabId}`);
     onClose?.();
   };
 
@@ -121,6 +127,11 @@ export default function Sidebar({ isOpen, onClose }) {
   const filteredMenuItems = menuItems.filter(item => {
     if (!currentUser) return false;
     
+    // Guest / Publik hanya dapat melihat modul transparansi publik
+    if (currentUser.role === 'guest') {
+      return ['dashboard', 'proker', 'history', 'anggaran', 'berkas', 'audit', 'kalender'].includes(item.id);
+    }
+
     // DPM has full access (Ketua/Wakil) or partial (Sekre, Bendahara)
     if (currentUser.ormawaId === 'dpm') {
       if (currentUser.role === 'ketua' || currentUser.role === 'wakil') return true;
@@ -173,7 +184,7 @@ export default function Sidebar({ isOpen, onClose }) {
           </p>
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive = activeTab === item.id || currentPathTab === item.id;
             return (
               <button
                 key={item.id}
@@ -234,7 +245,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 {currentUser.name}
               </p>
               <p className="text-[10px] text-blue-700 font-semibold truncate capitalize">
-                {currentUser.role} {currentUser.ormawaId.toUpperCase()}
+                {currentUser.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser.role} ${currentUser.ormawaId.toUpperCase()}`}
               </p>
             </div>
           </div>
@@ -252,17 +263,19 @@ export default function Sidebar({ isOpen, onClose }) {
           <span>Keluar Sistem</span>
         </button>
 
-        <button
-          onClick={() => {
-            if (window.confirm('Reset data ke kondisi awal demo DPM?')) {
-              resetToDefaultData();
-            }
-          }}
-          className="w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-800 py-1 font-medium transition"
-        >
-          <RotateCcw className="w-3 h-3 text-slate-400" />
-          <span>Reset Data Demo</span>
-        </button>
+        {currentUser.role !== 'guest' && (
+          <button
+            onClick={() => {
+              if (window.confirm('Reset data ke kondisi awal demo DPM?')) {
+                resetToDefaultData();
+              }
+            }}
+            className="w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-800 py-1 font-medium transition"
+          >
+            <RotateCcw className="w-3 h-3 text-slate-400" />
+            <span>Reset Data Demo</span>
+          </button>
+        )}
       </div>
     </aside>
 
@@ -297,9 +310,9 @@ export default function Sidebar({ isOpen, onClose }) {
             <p className="px-3 text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-2">
               Menu Legislatif & Pengawasan
             </p>
-            {menuItems.map((item) => {
+            {filteredMenuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
+              const isActive = activeTab === item.id || currentPathTab === item.id;
               return (
                 <button
                   key={item.id}
@@ -359,7 +372,7 @@ export default function Sidebar({ isOpen, onClose }) {
                   {currentUser.name}
                 </p>
                 <p className="text-[10px] text-blue-700 font-semibold truncate capitalize">
-                  {currentUser.role} {currentUser.ormawaId.toUpperCase()}
+                  {currentUser.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser.role} ${currentUser.ormawaId.toUpperCase()}`}
                 </p>
               </div>
             </div>
@@ -377,17 +390,19 @@ export default function Sidebar({ isOpen, onClose }) {
             <span>Keluar Sistem</span>
           </button>
 
-          <button
-            onClick={() => {
-              if (window.confirm('Reset data ke kondisi awal demo DPM?')) {
-                resetToDefaultData();
-              }
-            }}
-            className="w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-800 py-1 font-medium transition"
-          >
-            <RotateCcw className="w-3 h-3 text-slate-400" />
-            <span>Reset Data Demo</span>
-          </button>
+          {currentUser.role !== 'guest' && (
+            <button
+              onClick={() => {
+                if (window.confirm('Reset data ke kondisi awal demo DPM?')) {
+                  resetToDefaultData();
+                }
+              }}
+              className="w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-800 py-1 font-medium transition"
+            >
+              <RotateCcw className="w-3 h-3 text-slate-400" />
+              <span>Reset Data Demo</span>
+            </button>
+          )}
         </div>
       </aside>
     </>

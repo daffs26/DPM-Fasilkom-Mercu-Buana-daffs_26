@@ -1,4 +1,5 @@
 import React from 'react';
+import { useStore } from '@/store/useStore';
 import { 
   FileCheck, 
   FileText, 
@@ -19,6 +20,8 @@ export default function DetailLpjTab({
   onReviewProposal,
   toggleProposalRevisionItem
 }) {
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = currentUser?.role === 'guest';
   return (
     <div className="space-y-4">
       {/* Bagian LPJ */}
@@ -74,16 +77,18 @@ export default function DetailLpjTab({
           </div>
         )}
 
-        <div className="pt-1 flex items-center justify-end">
-          <button
-            type="button"
-            onClick={() => onAuditLPJ && onAuditLPJ(proker)}
-            className="w-full sm:w-auto justify-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer text-center"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>{proker.lpj?.auditScore ? 'Lihat Lembar Audit LPJ' : 'Buka Form Audit LPJ'}</span>
-          </button>
-        </div>
+        {(!isGuest || proker.lpj?.auditScore) && (
+          <div className="pt-1 flex items-center justify-end">
+            <button
+              type="button"
+              onClick={() => onAuditLPJ && onAuditLPJ(proker)}
+              className="w-full sm:w-auto justify-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer text-center"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>{proker.lpj?.auditScore ? 'Lihat Lembar Audit LPJ' : 'Buka Form Audit LPJ'}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Bagian Proposal */}
@@ -138,14 +143,16 @@ export default function DetailLpjTab({
                 <span>Unduh</span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => onReviewProposal && onReviewProposal(proker)}
-              className="w-full sm:w-auto justify-center px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shrink-0"
-            >
-              <Edit3 className="w-3 h-3" />
-              <span>{proker.proposal?.fileName ? 'Review & Validasi' : 'Upload Proposal'}</span>
-            </button>
+            {!isGuest && (
+              <button
+                type="button"
+                onClick={() => onReviewProposal && onReviewProposal(proker)}
+                className="w-full sm:w-auto justify-center px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shrink-0"
+              >
+                <Edit3 className="w-3 h-3" />
+                <span>{proker.proposal?.fileName ? 'Review & Validasi' : 'Upload Proposal'}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -169,8 +176,8 @@ export default function DetailLpjTab({
                 {proker.proposal.revisionItems.map((item, idx) => (
                   <div
                     key={item.id || idx}
-                    onClick={() => toggleProposalRevisionItem(proker.id, item.id)}
-                    className={`p-2.5 rounded-lg border transition cursor-pointer flex items-start gap-2 select-none ${
+                    onClick={() => !isGuest && toggleProposalRevisionItem(proker.id, item.id)}
+                    className={`p-2.5 rounded-lg border transition ${isGuest ? 'cursor-default' : 'cursor-pointer'} flex items-start gap-2 select-none ${
                       item.completed 
                         ? 'bg-emerald-50/60 border-emerald-200 text-slate-500' 
                         : 'bg-white border-amber-200/80 text-slate-900 shadow-2xs hover:border-amber-400'

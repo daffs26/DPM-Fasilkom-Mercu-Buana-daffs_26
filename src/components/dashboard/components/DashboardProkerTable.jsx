@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Layers } from 'lucide-react';
+import useStore from '@/store/useStore';
 
 export default function DashboardProkerTable({
   filteredProkers,
@@ -11,6 +12,8 @@ export default function DashboardProkerTable({
   onReviewProposal,
   onAuditLPJ
 }) {
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = currentUser?.role === 'guest';
   return (
     <Card className="lg:col-span-2 rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft">
       <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
@@ -33,7 +36,7 @@ export default function DashboardProkerTable({
               <TableHead className="pb-3 whitespace-nowrap">Jadwal Acara</TableHead>
               <TableHead className="pb-3 whitespace-nowrap">Status Proposal</TableHead>
               <TableHead className="pb-3 whitespace-nowrap">Status LPJ (H+14)</TableHead>
-              <TableHead className="pb-3 text-right whitespace-nowrap">Aksi DPM</TableHead>
+              <TableHead className="pb-3 text-right whitespace-nowrap">{isGuest ? 'Dokumen' : 'Aksi DPM'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -48,13 +51,15 @@ export default function DashboardProkerTable({
                     <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 font-normal">
                       Daftarkan kegiatan baru atau ganti filter ormawa untuk melihat status monitoring berkas.
                     </p>
-                    <Button
-                      onClick={onOpenAddProker}
-                      className="mt-3"
-                      size="sm"
-                    >
-                      + Tambah Proker Baru
-                    </Button>
+                    {!isGuest && (
+                      <Button
+                        onClick={onOpenAddProker}
+                        className="mt-3"
+                        size="sm"
+                      >
+                        + Tambah Proker Baru
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -131,7 +136,7 @@ export default function DashboardProkerTable({
                             onClick={() => onReviewProposal(p)}
                             className="h-7 px-2.5 text-[11px]"
                           >
-                            Review
+                            {isGuest ? 'Proposal' : 'Review'}
                           </Button>
                         )}
                         <Button
@@ -140,7 +145,7 @@ export default function DashboardProkerTable({
                           onClick={() => onAuditLPJ(p)}
                           className="h-7 px-2.5 text-[11px]"
                         >
-                          Audit
+                          {isGuest ? 'LPJ / Audit' : 'Audit'}
                         </Button>
                       </div>
                     </TableCell>
@@ -163,9 +168,11 @@ export default function DashboardProkerTable({
             <p className="text-[11px] text-slate-500 mt-1 max-w-xs mx-auto">
               Daftarkan kegiatan baru atau ganti filter ormawa.
             </p>
-            <Button onClick={onOpenAddProker} className="mt-3 text-xs" size="sm">
-              + Tambah Proker Baru
-            </Button>
+            {!isGuest && (
+              <Button onClick={onOpenAddProker} className="mt-3 text-xs" size="sm">
+                + Tambah Proker Baru
+              </Button>
+            )}
           </div>
         ) : (
           filteredProkers.slice(0, 5).map((p) => {
@@ -240,7 +247,7 @@ export default function DashboardProkerTable({
                       onClick={() => onReviewProposal(p)}
                       className="flex-1 h-8 text-xs font-semibold rounded-xl"
                     >
-                      Review Proposal
+                      {isGuest ? 'Lihat Proposal' : 'Review Proposal'}
                     </Button>
                   )}
                   <Button
@@ -249,7 +256,7 @@ export default function DashboardProkerTable({
                     onClick={() => onAuditLPJ(p)}
                     className="flex-1 h-8 text-xs font-semibold rounded-xl"
                   >
-                    Audit LPJ
+                    {isGuest ? 'Lihat Audit LPJ' : 'Audit LPJ'}
                   </Button>
                 </div>
               </div>

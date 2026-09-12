@@ -32,14 +32,16 @@ export default function AnggaranOrmawaGrid({
             Klik pada salah satu kartu ormawa untuk mengelola pencatatan kas masuk &amp; keluar
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onOpenSetPagu}
-          className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer self-start sm:self-center"
-        >
-          <Settings2 className="w-3.5 h-3.5" />
-          <span>Ubah Anggaran</span>
-        </button>
+        {onOpenSetPagu && (
+          <button
+            type="button"
+            onClick={onOpenSetPagu}
+            className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer self-start sm:self-center"
+          >
+            <Settings2 className="w-3.5 h-3.5" />
+            <span>Ubah Anggaran</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-4">

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,7 @@ import ProfileModal from './components/ProfileModal';
 import ManageDeletionRequestsModal from '../proker/components/ManageDeletionRequestsModal';
 
 export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar }) {
+  const navigate = useNavigate();
   const { 
     ormawas, 
     selectedOrmawaFilter, 
@@ -150,7 +152,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
     return [...exactPrefix, ...wordPrefix, ...contains].slice(0, 5);
   }, [searchQuery, prokers, ormawas]);
 
-  const isDPMAdmin = currentUser?.ormawaId === 'dpm' && (currentUser?.role === 'ketua' || currentUser?.role === 'wakil');
+  const isDPMAdmin = currentUser?.ormawaId === 'dpm' && currentUser?.role !== 'guest' && (currentUser?.role === 'ketua' || currentUser?.role === 'wakil');
 
   return (
     <header className="bg-white border-b border-slate-200/80 sticky top-0 z-20 px-3 sm:px-6 lg:px-8 py-3 sm:py-3.5">
@@ -228,7 +230,10 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                           key={n.id}
                           onClick={() => {
                             markNotificationAsRead(n.id);
-                            if (n.linkTab) setActiveTab(n.linkTab);
+                            if (n.linkTab) {
+                              setActiveTab(n.linkTab);
+                              navigate(`/${n.linkTab}`);
+                            }
                             setIsNotificationsOpen(false);
                           }}
                           className={`p-3 text-left transition cursor-pointer ${!n.isRead ? 'bg-blue-50/40' : 'hover:bg-slate-50'}`}
@@ -252,15 +257,19 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 space-y-1">
                   <div className="px-3 py-2 border-b border-slate-100 mb-1">
                     <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.name}</p>
-                    <p className="text-[10px] text-slate-500 capitalize">{currentUser?.role} {currentUser?.ormawaId}</p>
+                    <p className="text-[10px] text-slate-500 capitalize">
+                      {currentUser?.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser?.role} ${currentUser?.ormawaId}`}
+                    </p>
                   </div>
-                  <button 
-                    onClick={() => { setIsProfileModalOpen(true); setIsProfileOpen(false); }} 
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition"
-                  >
-                    <User className="w-4 h-4 text-blue-600" />
-                    <span>Profil Saya &amp; Password</span>
-                  </button>
+                  {currentUser?.role !== 'guest' && (
+                    <button 
+                      onClick={() => { setIsProfileModalOpen(true); setIsProfileOpen(false); }} 
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition"
+                    >
+                      <User className="w-4 h-4 text-blue-600" />
+                      <span>Profil Saya &amp; Password</span>
+                    </button>
+                  )}
                   {isDPMAdmin && pendingAccounts.length > 0 && (
                     <button onClick={() => { setIsApprovalModalOpen(true); setIsProfileOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50 rounded-xl transition">
                       <Users className="w-4 h-4" />
@@ -273,9 +282,9 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                       <span>Permohonan Hapus ({pendingDeletionCount})</span>
                     </button>
                   )}
-                  <button onClick={() => { if (window.confirm('Yakin ingin keluar?')) logout(); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition">
+                  <button onClick={() => { if (window.confirm(currentUser?.role === 'guest' ? 'Keluar dari mode tamu publik?' : 'Yakin ingin keluar?')) logout(); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition">
                     <LogOut className="w-4 h-4" />
-                    <span>Keluar Akun</span>
+                    <span>{currentUser?.role === 'guest' ? 'Keluar Mode Tamu' : 'Keluar Akun'}</span>
                   </button>
                 </div>
               )}
@@ -359,7 +368,10 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                           key={notif.id}
                           onClick={() => {
                             markNotificationAsRead(notif.id);
-                            if (notif.linkTab) setActiveTab(notif.linkTab);
+                            if (notif.linkTab) {
+                              setActiveTab(notif.linkTab);
+                              navigate(`/${notif.linkTab}`);
+                            }
                             setIsNotificationsOpen(false);
                           }}
                           className={`p-3.5 transition cursor-pointer hover:bg-slate-50 flex items-start gap-3 ${
@@ -397,14 +409,18 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
               )}
             </div>
 
-            <button onClick={onOpenIssueSP} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 cursor-pointer">
-              <AlertOctagon className="w-3.5 h-3.5" />
-              <span>Cetak SP</span>
-            </button>
-            <Button onClick={onOpenAddProker} size="sm" className="rounded-xl flex items-center gap-1.5 cursor-pointer">
-              <Plus className="w-3.5 h-3.5" />
-              <span>Tambah Proker</span>
-            </Button>
+            {currentUser?.role !== 'guest' && (
+              <>
+                <button onClick={onOpenIssueSP} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 cursor-pointer">
+                  <AlertOctagon className="w-3.5 h-3.5" />
+                  <span>Cetak SP</span>
+                </button>
+                <Button onClick={onOpenAddProker} size="sm" className="rounded-xl flex items-center gap-1.5 cursor-pointer">
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Tambah Proker</span>
+                </Button>
+              </>
+            )}
             
             <div className="relative ml-1" ref={profileRef}>
               <button onClick={() => setIsProfileOpen(prev => !prev)} className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center shadow-xs cursor-pointer">
@@ -414,15 +430,19 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 space-y-1">
                   <div className="px-3 py-2 border-b border-slate-100 mb-1">
                     <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.name}</p>
-                    <p className="text-[10px] text-slate-500 capitalize">{currentUser?.role} {currentUser?.ormawaId}</p>
+                    <p className="text-[10px] text-slate-500 capitalize">
+                      {currentUser?.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser?.role} ${currentUser?.ormawaId}`}
+                    </p>
                   </div>
-                  <button 
-                    onClick={() => { setIsProfileModalOpen(true); setIsProfileOpen(false); }} 
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
-                  >
-                    <User className="w-4 h-4 text-blue-600" />
-                    <span>Profil Saya &amp; Password</span>
-                  </button>
+                  {currentUser?.role !== 'guest' && (
+                    <button 
+                      onClick={() => { setIsProfileModalOpen(true); setIsProfileOpen(false); }} 
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                    >
+                      <User className="w-4 h-4 text-blue-600" />
+                      <span>Profil Saya &amp; Password</span>
+                    </button>
+                  )}
                   {isDPMAdmin && pendingAccounts.length > 0 && (
                     <button onClick={() => { setIsApprovalModalOpen(true); setIsProfileOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50 rounded-xl transition cursor-pointer">
                       <Users className="w-4 h-4" />
@@ -435,9 +455,9 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                       <span>Permohonan Hapus ({pendingDeletionCount})</span>
                     </button>
                   )}
-                  <button onClick={() => { if (window.confirm('Yakin ingin keluar?')) logout(); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer">
+                  <button onClick={() => { if (window.confirm(currentUser?.role === 'guest' ? 'Keluar dari mode tamu publik?' : 'Yakin ingin keluar?')) logout(); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer">
                     <LogOut className="w-4 h-4" />
-                    <span>Keluar Akun</span>
+                    <span>{currentUser?.role === 'guest' ? 'Keluar Mode Tamu' : 'Keluar Akun'}</span>
                   </button>
                 </div>
               )}

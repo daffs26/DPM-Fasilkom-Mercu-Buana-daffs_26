@@ -7,6 +7,7 @@ import {
   CalendarCheck2, 
   Plus 
 } from 'lucide-react';
+import useStore from '@/store/useStore';
 
 export default function KalenderSidebar({
   selectedDate,
@@ -18,6 +19,17 @@ export default function KalenderSidebar({
   onReviewProposal,
   onOpenAddProker
 }) {
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = currentUser?.role === 'guest';
+
+  const formatContact = (contact) => {
+    if (!isGuest || !contact) return contact;
+    const clean = contact.replace(/[^0-9]/g, '');
+    if (clean.length > 7) {
+      return `${clean.slice(0, 4)}-****-${clean.slice(-4)}`;
+    }
+    return '****';
+  };
   return (
     <div className="w-full lg:w-[350px] xl:w-[380px] shrink-0 bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-soft flex flex-col justify-between lg:sticky lg:top-[80px] lg:self-start lg:max-h-[calc(100vh-100px)] overflow-hidden">
       <div className="space-y-3 flex-1 overflow-y-auto pr-1">
@@ -100,7 +112,7 @@ export default function KalenderSidebar({
                         <span>Target: {p.targetPeserta} Mahasiswa</span>
                       </p>
                       <p className="flex items-center gap-1 font-bold text-slate-800">
-                        <span>PIC: {p.pic} ({p.picContact})</span>
+                        <span>PIC: {p.pic} {p.picContact ? `(${formatContact(p.picContact)})` : ''}</span>
                       </p>
                     </div>
 
@@ -127,15 +139,17 @@ export default function KalenderSidebar({
       </div>
 
       {/* Tombol Daftarkan Proker di Tanggal Ini */}
-      <div className="pt-3 border-t border-slate-100 shrink-0 mt-2">
-        <button
-          onClick={() => onOpenAddProker?.(selectedDate)}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          Jadwalkan Proker di Tanggal Ini
-        </button>
-      </div>
+      {!isGuest && (
+        <div className="pt-3 border-t border-slate-100 shrink-0 mt-2">
+          <button
+            onClick={() => onOpenAddProker?.(selectedDate)}
+            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            Jadwalkan Proker di Tanggal Ini
+          </button>
+        </div>
+      )}
     </div>
   );
 }

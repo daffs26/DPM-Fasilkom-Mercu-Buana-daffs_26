@@ -1,4 +1,5 @@
 import React from 'react';
+import { useStore } from '../../../store/useStore';
 import { 
   Receipt, 
   ArrowDownRight, 
@@ -15,6 +16,8 @@ export default function AnggaranTransactionTable({
   deleteBudgetTransaction,
   setReceiptPreviewData
 }) {
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = currentUser?.role === 'guest';
   if (filteredTransactions.length === 0) {
     return (
       <div className="py-10 text-center bg-slate-50/50 rounded-2xl border border-slate-200/80 p-6">
@@ -97,18 +100,20 @@ export default function AnggaranTransactionTable({
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm(`Hapus pencatatan transaksi "${tx.title}"?`)) {
-                    deleteBudgetTransaction(tx.id);
-                  }
-                }}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                title="Hapus Transaksi"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              {!isGuest && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Hapus pencatatan transaksi "${tx.title}"?`)) {
+                      deleteBudgetTransaction(tx.id);
+                    }
+                  }}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                  title="Hapus Transaksi"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
         );

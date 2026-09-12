@@ -1,4 +1,5 @@
 import React from 'react';
+import { useStore } from '@/store/useStore';
 import { 
   FileText, 
   Sparkles, 
@@ -24,22 +25,29 @@ export default function DetailOverviewTab({
   handleDeleteTujuan,
   handleAddTujuan
 }) {
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = currentUser?.role === 'guest';
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
         <div>
           <h4 className="font-extrabold text-xs text-slate-900">Deskripsi &amp; Target Tujuan Acara</h4>
-          <p className="text-[11px] text-slate-500">Anda dapat mengubah dan menyesuaikan penjelasan serta butir tujuan kegiatan.</p>
+          <p className="text-[11px] text-slate-500">
+            {isGuest ? 'Penjelasan dan target tujuan kegiatan ormawa.' : 'Anda dapat mengubah dan menyesuaikan penjelasan serta butir tujuan kegiatan.'}
+          </p>
         </div>
         {!isEditingDeskripsi ? (
-          <button
-            type="button"
-            onClick={() => setIsEditingDeskripsi(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer self-start sm:self-auto"
-          >
-            <Edit3 className="w-3.5 h-3.5 text-blue-600" />
-            <span>Ubah Deskripsi &amp; Tujuan</span>
-          </button>
+          !isGuest && (
+            <button
+              type="button"
+              onClick={() => setIsEditingDeskripsi(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer self-start sm:self-auto"
+            >
+              <Edit3 className="w-3.5 h-3.5 text-blue-600" />
+              <span>Ubah Deskripsi &amp; Tujuan</span>
+            </button>
+          )
         ) : (
           <div className="flex items-center gap-2 self-start sm:self-auto">
             <button

@@ -1,4 +1,5 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense, useEffect, useRef } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from './store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import Sidebar from './components/layout/Sidebar';
@@ -66,8 +67,53 @@ function ViewLoadingFallback({ tab }) {
 }
 
 export default function App() {
-  const { activeTab, currentUser } = useStore(useShallow(state => ({ activeTab: state.activeTab, currentUser: state.currentUser })));
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { activeTab, currentUser, logout } = useStore(useShallow(state => ({ 
+    activeTab: state.activeTab, 
+    currentUser: state.currentUser,
+    logout: state.logout 
+  })));
+  const isGuest = currentUser?.role === 'guest';
+  const [idleNotice, setIdleNotice] = useState('');
+  const lastActivityRef = useRef(Date.now());
+
+  // Sinkronkan URL path saat ini ke activeTab di Zustand store agar backward-compatible
+  const currentPathTab = location.pathname.replace(/^\//, '') || 'dashboard';
+  useEffect(() => {
+    const validTabs = ['dashboard', 'proker', 'history', 'anggaran', 'berkas', 'template', 'audit', 'kalender', 'sp'];
+    if (validTabs.includes(currentPathTab) && currentPathTab !== activeTab) {
+      useStore.getState().setActiveTab(currentPathTab);
+    }
+  }, [currentPathTab, activeTab]);
+
+  // 15-Minute Inactivity Auto-Logout (15 * 60 * 1000 ms)
+  useEffect(() => {
+    if (!currentUser) return;
+
+    // Reset activity timer on any user action
+    const resetTimer = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach(ev => window.addEventListener(ev, resetTimer, { passive: true }));
+
+    const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 menit
+    const intervalId = setInterval(() => {
+      if (Date.now() - lastActivityRef.current >= IDLE_TIMEOUT_MS) {
+        logout();
+        setIdleNotice('Sesi Anda telah berakhir otomatis karena tidak ada aktivitas selama 15 menit demi keamanan akun.');
+        navigate('/login');
+      }
+    }, 5000);
+
+    return () => {
+      events.forEach(ev => window.removeEventListener(ev, resetTimer));
+      clearInterval(intervalId);
+    };
+  }, [currentUser, logout, navigate]);
 
   // Modal States
   const [isAddProkerOpen, setIsAddProkerOpen] = useState(false);
@@ -89,22 +135,41 @@ export default function App() {
   const [isPreviewSkeleton, setIsPreviewSkeleton] = useState(false);
 
   const handleOpenAddTransaction = (mode = 'pengeluaran', ormawaId = '') => {
+    if (isGuest) return;
     setAddTransactionConfig({ mode, ormawaId });
     setIsAddTransactionOpen(true);
   };
 
   const handleOpenAddProker = (date = '') => {
+    if (isGuest) return;
     setInitialProkerDate(typeof date === 'string' ? date : '');
     setIsAddProkerOpen(true);
   };
 
+  // Auth Routing: Jika belum login, hanya rute login/register yang dapat diakses
   if (!currentUser) {
-    if (authMode === 'register') {
-      return <RegisterView onSwitchToLogin={() => setAuthMode('login')} />;
-    }
-    return <LoginView onSwitchToRegister={() => setAuthMode('register')} />;
+    return (
+      <Routes>
+        <Route 
+          path="/register" 
+          element={<RegisterView onSwitchToLogin={() => navigate('/login')} />} 
+        />
+        <Route 
+          path="/login" 
+          element={
+            <LoginView 
+              onSwitchToRegister={() => navigate('/register')} 
+              notice={idleNotice}
+              onClearNotice={() => setIdleNotice('')}
+            />
+          } 
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
 
+  // Authenticated Routing: Dashboard and Sub-pages
   return (
     <div className="flex h-screen overflow-hidden bg-[#F8FAFC] text-slate-900 font-sans selection:bg-slate-900 selection:text-amber-400">
       {isSidebarOpen && (
@@ -120,7 +185,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         <Header 
           onOpenAddProker={() => {
-            if (activeTab === 'kalender' && calendarSelectedDate) {
+            if (currentPathTab === 'kalender' && calendarSelectedDate) {
               handleOpenAddProker(calendarSelectedDate);
             } else {
               handleOpenAddProker('');
@@ -132,80 +197,96 @@ export default function App() {
 
         <main className="flex-1 p-3.5 sm:p-5 lg:p-7 xl:p-8 max-w-[1440px] w-full mx-auto overflow-x-hidden">
           {isPreviewSkeleton ? (
-            <ViewLoadingFallback tab={activeTab} />
+            <ViewLoadingFallback tab={currentPathTab} />
           ) : (
-            <Suspense fallback={<ViewLoadingFallback tab={activeTab} />}>
-              {activeTab === 'dashboard' && (
-                <DashboardView 
-                  onOpenAddProker={() => handleOpenAddProker('')}
-                  onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                  onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                />
-              )}
+            <Suspense fallback={<ViewLoadingFallback tab={currentPathTab} />}>
+              <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/register" element={<Navigate to="/dashboard" replace />} />
+                
+                <Route path="/dashboard" element={
+                  <DashboardView 
+                    onOpenAddProker={() => handleOpenAddProker('')}
+                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                  />
+                } />
 
-              {activeTab === 'proker' && (
-                <ProkerView 
-                  onOpenAddProker={() => handleOpenAddProker('')}
-                  onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                  onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
-                  onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                  onPrintDoc={(docData) => setPrintDocData(docData)}
-                />
-              )}
+                <Route path="/proker" element={
+                  <ProkerView 
+                    onOpenAddProker={() => handleOpenAddProker('')}
+                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                    onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
+                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                    onPrintDoc={(docData) => setPrintDocData(docData)}
+                  />
+                } />
 
-              {activeTab === 'history' && (
-                <HistoryView 
-                  onOpenAddProker={() => handleOpenAddProker('')}
-                />
-              )}
+                <Route path="/history" element={
+                  <HistoryView 
+                    onOpenAddProker={() => handleOpenAddProker('')}
+                  />
+                } />
 
-              {activeTab === 'anggaran' && (
-                <AnggaranView 
-                  onOpenSetPagu={() => setIsSetPaguOpen(true)}
-                  onOpenAddTransaction={handleOpenAddTransaction}
-                  onPrintDoc={(docData) => setPrintDocData(docData)}
-                />
-              )}
+                <Route path="/anggaran" element={
+                  <AnggaranView 
+                    onOpenSetPagu={() => setIsSetPaguOpen(true)}
+                    onOpenAddTransaction={handleOpenAddTransaction}
+                    onPrintDoc={(docData) => setPrintDocData(docData)}
+                  />
+                } />
 
-              {activeTab === 'berkas' && (
-                <BerkasView 
-                  onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                  onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                />
-              )}
+                <Route path="/berkas" element={
+                  <BerkasView 
+                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                  />
+                } />
 
-              {activeTab === 'template' && (
-                <TemplateView />
-              )}
+                <Route path="/template" element={
+                  isGuest ? (
+                    <Navigate to="/dashboard" replace />
+                  ) : (
+                    <TemplateView />
+                  )
+                } />
 
-              {activeTab === 'audit' && (
-                <AuditView 
-                  onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                  onPrintDoc={(docData) => setPrintDocData(docData)}
-                />
-              )}
+                <Route path="/audit" element={
+                  <AuditView 
+                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                    onPrintDoc={(docData) => setPrintDocData(docData)}
+                  />
+                } />
 
-              {activeTab === 'kalender' && (
-                <KalenderView 
-                  onOpenAddProker={(date) => handleOpenAddProker(date || calendarSelectedDate)}
-                  onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                  onDateChange={setCalendarSelectedDate}
-                />
-              )}
+                <Route path="/kalender" element={
+                  <KalenderView 
+                    onOpenAddProker={(date) => handleOpenAddProker(date || calendarSelectedDate)}
+                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                    onDateChange={setCalendarSelectedDate}
+                  />
+                } />
 
-              {activeTab === 'sp' && (
-                <SuratPeringatanView 
-                  onOpenIssueSP={() => setIsIssueSPOpen(true)}
-                  onPrintDoc={(docData) => setPrintDocData(docData)}
-                />
-              )}
+                <Route path="/sp" element={
+                  isGuest ? (
+                    <Navigate to="/dashboard" replace />
+                  ) : (
+                    <SuratPeringatanView 
+                      onOpenIssueSP={() => setIsIssueSPOpen(true)}
+                      onPrintDoc={(docData) => setPrintDocData(docData)}
+                    />
+                  )
+                } />
+
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
             </Suspense>
           )}
         </main>
       </div>
 
       <Suspense fallback={null}>
-        {isAddProkerOpen && (
+        {isAddProkerOpen && !isGuest && (
           <AddProkerModal 
             isOpen={isAddProkerOpen} 
             onClose={() => {
@@ -232,7 +313,7 @@ export default function App() {
           />
         )}
 
-        {isIssueSPOpen && (
+        {isIssueSPOpen && !isGuest && (
           <IssueSPModal 
             isOpen={isIssueSPOpen} 
             onClose={() => setIsIssueSPOpen(false)}
@@ -247,14 +328,14 @@ export default function App() {
           />
         )}
 
-        {isSetPaguOpen && (
+        {isSetPaguOpen && !isGuest && (
           <SetPaguModal 
             isOpen={isSetPaguOpen}
             onClose={() => setIsSetPaguOpen(false)}
           />
         )}
 
-        {isAddTransactionOpen && (
+        {isAddTransactionOpen && !isGuest && (
           <AddTransactionModal 
             isOpen={isAddTransactionOpen}
             initialMode={addTransactionConfig.mode}

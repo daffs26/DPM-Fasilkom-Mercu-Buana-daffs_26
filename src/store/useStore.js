@@ -77,6 +77,20 @@ export const useStore = create(
         return { success: false, message: `Akun demo ${username} tidak ditemukan.` };
       },
 
+      // Akses Tamu Publik (Mode Transparansi Ormawa)
+      loginAsGuest: () => {
+        const guestUser = {
+          id: 'guest-public',
+          name: 'Tamu / Mahasiswa Umum',
+          username: 'tamu_publik',
+          role: 'guest',
+          ormawaId: 'dpm', // agar dapat melihat seluruh data ormawa secara transparan
+          isGuest: true
+        };
+        set({ currentUser: guestUser, selectedOrmawaFilter: 'all', activeTab: 'dashboard' });
+        return { success: true };
+      },
+
       logout: () => {
         set({ currentUser: null, activeTab: 'dashboard', selectedOrmawaFilter: 'all' });
       },
@@ -1455,13 +1469,13 @@ export const useStore = create(
         notifications: state.notifications,
         users: state.users,
         pendingAccounts: state.pendingAccounts,
-        currentUser: state.currentUser,
         lastReadHistoryCount: state.lastReadHistoryCount,
         hasSeenTemplateTab: state.hasSeenTemplateTab
       }),
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...persistedState,
+        currentUser: null,
         users: (persistedState && Array.isArray(persistedState.users) && persistedState.users.length > 0)
           ? [
               ...persistedState.users,
@@ -1487,3 +1501,5 @@ export const useStore = create(
     }
   )
 );
+
+export default useStore;

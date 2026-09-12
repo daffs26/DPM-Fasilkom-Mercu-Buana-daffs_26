@@ -133,7 +133,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-            {currentUser?.ormawaId === 'dpm' && pendingDeletionCount > 0 && (
+            {currentUser?.ormawaId === 'dpm' && currentUser?.role !== 'guest' && pendingDeletionCount > 0 && (
               <button
                 type="button"
                 onClick={() => setIsManageDeletionOpen(true)}
@@ -152,13 +152,15 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
               {isKpiExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               <span>{isKpiExpanded ? 'Ringkas KPI' : 'Statistik KPI'}</span>
             </button>
-            <button
-              onClick={onOpenAddProker}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tambah Proker</span>
-            </button>
+            {currentUser?.role !== 'guest' && (
+              <button
+                onClick={onOpenAddProker}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Tambah Proker</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -281,17 +283,19 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                     )}
 
                     {/* Tombol Hapus */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleInitiateDelete(p);
-                      }}
-                      className="p-1 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                      title={currentUser?.ormawaId === 'dpm' ? "Hapus Program Kerja" : "Ajukan Permohonan Hapus"}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {currentUser?.role !== 'guest' && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInitiateDelete(p);
+                        }}
+                        className="p-1 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                        title={currentUser?.ormawaId === 'dpm' ? "Hapus Program Kerja" : "Ajukan Permohonan Hapus"}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -367,7 +371,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                   <span>Detail</span>
                 </button>
 
-                {isRevisi && (currentUser?.ormawaId === p.ormawaId || currentUser?.ormawaId !== 'dpm') ? (
+                {isRevisi && currentUser?.role !== 'guest' && (currentUser?.ormawaId === p.ormawaId || currentUser?.ormawaId !== 'dpm') ? (
                   <button
                     type="button"
                     onClick={() => setProkerToRevise(p)}
@@ -397,17 +401,19 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                     <Printer className="w-3.5 h-3.5" />
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleInitiateDelete(p);
-                  }}
-                  className="p-2 border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition shrink-0 cursor-pointer"
-                  title={currentUser?.ormawaId === 'dpm' ? "Hapus Program Kerja" : "Ajukan Permohonan Hapus"}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                {currentUser?.role !== 'guest' && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleInitiateDelete(p);
+                    }}
+                    className="p-2 border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition shrink-0 cursor-pointer"
+                    title={currentUser?.ormawaId === 'dpm' ? "Hapus Program Kerja" : "Ajukan Permohonan Hapus"}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           );
