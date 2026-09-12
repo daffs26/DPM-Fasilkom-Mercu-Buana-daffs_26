@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dpm-fasilkom-mercu-buana-daffs-26.vercel.app/sitemap.xml
+Sitemap: https://dpm-fasilkom.vercel.app/sitemap.xml
