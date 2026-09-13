@@ -5,7 +5,7 @@ import {
   ArrowDownRight, 
   Scale 
 } from 'lucide-react';
-import { formatRupiah } from '../../../utils/formatters';
+import { formatRupiah } from '@/utils/formatters';
 
 export default function AnggaranKpiCards({
   totalPaguFakultas,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileSpreadsheet, ChevronDown, ChevronUp } from 'lucide-react';
-import { formatRupiah } from '../../../utils/formatters';
+import { formatRupiah } from '@/utils/formatters';
 
 export default function AnggaranProkerMatrix({
   filteredProkers,

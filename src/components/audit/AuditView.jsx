@@ -1,9 +1,9 @@
 import React from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
-import AuditParameterStandards from './components/AuditParameterStandards';
-import AuditOrmawaReport from './components/AuditOrmawaReport';
-import AuditProkerTable from './components/AuditProkerTable';
+import AuditParameterStandards from './components/StandarParameter';
+import AuditOrmawaReport from './components/LaporanAudit';
+import AuditProkerTable from './components/TabelAuditProker';
 
 export default function AuditView({ onAuditLPJ, onPrintDoc }) {
   const { ormawas, prokers, currentUser } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, currentUser: state.currentUser })));

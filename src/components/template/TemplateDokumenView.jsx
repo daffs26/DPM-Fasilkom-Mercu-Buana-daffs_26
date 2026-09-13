@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
-import TemplatePreviewModal from './components/TemplatePreviewModal';
+import TemplatePreviewModal from './components/PreviewTemplateModal';
 import UploadTemplateModal from './components/UploadTemplateModal';
-import { TEMPLATE_CATEGORIES } from '../../data/templatesData';
+import { TEMPLATE_CATEGORIES } from '@/data/templatesData';
 import { 
   FileText, 
   Download, 

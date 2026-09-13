@@ -15,18 +15,18 @@ const BerkasView = lazy(() => import('./components/berkas/BerkasView'));
 const AuditView = lazy(() => import('./components/audit/AuditView'));
 const KalenderView = lazy(() => import('./components/kalender/KalenderView'));
 const SuratPeringatanView = lazy(() => import('./components/sp/SuratPeringatanView'));
-const TemplateView = lazy(() => import('./components/template/TemplateView'));
+const TemplateView = lazy(() => import('./components/template/TemplateDokumenView'));
 const AnggaranView = lazy(() => import('./components/anggaran/AnggaranView'));
 
-// Modals loaded on-demand
-const AddProkerModal = lazy(() => import('./components/proker/components/AddProkerModal'));
+// Modals loaded on-demand (Disederhanakan & Lokasi Per Fitur)
+const AddProkerModal = lazy(() => import('./components/proker/components/TambahProkerModal'));
 const ReviewProposalModal = lazy(() => import('./components/proker/components/ReviewProposalModal'));
 const DetailProkerModal = lazy(() => import('./components/proker/components/DetailProkerModal'));
-const AuditLPJModal = lazy(() => import('./components/audit/components/AuditLPJModal'));
-const IssueSPModal = lazy(() => import('./components/sp/components/IssueSPModal'));
+const AuditLPJModal = lazy(() => import('./components/audit/components/AuditLpjModal'));
+const IssueSPModal = lazy(() => import('./components/sp/components/TerbitkanSPModal'));
 const PrintDocModal = lazy(() => import('./components/print/PrintDocModal'));
-const SetPaguModal = lazy(() => import('./components/anggaran/components/SetPaguModal'));
-const AddTransactionModal = lazy(() => import('./components/anggaran/components/AddTransactionModal'));
+const SetPaguModal = lazy(() => import('./components/anggaran/components/AturPaguModal'));
+const AddTransactionModal = lazy(() => import('./components/anggaran/components/TambahTransaksiModal'));
 
 import {
   DashboardSkeleton,

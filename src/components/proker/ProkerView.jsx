@@ -1,27 +1,29 @@
 import React, { useState, useMemo } from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { 
-  Plus, 
   Search, 
-  FileText, 
+  Filter, 
+  Calendar, 
+  User, 
+  Eye, 
   CheckCircle2, 
+  AlertCircle, 
   Clock, 
-  AlertTriangle, 
-  Award, 
-  MapPin, 
-  Users, 
-  Calendar,
-  AlertOctagon,
-  Printer,
-  Layers,
-  Eye,
-  Trash2,
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
+  ArrowRight,
   Sparkles,
-  TrendingUp,
+  FileCheck,
+  FileX,
+  FileText,
+  FileUp,
+  Download,
+  Trash2,
+  Lock,
+  MessageSquareWarning,
+  RotateCcw,
+  Check,
+  Building2,
+  Plus,
   UploadCloud
 } from 'lucide-react';
 import {
@@ -32,9 +34,9 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import RequestDeleteProkerModal from './components/RequestDeleteProkerModal';
-import SubmitRevisionModal from './components/SubmitRevisionModal';
-import ManageDeletionRequestsModal from './components/ManageDeletionRequestsModal';
+import AjukanHapusProkerModal from './components/AjukanHapusProkerModal';
+import UploadRevisiModal from './components/UploadRevisiModal';
+import KelolaHapusProkerModal from './components/KelolaHapusProkerModal';
 
 export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDetailProker, onAuditLPJ, onPrintDoc }) {
   const { 
@@ -469,21 +471,21 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
       </Dialog>
 
       {/* Modal Permohonan Hapus (Ormawa -> DPM) */}
-      <RequestDeleteProkerModal
+      <AjukanHapusProkerModal
         isOpen={Boolean(prokerToRequestDelete)}
         onClose={() => setProkerToRequestDelete(null)}
         proker={prokerToRequestDelete}
       />
 
       {/* Modal Unggah Revisi Berkas (Ormawa) */}
-      <SubmitRevisionModal
+      <UploadRevisiModal
         isOpen={Boolean(prokerToRevise)}
         onClose={() => setProkerToRevise(null)}
         proker={prokerToRevise}
       />
 
       {/* Modal Kelola Permohonan Hapus (DPM) */}
-      <ManageDeletionRequestsModal
+      <KelolaHapusProkerModal
         isOpen={isManageDeletionOpen}
         onClose={() => setIsManageDeletionOpen(false)}
       />

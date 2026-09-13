@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function UploadBerkasModal({ isOpen, onClose, defaultOrmawaId = 'bem' }) {
-  const { ormawas, prokers, uploadProposal, uploadLPJ, uploadOtherDoc, addProker } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, uploadProposal: state.uploadProposal, uploadLPJ: state.uploadLPJ, uploadOtherDoc: state.uploadOtherDoc, addProker: state.addProker })));
+  const { ormawas, prokers, uploadProposal, uploadLPJ, uploadOtherDoc, addProker, currentUser } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, uploadProposal: state.uploadProposal, uploadLPJ: state.uploadLPJ, uploadOtherDoc: state.uploadOtherDoc, addProker: state.addProker, currentUser: state.currentUser })));
 
   const [ormawaId, setOrmawaId] = useState(defaultOrmawaId);
   const [docCategory, setDocCategory] = useState('proposal'); // 'proposal' | 'lpj' | 'other'
@@ -65,7 +65,7 @@ export default function UploadBerkasModal({ isOpen, onClose, defaultOrmawaId = '
     }
   }, [ormawaId, prokers]);
 
-  if (!isOpen) return null;
+  if (!isOpen || currentUser?.role === 'guest') return null;
 
   const currentProker = availableProkers.find(p => p.id === selectedProkerId);
 

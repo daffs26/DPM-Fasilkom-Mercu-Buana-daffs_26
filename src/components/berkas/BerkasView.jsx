@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import UploadBerkasModal from './components/UploadBerkasModal';
 import { 
@@ -386,15 +386,19 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
             </div>
             <p className="font-extrabold text-slate-900 text-sm">Belum Ada Berkas yang Sesuai</p>
             <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto font-normal">
-              Pilih folder ormawa lain atau unggah berkas pengawasan baru.
+              {isGuest 
+                ? 'Pilih folder ormawa lain untuk melihat arsip transparansi berkas.' 
+                : 'Pilih folder ormawa lain atau unggah berkas pengawasan baru.'}
             </p>
-            <button
-              onClick={() => setIsUploadModalOpen(true)}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
-            >
-              <UploadCloud className="w-4 h-4" />
-              <span>Upload Berkas Sekarang</span>
-            </button>
+            {!isGuest && (
+              <button
+                onClick={() => setIsUploadModalOpen(true)}
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+              >
+                <UploadCloud className="w-4 h-4" />
+                <span>Upload Berkas Sekarang</span>
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -528,11 +532,13 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
       )}
 
       {/* Modal Upload Berkas */}
-      <UploadBerkasModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        defaultOrmawaId={selectedOrmawaFilter !== 'all' ? selectedOrmawaFilter : 'bem'}
-      />
+      {!isGuest && (
+        <UploadBerkasModal
+          isOpen={isUploadModalOpen}
+          onClose={() => setIsUploadModalOpen(false)}
+          defaultOrmawaId={selectedOrmawaFilter !== 'all' ? selectedOrmawaFilter : 'bem'}
+        />
+      )}
       </div>
     </div>
   );

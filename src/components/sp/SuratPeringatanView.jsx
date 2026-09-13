@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { 
   AlertOctagon, 
@@ -15,8 +15,8 @@ import {
   Clock,
   ExternalLink
 } from 'lucide-react';
-import SPClarificationModal from './components/SPClarificationModal';
-import ReviewSPClarificationModal from './components/ReviewSPClarificationModal';
+import KlarifikasiSPModal from './components/KlarifikasiSPModal';
+import ReviewKlarifikasiModal from './components/ReviewKlarifikasiModal';
 
 export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
   const { suratPeringatan, ormawas, resolveSP, currentUser } = useStore(useShallow(state => ({ suratPeringatan: state.suratPeringatan, ormawas: state.ormawas, resolveSP: state.resolveSP, currentUser: state.currentUser })));
@@ -335,14 +335,14 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
       )}
 
       {/* Modal Klarifikasi SP oleh Ormawa */}
-      <SPClarificationModal
+      <KlarifikasiSPModal
         isOpen={Boolean(selectedSpForClarification)}
         onClose={() => setSelectedSpForClarification(null)}
         sp={selectedSpForClarification}
       />
 
       {/* Modal Tinjau Klarifikasi SP oleh DPM */}
-      <ReviewSPClarificationModal
+      <ReviewKlarifikasiModal
         isOpen={Boolean(selectedSpForReview)}
         onClose={() => setSelectedSpForReview(null)}
         sp={selectedSpForReview}

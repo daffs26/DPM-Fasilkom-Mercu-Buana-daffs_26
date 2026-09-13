@@ -1,13 +1,14 @@
 import React from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 
 // Modular Dashboard Sub-Components
-import DashboardKpiSummary from './components/DashboardKpiSummary';
-import DashboardScorecard from './components/DashboardScorecard';
-import DashboardBudgetCard from './components/DashboardBudgetCard';
-import DashboardProkerTable from './components/DashboardProkerTable';
-import DashboardActivityFeed from './components/DashboardActivityFeed';
+import DashboardKpiSummary from './components/KpiSummary';
+import DashboardScorecard from './components/Scorecard';
+import DashboardBudgetCard from './components/BudgetCard';
+import DashboardProkerTable from './components/ProkerTable';
+import DashboardActivityFeed from './components/ActivityFeed';
+import TamuGuideCard from '@/components/tamu/TamuGuideCard';
 
 export default function DashboardView({ onOpenAddProker, onReviewProposal, onAuditLPJ }) {
   const { 
@@ -20,9 +21,10 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
     currentUser 
   } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, activityLogs: state.activityLogs, suratPeringatan: state.suratPeringatan, currentUser: state.currentUser })));
 
-  const isDpm = currentUser?.ormawaId === 'dpm';
-  // Jika BEM/HIMTI/HIMSISFO, kunci filter ke ormawa sendiri
-  const effectiveOrmawaFilter = isDpm ? selectedOrmawaFilter : (currentUser?.ormawaId || 'bem');
+  const isGuest = currentUser?.role === 'guest';
+  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
+  // Jika BEM/HIMTI/HIMSISFO, kunci filter ke ormawa sendiri, jika DPM/Tamu maka bebas memilih filter
+  const effectiveOrmawaFilter = (isDpm || isGuest) ? selectedOrmawaFilter : (currentUser?.ormawaId || 'bem');
 
   // Filter proker berdasarkan ormawa yang aktif
   const filteredProkers = effectiveOrmawaFilter === 'all'
@@ -89,6 +91,9 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
 
   return (
     <div className="space-y-6">
+      {/* Panduan Transparansi Khusus Tamu Publik */}
+      {isGuest && <TamuGuideCard />}
+
       {/* 1. TOP HERO KPI CARDS (Mobile + Desktop) */}
       <DashboardKpiSummary
         avgScore={avgScore}

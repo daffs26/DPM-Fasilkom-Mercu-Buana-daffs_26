@@ -21,12 +21,12 @@ import { useShallow } from 'zustand/react/shallow';
 import { formatRupiah, getStatusBadge } from '@/utils/formatters';
 
 // Tab Sub-Components
-import DetailOverviewTab from './detail-proker/DetailOverviewTab';
-import DetailPanitiaTab from './detail-proker/DetailPanitiaTab';
-import DetailRundownTab from './detail-proker/DetailRundownTab';
-import DetailRabTab from './detail-proker/DetailRabTab';
-import DetailLpjTab from './detail-proker/DetailLpjTab';
-import ReceiptPreviewModal from './detail-proker/ReceiptPreviewModal';
+import DetailOverviewTab from './detail-tabs/TabRingkasan';
+import DetailPanitiaTab from './detail-tabs/TabPanitia';
+import DetailRundownTab from './detail-tabs/TabRundown';
+import DetailRabTab from './detail-tabs/TabRAB';
+import DetailLpjTab from './detail-tabs/TabLPJ';
+import ReceiptPreviewModal from './detail-tabs/PreviewKwitansiModal';
 
 export default function DetailProkerModal({ 
   isOpen, 

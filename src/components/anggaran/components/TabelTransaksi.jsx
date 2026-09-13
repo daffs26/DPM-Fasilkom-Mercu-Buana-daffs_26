@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStore } from '../../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { 
   Receipt, 
   ArrowDownRight, 
@@ -8,7 +8,7 @@ import {
   Eye, 
   Trash2 
 } from 'lucide-react';
-import { formatRupiah, getTransactionTypeBadge } from '../../../utils/formatters';
+import { formatRupiah, getTransactionTypeBadge } from '@/utils/formatters';
 
 export default function AnggaranTransactionTable({
   filteredTransactions,

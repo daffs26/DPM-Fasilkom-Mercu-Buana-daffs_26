@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { 
   Wallet, 
@@ -11,14 +11,14 @@ import {
   ArrowDownLeft,
   ArrowUpRight
 } from 'lucide-react';
-import { exportFinancialWorkbook, exportFormattedCSV } from '../../utils/exportExcel';
+import { exportFinancialWorkbook, exportFormattedCSV } from '@/utils/exportExcel';
 
 // Sub-components
-import AnggaranKpiCards from './components/AnggaranKpiCards';
-import AnggaranOrmawaGrid from './components/AnggaranOrmawaGrid';
-import AnggaranProkerMatrix from './components/AnggaranProkerMatrix';
-import AnggaranTransactionTable from './components/AnggaranTransactionTable';
-import AnggaranReceiptModal from './components/AnggaranReceiptModal';
+import AnggaranKpiCards from './components/KpiAnggaran';
+import AnggaranOrmawaGrid from './components/GridOrmawa';
+import AnggaranProkerMatrix from './components/MatrixProker';
+import AnggaranTransactionTable from './components/TabelTransaksi';
+import AnggaranReceiptModal from './components/PreviewBuktiModal';
 
 export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPrintDoc }) {
   const { 

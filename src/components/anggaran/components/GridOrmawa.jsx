@@ -1,6 +1,6 @@
 import React from 'react';
 import { Settings2, ArrowDownLeft, ArrowUpRight, Check } from 'lucide-react';
-import { formatRupiah } from '../../../utils/formatters';
+import { formatRupiah } from '@/utils/formatters';
 
 export default function AnggaranOrmawaGrid({ 
   filteredOrmawas, 

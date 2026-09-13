@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { 
   Plus, 

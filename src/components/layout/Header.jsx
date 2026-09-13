@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,7 +36,7 @@ import {
   FileText
 } from 'lucide-react';
 import ProfileModal from './components/ProfileModal';
-import ManageDeletionRequestsModal from '../proker/components/ManageDeletionRequestsModal';
+import KelolaHapusProkerModal from '@/components/proker/components/KelolaHapusProkerModal';
 
 export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar }) {
   const navigate = useNavigate();
@@ -508,7 +508,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
       />
 
       {/* Modal Manajemen Permohonan Hapus Proker */}
-      <ManageDeletionRequestsModal 
+      <KelolaHapusProkerModal 
         isOpen={isManageDeletionOpen} 
         onClose={() => setIsManageDeletionOpen(false)} 
       />

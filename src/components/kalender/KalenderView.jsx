@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useStore } from '../../store/useStore';
+import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Calendar as CalendarIcon, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
-import { getHoliday } from '../../data/holidays';
+import { getHoliday } from '@/data/holidays';
 import KalenderGrid from './components/KalenderGrid';
 import KalenderSidebar from './components/KalenderSidebar';
 

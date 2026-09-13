@@ -8,7 +8,7 @@ import {
   DialogFooter 
 } from '@/components/ui/dialog';
 import { ExternalLink } from 'lucide-react';
-import { formatRupiah } from '../../../utils/formatters';
+import { formatRupiah } from '@/utils/formatters';
 
 export default function AnggaranReceiptModal({ receiptPreviewData, onClose }) {
   if (!receiptPreviewData) return null;
