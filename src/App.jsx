@@ -2,6 +2,7 @@ import React, { useState, lazy, Suspense, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from './store/useStore';
 import { useShallow } from 'zustand/react/shallow';
+import { AlertCircle } from 'lucide-react';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import DashboardView from './components/dashboard/DashboardView';
@@ -63,6 +64,45 @@ function ViewLoadingFallback({ tab }) {
       return <HistorySkeleton />;
     default:
       return <GenericPageSkeleton />;
+  }
+}
+
+class RouteErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Route error caught:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-slate-200/80 shadow-soft max-w-lg mx-auto my-8">
+          <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <h3 className="font-extrabold text-slate-900 text-base">Terjadi Kendala Memuat Halaman</h3>
+          <p className="text-xs text-slate-500 mt-1.5 mb-4">
+            Silakan coba muat ulang atau kembali ke Dashboard.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              this.setState({ hasError: false });
+              window.location.href = '/dashboard';
+            }}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
+          >
+            Kembali ke Dashboard
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
   }
 }
 
@@ -200,86 +240,88 @@ export default function App() {
             <ViewLoadingFallback tab={currentPathTab} />
           ) : (
             <Suspense fallback={<ViewLoadingFallback tab={currentPathTab} />}>
-              <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/register" element={<Navigate to="/dashboard" replace />} />
-                
-                <Route path="/dashboard" element={
-                  <DashboardView 
-                    onOpenAddProker={() => handleOpenAddProker('')}
-                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                  />
-                } />
+              <RouteErrorBoundary>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/register" element={<Navigate to="/dashboard" replace />} />
+                  
+                  <Route path="/dashboard" element={
+                    <DashboardView 
+                      onOpenAddProker={() => handleOpenAddProker('')}
+                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                    />
+                  } />
 
-                <Route path="/proker" element={
-                  <ProkerView 
-                    onOpenAddProker={() => handleOpenAddProker('')}
-                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                    onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
-                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                    onPrintDoc={(docData) => setPrintDocData(docData)}
-                  />
-                } />
-
-                <Route path="/history" element={
-                  <HistoryView 
-                    onOpenAddProker={() => handleOpenAddProker('')}
-                  />
-                } />
-
-                <Route path="/anggaran" element={
-                  <AnggaranView 
-                    onOpenSetPagu={() => setIsSetPaguOpen(true)}
-                    onOpenAddTransaction={handleOpenAddTransaction}
-                    onPrintDoc={(docData) => setPrintDocData(docData)}
-                  />
-                } />
-
-                <Route path="/berkas" element={
-                  <BerkasView 
-                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                  />
-                } />
-
-                <Route path="/template" element={
-                  isGuest ? (
-                    <Navigate to="/dashboard" replace />
-                  ) : (
-                    <TemplateView />
-                  )
-                } />
-
-                <Route path="/audit" element={
-                  <AuditView 
-                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                    onPrintDoc={(docData) => setPrintDocData(docData)}
-                  />
-                } />
-
-                <Route path="/kalender" element={
-                  <KalenderView 
-                    onOpenAddProker={(date) => handleOpenAddProker(date || calendarSelectedDate)}
-                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                    onDateChange={setCalendarSelectedDate}
-                  />
-                } />
-
-                <Route path="/sp" element={
-                  isGuest ? (
-                    <Navigate to="/dashboard" replace />
-                  ) : (
-                    <SuratPeringatanView 
-                      onOpenIssueSP={() => setIsIssueSPOpen(true)}
+                  <Route path="/proker" element={
+                    <ProkerView 
+                      onOpenAddProker={() => handleOpenAddProker('')}
+                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                      onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
+                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
                       onPrintDoc={(docData) => setPrintDocData(docData)}
                     />
-                  )
-                } />
+                  } />
 
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Routes>
+                  <Route path="/history" element={
+                    <HistoryView 
+                      onOpenAddProker={() => handleOpenAddProker('')}
+                    />
+                  } />
+
+                  <Route path="/anggaran" element={
+                    <AnggaranView 
+                      onOpenSetPagu={() => setIsSetPaguOpen(true)}
+                      onOpenAddTransaction={handleOpenAddTransaction}
+                      onPrintDoc={(docData) => setPrintDocData(docData)}
+                    />
+                  } />
+
+                  <Route path="/berkas" element={
+                    <BerkasView 
+                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                    />
+                  } />
+
+                  <Route path="/template" element={
+                    isGuest ? (
+                      <Navigate to="/dashboard" replace />
+                    ) : (
+                      <TemplateView />
+                    )
+                  } />
+
+                  <Route path="/audit" element={
+                    <AuditView 
+                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                      onPrintDoc={(docData) => setPrintDocData(docData)}
+                    />
+                  } />
+
+                  <Route path="/kalender" element={
+                    <KalenderView 
+                      onOpenAddProker={(date) => handleOpenAddProker(date || calendarSelectedDate)}
+                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                      onDateChange={setCalendarSelectedDate}
+                    />
+                  } />
+
+                  <Route path="/sp" element={
+                    isGuest ? (
+                      <Navigate to="/dashboard" replace />
+                    ) : (
+                      <SuratPeringatanView 
+                        onOpenIssueSP={() => setIsIssueSPOpen(true)}
+                        onPrintDoc={(docData) => setPrintDocData(docData)}
+                      />
+                    )
+                  } />
+
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </Routes>
+              </RouteErrorBoundary>
             </Suspense>
           )}
         </main>

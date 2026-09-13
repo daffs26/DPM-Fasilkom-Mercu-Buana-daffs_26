@@ -5,11 +5,15 @@ import {
   FileText, 
   CheckCircle2, 
   AlertTriangle, 
-  AlertOctagon 
+  AlertOctagon,
+  Clock,
+  ArrowRight,
+  Info
 } from 'lucide-react';
 
 const DashboardScorecard = React.memo(function DashboardScorecard({
   isDpm = true,
+  isGuest = false,
   selectedOrmawaFilter,
   setSelectedOrmawaFilter,
   ormawas,
@@ -23,11 +27,14 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
   activeOrmawaSPs,
   activeOrmawaProkers
 }) {
+  const canViewAll = isDpm || isGuest;
+  const currentOrmawa = activeOrmawa || ormawas?.find(o => o.id === selectedOrmawaFilter) || ormawas?.[0];
+
   return (
     <Card className="lg:col-span-2 rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft flex flex-col justify-between">
-      {selectedOrmawaFilter === 'all' && isDpm ? (
+      {selectedOrmawaFilter === 'all' && canViewAll ? (
         <>
-          {/* TAMPILAN 1: OVERVIEW 4 ORMAWA (HANYA DPM) */}
+          {/* TAMPILAN 1: OVERVIEW 4 ORMAWA (DPM & TAMU PUBLIK) */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
             <div>
               <h3 className="font-extrabold text-slate-900 text-sm tracking-normal">
@@ -97,38 +104,55 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
           </div>
 
           {/* Baris bawah: Peringatan SLA DPM */}
-          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2 text-slate-700 text-[11px]">
-              <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
-              <span><strong>Standar Batas Waktu:</strong> Proposal minimal <strong>14 hari sebelum acara (H-14)</strong> • LPJ maksimal <strong>14 hari setelah acara (H+14)</strong></span>
+          <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-6 h-6 rounded-lg bg-blue-100/70 text-blue-700 flex items-center justify-center shrink-0">
+                <Clock className="w-3.5 h-3.5" />
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                <span className="font-bold text-slate-800">Ketentuan SLA:</span>{' '}
+                Proposal min. <span className="font-bold text-slate-900">H-14</span>{' '}
+                <span className="text-slate-300 mx-1">•</span>{' '}
+                LPJ maks. <span className="font-bold text-slate-900">H+14</span> setelah acara
+              </p>
             </div>
-            <span className="text-slate-500 text-[10px] font-semibold hidden sm:inline">
-              Klik kartu ormawa untuk fokus
-            </span>
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-500 bg-white border border-slate-200/90 px-2.5 py-1 rounded-xl shadow-2xs self-start sm:self-auto shrink-0">
+              <span>Klik kartu untuk fokus</span>
+              <ArrowRight className="w-3 h-3 text-slate-400" />
+            </div>
           </div>
         </>
       ) : (
-        /* TAMPILAN 2: SPOTLIGHT KHUSUS ORMAWA SENDIRI (ORMAWA) ATAU ORMAWA TERPILIH (DPM) */
+        /* TAMPILAN 2: SPOTLIGHT KHUSUS ORMAWA SENDIRI (ORMAWA) ATAU ORMAWA TERPILIH (DPM / TAMU) */
         <>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-10 h-10 p-1 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center shrink-0">
-                <img src={activeOrmawa?.logo} alt={activeOrmawa?.name} className="w-full h-full object-contain" />
+              <div className="w-10 h-10 p-1 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center shrink-0 overflow-hidden">
+                {currentOrmawa?.logo ? (
+                  <img 
+                    src={currentOrmawa.logo} 
+                    alt={currentOrmawa.name || 'Logo Ormawa'} 
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : null}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="font-extrabold text-slate-900 text-sm tracking-normal">
-                    Indeks Kinerja: {activeOrmawa?.shortName}
+                    Indeks Kinerja: {currentOrmawa?.shortName || 'Ormawa'}
                   </h3>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-0.5 truncate">
-                  {activeOrmawa?.name} • Evaluasi Kepatuhan Periode 2026/2027
+                  {currentOrmawa?.name || 'Organisasi Mahasiswa'} • Evaluasi Kepatuhan Periode 2026/2027
                 </p>
               </div>
             </div>
 
-            {/* Tombol kembali ke overview 4 ormawa khusus untuk DPM */}
-            {isDpm && (
+            {/* Tombol kembali ke overview 4 ormawa untuk DPM & Tamu Publik */}
+            {canViewAll && (
               <button
                 type="button"
                 onClick={() => setSelectedOrmawaFilter('all')}
