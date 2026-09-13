@@ -26,7 +26,7 @@ export default function TamuGuideCard({ className = '' }) {
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              Selamat datang di portal transparansi Fasilkom UMB. Anda memiliki akses penuh membaca dan memverifikasi data proker, anggaran, berkas laporan, serta kalender kegiatan. Pengelolaan berkas dan administrasi khusus diperuntukkan bagi pengurus resmi Ormawa (DPM, BEM, HiMTI, HIMSISFO).
+              Pantau transparansi program kerja, anggaran, dan dokumen kegiatan Fasilkom UMB secara terbuka. Pengelolaan berkas dikhususkan bagi pengurus resmi Ormawa.
             </p>
           </div>
         </div>
