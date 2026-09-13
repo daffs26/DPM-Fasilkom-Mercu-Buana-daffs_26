@@ -165,18 +165,57 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
             <h2 className="text-sm font-extrabold text-slate-900 tracking-normal">AUDITMAWA</h2>
           </div>
           <div className="flex items-center gap-2">
-            {currentUser?.ormawaId === 'dpm' && (
+            {(currentUser?.ormawaId === 'dpm' || currentUser?.role === 'guest') && (
               <div className="relative" ref={dropdownRef}>
-                <button type="button" onClick={() => setIsOrmawaDropdownOpen(prev => !prev)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white shadow-2xs">
-                  {activeOrmawa ? <div className="flex items-center gap-1.5"><div className="w-3.5 h-3.5 bg-white rounded-sm p-0.5"><img src={activeOrmawa.logo} alt={activeOrmawa.shortName} className="w-full h-full object-contain" /></div><span>{activeOrmawa.shortName}</span></div> : <span>Semua Ormawa</span>}
+                <button 
+                  type="button" 
+                  onClick={() => setIsOrmawaDropdownOpen(prev => !prev)} 
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white shadow-2xs cursor-pointer transition"
+                  title="Filter Ormawa"
+                >
+                  {activeOrmawa ? (
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3.5 h-3.5 bg-white rounded-sm p-0.5 flex items-center justify-center">
+                        <img src={activeOrmawa.logo} alt={activeOrmawa.shortName} className="w-full h-full object-contain" />
+                      </div>
+                      <span className="max-w-[72px] sm:max-w-none truncate">{activeOrmawa.shortName}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline">Semua Ormawa</span>
+                      <span className="sm:hidden">Semua</span>
+                    </>
+                  )}
                   <ChevronDown className={`w-3.5 h-3.5 text-blue-200 transition-transform ${isOrmawaDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isOrmawaDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-1.5 space-y-1">
-                    <button type="button" onClick={() => { setSelectedOrmawaFilter('all'); setIsOrmawaDropdownOpen(false); }} className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold ${selectedOrmawaFilter === 'all' ? 'bg-blue-50 text-blue-700' : 'text-slate-700'}`}>Semua Ormawa</button>
-                    {ormawas.map(o => (
-                      <button key={o.id} type="button" onClick={() => { setSelectedOrmawaFilter(o.id); setIsOrmawaDropdownOpen(false); }} className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold ${selectedOrmawaFilter === o.id ? 'bg-blue-600 text-white' : 'text-blue-700'}`}>
-                        <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-md bg-white p-0.5"><img src={o.logo} alt={o.shortName} className="w-full h-full object-contain" /></div><span>{o.shortName}</span></div>
+                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                    <button 
+                      type="button" 
+                      onClick={() => { setSelectedOrmawaFilter('all'); setIsOrmawaDropdownOpen(false); }} 
+                      className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        selectedOrmawaFilter === 'all' ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>Semua Ormawa</span>
+                      {selectedOrmawaFilter === 'all' && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                    </button>
+                    {sortedOrmawas.map(o => (
+                      <button 
+                        key={o.id} 
+                        type="button" 
+                        onClick={() => { setSelectedOrmawaFilter(o.id); setIsOrmawaDropdownOpen(false); }} 
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          selectedOrmawaFilter === o.id ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <div className="w-5 h-5 rounded-md bg-white p-0.5 border border-slate-100 flex items-center justify-center shrink-0">
+                            <img src={o.logo} alt={o.shortName} className="w-full h-full object-contain" />
+                          </div>
+                          <span className="truncate">{o.shortName}</span>
+                        </div>
+                        {selectedOrmawaFilter === o.id && <Check className="w-3.5 h-3.5 text-white" />}
                       </button>
                     ))}
                   </div>
@@ -306,9 +345,68 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
             <p className="text-xs text-slate-500 mt-0.5">Portal audit &amp; akuntabilitas</p>
           </div>
           <div className="flex items-center gap-2.5">
-            <div className="relative w-72">
+            {(currentUser?.ormawaId === 'dpm' || currentUser?.role === 'guest') && (
+              <div className="relative" ref={desktopDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsDesktopOrmawaOpen(prev => !prev)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-xs font-bold text-slate-700 shadow-2xs transition cursor-pointer"
+                  title="Pilih Entitas Ormawa"
+                >
+                  {activeOrmawa ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-md bg-white p-0.5 border border-slate-200 flex items-center justify-center shrink-0">
+                        <img src={activeOrmawa.logo} alt={activeOrmawa.shortName} className="w-full h-full object-contain" />
+                      </div>
+                      <span className="text-slate-900 font-bold">{activeOrmawa.shortName}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-slate-700">
+                      <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Semua Ormawa</span>
+                    </div>
+                  )}
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isDesktopOrmawaOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isDesktopOrmawaOpen && (
+                  <div className="absolute left-0 top-full mt-1.5 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedOrmawaFilter('all'); setIsDesktopOrmawaOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        selectedOrmawaFilter === 'all' ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>Semua Ormawa (Fasilkom)</span>
+                      {selectedOrmawaFilter === 'all' && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                    </button>
+                    {sortedOrmawas.map(o => (
+                      <button
+                        key={o.id}
+                        type="button"
+                        onClick={() => { setSelectedOrmawaFilter(o.id); setIsDesktopOrmawaOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          selectedOrmawaFilter === o.id ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 truncate">
+                          <div className="w-5 h-5 rounded-md bg-white p-0.5 border border-slate-100 flex items-center justify-center shrink-0">
+                            <img src={o.logo} alt={o.shortName} className="w-full h-full object-contain" />
+                          </div>
+                          <span className="truncate">{o.shortName}</span>
+                        </div>
+                        {selectedOrmawaFilter === o.id && <Check className="w-3.5 h-3.5 text-white" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="relative w-64 xl:w-72">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <Input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="rounded-full pl-9 pr-4 py-2 text-xs bg-slate-50" />
+              <Input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Cari proker, dokumen..." className="rounded-full pl-9 pr-4 py-2 text-xs bg-slate-50" />
             </div>
 
             {/* Desktop Notification Bell */}

@@ -7,13 +7,15 @@ import AuditProkerTable from './components/TabelAuditProker';
 
 export default function AuditView({ onAuditLPJ, onPrintDoc }) {
   const { ormawas, prokers, currentUser } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, currentUser: state.currentUser })));
-  const isDpm = currentUser?.ormawaId === 'dpm';
+  const isGuest = currentUser?.role === 'guest';
+  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
+  const canViewAll = isDpm || isGuest;
 
-  const displayedProkers = isDpm 
+  const displayedProkers = canViewAll 
     ? prokers 
     : prokers.filter(p => p.ormawaId === currentUser?.ormawaId);
 
-  const displayedOrmawas = isDpm 
+  const displayedOrmawas = canViewAll 
     ? ormawas 
     : ormawas.filter(o => o.id === currentUser?.ormawaId);
 

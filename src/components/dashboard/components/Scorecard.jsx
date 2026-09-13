@@ -85,7 +85,7 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
                     </span>
                   </div>
 
-                  <span className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0 whitespace-nowrap ${
+                  <span className={`text-[9px] px-2 sm:px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0 max-w-full truncate block ${
                     hasOverdue 
                       ? 'bg-rose-100 text-rose-700' 
                       : oScore !== null 

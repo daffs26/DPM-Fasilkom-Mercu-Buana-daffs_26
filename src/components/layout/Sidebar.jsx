@@ -253,14 +253,14 @@ export default function Sidebar({ isOpen, onClose }) {
 
         <button
           onClick={() => {
-            if (window.confirm('Yakin ingin keluar?')) {
+            if (window.confirm(currentUser?.role === 'guest' ? 'Keluar dari mode tamu publik?' : 'Yakin ingin keluar dari akun?')) {
               logout();
             }
           }}
-          className="w-full flex items-center justify-center gap-1.5 text-[11px] text-red-500 hover:text-red-700 py-1 font-medium transition bg-red-50 hover:bg-red-100 rounded-lg"
+          className="w-full flex items-center justify-center gap-1.5 text-[11px] text-red-600 hover:text-red-700 py-1.5 font-bold transition bg-red-50 hover:bg-red-100 rounded-xl cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
-          <span>Keluar Sistem</span>
+          <span>{currentUser?.role === 'guest' ? 'Keluar Mode Tamu' : 'Keluar Akun'}</span>
         </button>
 
         {currentUser.role !== 'guest' && (
@@ -380,14 +380,14 @@ export default function Sidebar({ isOpen, onClose }) {
 
           <button
             onClick={() => {
-              if (window.confirm('Yakin ingin keluar?')) {
+              if (window.confirm(currentUser?.role === 'guest' ? 'Keluar dari mode tamu publik?' : 'Yakin ingin keluar dari akun?')) {
                 logout();
               }
             }}
-            className="w-full flex items-center justify-center gap-1.5 text-[11px] text-red-500 hover:text-red-700 py-1.5 font-medium transition bg-red-50 hover:bg-red-100 rounded-lg"
+            className="w-full flex items-center justify-center gap-1.5 text-[11px] text-red-600 hover:text-red-700 py-2 font-bold transition bg-red-50 hover:bg-red-100 rounded-xl cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
-            <span>Keluar Sistem</span>
+            <LogOut className="w-3.5 h-3.5" />
+            <span>{currentUser?.role === 'guest' ? 'Keluar Mode Tamu' : 'Keluar Akun'}</span>
           </button>
 
           {currentUser.role !== 'guest' && (

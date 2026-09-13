@@ -65,6 +65,19 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
   const [isKpiExpanded, setIsKpiExpanded] = useState(false);
 
   const pendingDeletionCount = (deletionRequests || []).filter(r => r.status === 'pending').length;
+  const isGuest = currentUser?.role === 'guest';
+  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
+  const canViewAll = isDpm || isGuest;
+
+  const ormawaOrder = ['dpm', 'bem', 'himti', 'himsisfo'];
+  const sortedOrmawas = useMemo(() => {
+    return [...ormawas].sort((a, b) => {
+      const idxA = ormawaOrder.indexOf(a.id);
+      const idxB = ormawaOrder.indexOf(b.id);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return 0;
+    });
+  }, [ormawas]);
 
   // Filter ormawa dasar untuk menghitung status counts
   const ormawaProkers = useMemo(() => {
@@ -197,6 +210,55 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
               <span className="text-[10px] text-emerald-700 font-bold uppercase block">Selesai Diaudit</span>
               <span className="text-base font-black text-emerald-900 block mt-0.5">{statusCounts.completed}</span>
             </div>
+          </div>
+        )}
+
+        {/* Filter Entitas Ormawa (Khusus DPM & Tamu Publik) */}
+        {canViewAll && (
+          <div className="flex items-center gap-1.5 overflow-x-auto pt-2.5 pb-2 hide-scrollbar border-b border-slate-100">
+            <span className="text-[11px] font-bold text-slate-500 shrink-0 mr-1">Ormawa:</span>
+            <button
+              type="button"
+              onClick={() => setSelectedOrmawaFilter('all')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer ${
+                selectedOrmawaFilter === 'all'
+                  ? 'bg-slate-900 text-white shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 bg-slate-50 border border-slate-200/60'
+              }`}
+            >
+              <span>Semua Ormawa</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                selectedOrmawaFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {prokers.length}
+              </span>
+            </button>
+            {sortedOrmawas.map(o => {
+              const oCount = prokers.filter(p => p.ormawaId === o.id).length;
+              const isSelected = selectedOrmawaFilter === o.id;
+              return (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => setSelectedOrmawaFilter(o.id)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer ${
+                    isSelected
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 bg-slate-50 border border-slate-200/60'
+                  }`}
+                >
+                  <div className="w-4 h-4 rounded bg-white p-0.5 flex items-center justify-center shrink-0">
+                    <img src={o.logo} alt={o.shortName} className="w-full h-full object-contain" />
+                  </div>
+                  <span>{o.shortName}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                    isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {oCount}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -375,7 +437,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 <button
                   type="button"
                   onClick={() => onOpenDetailProker ? onOpenDetailProker(p) : onReviewProposal(p)}
-                  className="flex-1 min-w-[90px] py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 min-w-[76px] sm:min-w-[84px] py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Eye className="w-3.5 h-3.5 text-slate-600" />
                   <span>Detail</span>
@@ -385,7 +447,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                   <button
                     type="button"
                     onClick={() => setProkerToRevise(p)}
-                    className="flex-1 min-w-[110px] py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 min-w-[95px] sm:min-w-[105px] py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer"
                     title="Unggah Berkas Revisi"
                   >
                     <UploadCloud className="w-3.5 h-3.5" />
@@ -395,7 +457,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                   <button
                     type="button"
                     onClick={() => onAuditLPJ(p)}
-                    className="flex-1 min-w-[90px] py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition text-center cursor-pointer"
+                    className="flex-1 min-w-[76px] sm:min-w-[84px] py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition text-center cursor-pointer"
                   >
                     {p.lpj?.auditScore ? 'Hasil Audit' : 'Audit LPJ'}
                   </button>

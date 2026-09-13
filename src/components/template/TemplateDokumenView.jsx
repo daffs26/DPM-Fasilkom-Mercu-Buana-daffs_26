@@ -125,8 +125,9 @@ export default function TemplateView() {
 
           {/* Tombol Unggah Template Baru */}
           <button
+            type="button"
             onClick={() => setIsUploadModalOpen(true)}
-            className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition shrink-0"
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Unggah Template Baru</span>

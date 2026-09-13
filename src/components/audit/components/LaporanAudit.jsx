@@ -1,8 +1,10 @@
 import React from 'react';
 
 const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, prokers, currentUser }) {
-  const isDpm = currentUser?.ormawaId === 'dpm';
-  const displayedOrmawas = isDpm 
+  const isGuest = currentUser?.role === 'guest';
+  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
+  const canViewAll = isDpm || isGuest;
+  const displayedOrmawas = canViewAll 
     ? ormawas 
     : ormawas.filter(o => o.id === currentUser?.ormawaId);
 
@@ -11,18 +13,18 @@ const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, proke
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <div>
           <h3 className="font-bold text-slate-900 text-sm">
-            {isDpm ? 'Rapor Kinerja & Akreditasi Ormawa Fasilkom' : `Rapor Kinerja & Akreditasi: ${displayedOrmawas[0]?.shortName || 'Ormawa'}`}
+            {canViewAll ? 'Rapor Kinerja & Akreditasi Ormawa Fasilkom' : `Rapor Kinerja & Akreditasi: ${displayedOrmawas[0]?.shortName || 'Ormawa'}`}
           </h3>
           <p className="text-xs text-slate-600 mt-0.5">
-            {isDpm 
+            {canViewAll 
               ? 'Akumulasi performa ormawa berdasarkan seluruh audit kegiatan periode berjalan'
               : `Akumulasi performa internal ${displayedOrmawas[0]?.name || 'Ormawa'} berdasarkan seluruh audit kegiatan periode berjalan`}
           </p>
         </div>
       </div>
 
-      <div className={`grid gap-4 sm:gap-5 mt-5 ${isDpm ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-2xl'}`}>
-        {ormawas.map((o) => {
+      <div className={`grid gap-4 sm:gap-5 mt-5 ${canViewAll ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 max-w-xl'}`}>
+        {displayedOrmawas.map((o) => {
           const oProkers = prokers.filter(p => p.ormawaId === o.id);
           const auditedProkers = oProkers.filter(p => p.lpj?.auditScore);
           const avgScore = auditedProkers.length > 0

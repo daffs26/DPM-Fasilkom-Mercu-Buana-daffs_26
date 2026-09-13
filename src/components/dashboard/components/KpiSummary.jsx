@@ -111,10 +111,10 @@ export default function DashboardKpiSummary({
 
             {/* Bottom row / value */}
             <div className="my-1 lg:my-0 lg:mt-3 flex flex-col items-center text-center lg:flex-row lg:items-baseline lg:text-left lg:gap-2">
-              <span className={`text-2xl lg:text-3xl font-black tracking-tight ${card.valueColor}`}>
+              <span className={`text-xl sm:text-2xl lg:text-3xl font-black tracking-tight ${card.valueColor}`}>
                 {card.value}
               </span>
-              <span className={`text-[10px] lg:text-xs block lg:inline font-medium ${card.unitColor}`}>
+              <span className={`text-[9.5px] sm:text-[10.5px] lg:text-xs block lg:inline font-medium leading-tight max-w-full truncate sm:whitespace-normal ${card.unitColor}`}>
                 {card.unit}
               </span>
             </div>

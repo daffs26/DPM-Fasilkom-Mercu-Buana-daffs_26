@@ -155,7 +155,58 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
           </div>
         </div>
 
-        {/* Ormawa Folders - hidden on mobile, ormawa filter available in header */}
+        {/* Ormawa Folders on Mobile (< md) */}
+        <div className="md:hidden">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 block mb-2 px-2">
+            Filter Ormawa
+          </span>
+          <div className="flex gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
+            <button
+              type="button"
+              onClick={() => setSelectedOrmawaFilter('all')}
+              className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                selectedOrmawaFilter === 'all'
+                  ? 'bg-slate-900 text-white shadow-2xs'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+              }`}
+            >
+              <span>Semua</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                selectedOrmawaFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
+              }`}>
+                {allFiles.length}
+              </span>
+            </button>
+            {visibleOrmawas.map(o => {
+              const count = allFiles.filter(f => f.ormawaId === o.id).length;
+              const isSelected = selectedOrmawaFilter === o.id;
+              return (
+                <button
+                  key={`mob-ormawa-${o.id}`}
+                  type="button"
+                  onClick={() => setSelectedOrmawaFilter(isSelected ? 'all' : o.id)}
+                  className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    isSelected
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                  }`}
+                >
+                  <div className="w-4 h-4 rounded-md bg-white p-0.5 flex items-center justify-center shrink-0 border border-slate-100">
+                    <img src={o.logo} alt={o.name} className="w-full h-full object-contain" />
+                  </div>
+                  <span>{o.shortName}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Ormawa Folders - Desktop (>= md) */}
         <div className="hidden md:block">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 block mb-2 px-2">
             Folder per Ormawa

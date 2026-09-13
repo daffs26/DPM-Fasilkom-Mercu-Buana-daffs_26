@@ -431,7 +431,7 @@ export default function DetailProkerModal({
           </DialogHeader>
 
           {/* Tab Bar Navigation */}
-          <div className="px-3 sm:px-6 border-b border-slate-200/80 bg-white flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0">
+          <div className="px-3 sm:px-6 border-b border-slate-200/80 bg-white flex items-center gap-1 overflow-x-auto hide-scrollbar shrink-0">
             {[
               { id: 'deskripsi', label: 'Deskripsi & Tujuan', icon: FileText },
               { id: 'panitia', label: 'Kepanitiaan', icon: Users, badge: panitiaItems.length },
@@ -446,7 +446,7 @@ export default function DetailProkerModal({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-2.5 sm:py-3 px-2.5 sm:px-3 text-xs font-bold border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`py-2.5 sm:py-3 px-2.5 sm:px-3 text-xs font-bold border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                     isActive 
                       ? 'border-slate-900 text-slate-900' 
                       : 'border-transparent text-slate-500 hover:text-slate-800'

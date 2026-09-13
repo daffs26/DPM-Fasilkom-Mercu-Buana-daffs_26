@@ -9,6 +9,7 @@ import DashboardView from './components/dashboard/DashboardView';
 import ProkerView from './components/proker/ProkerView';
 import LoginView from './components/auth/LoginView';
 import RegisterView from './components/auth/RegisterView';
+import { Analytics } from '@vercel/analytics/react';
 
 // Secondary views loaded on-demand
 const HistoryView = lazy(() => import('./components/history/HistoryView'));
@@ -189,28 +190,32 @@ export default function App() {
   // Auth Routing: Jika belum login, hanya rute login/register yang dapat diakses
   if (!currentUser) {
     return (
-      <Routes>
-        <Route 
-          path="/register" 
-          element={<RegisterView onSwitchToLogin={() => navigate('/login')} />} 
-        />
-        <Route 
-          path="/login" 
-          element={
-            <LoginView 
-              onSwitchToRegister={() => navigate('/register')} 
-              notice={idleNotice}
-              onClearNotice={() => setIdleNotice('')}
-            />
-          } 
-        />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+      <>
+        <Routes>
+          <Route 
+            path="/register" 
+            element={<RegisterView onSwitchToLogin={() => navigate('/login')} />} 
+          />
+          <Route 
+            path="/login" 
+            element={
+              <LoginView 
+                onSwitchToRegister={() => navigate('/register')} 
+                notice={idleNotice}
+                onClearNotice={() => setIdleNotice('')}
+              />
+            } 
+          />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+        <Analytics />
+      </>
     );
   }
 
   // Authenticated Routing: Dashboard and Sub-pages
   return (
+    <>
     <div className="flex h-screen overflow-hidden bg-[#F8FAFC] text-slate-900 font-sans selection:bg-slate-900 selection:text-amber-400">
       {isSidebarOpen && (
         <div
@@ -430,5 +435,7 @@ export default function App() {
         </div>
       )}
     </div>
+    <Analytics />
+    </>
   );
 }
