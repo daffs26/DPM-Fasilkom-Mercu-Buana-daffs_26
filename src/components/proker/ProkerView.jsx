@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { 
@@ -63,6 +63,27 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
   const [prokerToRevise, setProkerToRevise] = useState(null);
   const [isManageDeletionOpen, setIsManageDeletionOpen] = useState(false);
   const [isKpiExpanded, setIsKpiExpanded] = useState(false);
+  const [isMobileOrmawaOpen, setIsMobileOrmawaOpen] = useState(false);
+  const [isMobileStatusOpen, setIsMobileStatusOpen] = useState(false);
+  const mobileOrmawaRef = useRef(null);
+  const mobileStatusRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (mobileOrmawaRef.current && !mobileOrmawaRef.current.contains(e.target)) {
+        setIsMobileOrmawaOpen(false);
+      }
+      if (mobileStatusRef.current && !mobileStatusRef.current.contains(e.target)) {
+        setIsMobileStatusOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
 
   const pendingDeletionCount = (deletionRequests || []).filter(r => r.status === 'pending').length;
   const isGuest = currentUser?.role === 'guest';
@@ -141,39 +162,53 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     { id: 'completed', label: 'Proker Selesai', count: statusCounts.completed, color: 'text-emerald-600' }
   ];
 
+  const currentOrmawaObj = ormawas.find(o => o.id === selectedOrmawaFilter);
+  const mobileOrmawaLabel = selectedOrmawaFilter === 'all'
+    ? `Semua Ormawa (${prokers.length})`
+    : `${currentOrmawaObj?.shortName || selectedOrmawaFilter} (${prokers.filter(p => p.ormawaId === selectedOrmawaFilter).length})`;
+
+  const currentStatusTab = filterTabs.find(t => t.id === statusFilter);
+  const mobileStatusLabel = currentStatusTab
+    ? `${currentStatusTab.label} (${currentStatusTab.count})`
+    : 'Semua Status';
+
   return (
     <div className="space-y-4 sm:space-y-5">
       {/* 1. TOP EFFICIENCY STRIP: Mini KPI & Ringkasan Cepat */}
       <div className="bg-white rounded-3xl p-3.5 sm:p-4 border border-slate-200/80 shadow-soft transition-all duration-300">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-              <Layers className="w-4 h-4" />
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <Layers className="w-4 h-4" />
+              </div>
+              <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm truncate">
+                Manajemen &amp; Pengawasan Proker
+              </h3>
             </div>
-            <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm truncate sm:whitespace-normal">
-              Manajemen &amp; Pengawasan Program Kerja
-            </h3>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+          <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
             {currentUser?.ormawaId === 'dpm' && currentUser?.role !== 'guest' && pendingDeletionCount > 0 && (
               <button
                 type="button"
                 onClick={() => setIsManageDeletionOpen(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer animate-pulse"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer animate-pulse"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Permohonan Hapus ({pendingDeletionCount})</span>
+                <span className="hidden sm:inline">Permohonan Hapus</span>
+                <span>({pendingDeletionCount})</span>
               </button>
             )}
             <button
               type="button"
               onClick={() => setIsKpiExpanded(!isKpiExpanded)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl text-[11px] font-bold transition shadow-2xs cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl text-[11px] font-bold transition shadow-2xs cursor-pointer"
               title={isKpiExpanded ? 'Tutup Ringkasan' : 'Buka Ringkasan KPI'}
             >
               {isKpiExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              <span>{isKpiExpanded ? 'Ringkas KPI' : 'Statistik KPI'}</span>
+              <span className="hidden sm:inline">{isKpiExpanded ? 'Ringkas KPI' : 'Statistik KPI'}</span>
+              <span className="sm:hidden">KPI</span>
             </button>
             {currentUser?.role !== 'guest' && (
               <button
@@ -181,7 +216,8 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                <span>Tambah Proker</span>
+                <span className="hidden sm:inline">Tambah Proker</span>
+                <span className="sm:hidden">Tambah</span>
               </button>
             )}
           </div>
@@ -213,9 +249,12 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
           </div>
         )}
 
+        {/* ============================================================ */}
+        {/* DESKTOP FILTER SECTION (sm: ke atas: Pills Row)              */}
+        {/* ============================================================ */}
         {/* Filter Entitas Ormawa (Khusus DPM & Tamu Publik) */}
         {canViewAll && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pt-2.5 pb-2 hide-scrollbar border-b border-slate-100">
+          <div className="hidden sm:flex items-center gap-1.5 overflow-x-auto pt-2.5 pb-2 hide-scrollbar border-b border-slate-100">
             <span className="text-[11px] font-bold text-slate-500 shrink-0 mr-1">Ormawa:</span>
             <button
               type="button"
@@ -262,8 +301,8 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
           </div>
         )}
 
-        {/* Filter Status Tabs with Smart Real-Time Badges */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pt-2.5 hide-scrollbar">
+        {/* Filter Status Tabs (Desktop) */}
+        <div className="hidden sm:flex items-center gap-1.5 overflow-x-auto pt-2.5 hide-scrollbar">
           {filterTabs.map((tab) => {
             const isSelected = statusFilter === tab.id;
             return (
@@ -291,6 +330,169 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
               </button>
             );
           })}
+        </div>
+
+        {/* ============================================================ */}
+        {/* MOBILE FILTER SECTION (< sm: Custom React Dropdown Menu)      */}
+        {/* ============================================================ */}
+        <div className="sm:hidden pt-2.5 space-y-2">
+          <div className={`grid ${canViewAll ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+            {/* Filter Ormawa Dropdown */}
+            {canViewAll && (
+              <div className="relative min-w-0" ref={mobileOrmawaRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileOrmawaOpen(prev => !prev);
+                    setIsMobileStatusOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 active:bg-slate-100 border border-slate-200/90 text-slate-800 text-[11px] font-bold rounded-xl px-2.5 py-2 cursor-pointer transition shadow-2xs min-w-0"
+                >
+                  <div className="flex items-center gap-1.5 min-w-0 truncate">
+                    <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{mobileOrmawaLabel}</span>
+                  </div>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ml-1 ${isMobileOrmawaOpen ? 'rotate-180 text-blue-600' : ''}`} />
+                </button>
+
+                {isMobileOrmawaOpen && (
+                  <div className="absolute left-0 top-full mt-1.5 w-52 max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedOrmawaFilter('all');
+                        setIsMobileOrmawaOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        selectedOrmawaFilter === 'all' ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="truncate">Semua Ormawa</span>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-1.5">
+                        <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold bg-slate-100 text-slate-600">
+                          {prokers.length}
+                        </span>
+                        {selectedOrmawaFilter === 'all' && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                      </div>
+                    </button>
+                    {sortedOrmawas.map(o => {
+                      const oCount = prokers.filter(p => p.ormawaId === o.id).length;
+                      const isSelected = selectedOrmawaFilter === o.id;
+                      return (
+                        <button
+                          key={o.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedOrmawaFilter(o.id);
+                            setIsMobileOrmawaOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            isSelected ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0 truncate">
+                            <div className="w-4 h-4 rounded bg-white p-0.5 border border-slate-100 flex items-center justify-center shrink-0">
+                              <img src={o.logo} alt={o.shortName} className="w-full h-full object-contain" />
+                            </div>
+                            <span className="truncate">{o.shortName}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 ml-1.5">
+                            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold bg-slate-100 text-slate-600">
+                              {oCount}
+                            </span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Filter Status Dropdown */}
+            <div className="relative min-w-0" ref={mobileStatusRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileStatusOpen(prev => !prev);
+                  setIsMobileOrmawaOpen(false);
+                }}
+                className="w-full flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 active:bg-slate-100 border border-slate-200/90 text-slate-800 text-[11px] font-bold rounded-xl px-2.5 py-2 cursor-pointer transition shadow-2xs min-w-0"
+              >
+                <div className="flex items-center gap-1.5 min-w-0 truncate">
+                  <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="truncate">{mobileStatusLabel}</span>
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ml-1 ${isMobileStatusOpen ? 'rotate-180 text-blue-600' : ''}`} />
+              </button>
+
+              {isMobileStatusOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-56 max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
+                  {filterTabs.map((tab) => {
+                    const isSelected = statusFilter === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => {
+                          setStatusFilter(tab.id);
+                          setIsMobileStatusOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          isSelected ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0 truncate">
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${
+                            tab.id === 'overdue' ? 'bg-rose-500' :
+                            tab.id === 'revisi' ? 'bg-amber-500' :
+                            tab.id === 'completed' ? 'bg-emerald-500' :
+                            tab.id === 'approved' ? 'bg-blue-500' :
+                            'bg-slate-400'
+                          }`} />
+                          <span className="truncate">{tab.label}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-1.5">
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                            isSelected
+                              ? 'bg-blue-100 text-blue-800'
+                              : tab.count > 0 && tab.id === 'overdue'
+                              ? 'bg-rose-100 text-rose-700'
+                              : tab.count > 0 && tab.id === 'revisi'
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {tab.count}
+                          </span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Active Filter Helper / Reset Chip */}
+          {(statusFilter !== 'all' || (canViewAll && selectedOrmawaFilter !== 'all')) && (
+            <div className="flex items-center justify-between px-1 pt-0.5 text-[10px]">
+              <span className="text-slate-500 font-medium truncate">
+                Hasil: <strong className="text-slate-800 font-bold">{filtered.length}</strong> proker
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setStatusFilter('all');
+                  if (canViewAll) setSelectedOrmawaFilter('all');
+                }}
+                className="font-bold text-blue-600 hover:text-blue-700 underline cursor-pointer shrink-0 ml-2"
+              >
+                Reset Filter
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

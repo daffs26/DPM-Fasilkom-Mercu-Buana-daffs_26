@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { 
@@ -127,33 +127,15 @@ export default function Sidebar({ isOpen, onClose }) {
   const filteredMenuItems = menuItems.filter(item => {
     if (!currentUser) return false;
     
-    // Guest / Publik hanya dapat melihat modul transparansi publik
+    // Guest / Publik hanya dapat melihat modul transparansi publik (tanpa template & SP)
     if (currentUser.role === 'guest') {
       return ['dashboard', 'proker', 'history', 'anggaran', 'berkas', 'audit', 'kalender'].includes(item.id);
     }
 
-    // DPM has full access (Ketua/Wakil) or partial (Sekre, Bendahara)
-    if (currentUser.ormawaId === 'dpm') {
-      if (currentUser.role === 'ketua' || currentUser.role === 'wakil') return true;
-      if (currentUser.role === 'sekre') {
-        return ['dashboard', 'berkas', 'template', 'kalender', 'proker', 'history'].includes(item.id);
-      }
-      if (currentUser.role === 'bendahara') {
-        return ['dashboard', 'anggaran', 'history'].includes(item.id);
-      }
-    } else {
-      // BEM/HIMSISFO/HIMTI
-      if (currentUser.role === 'ketua' || currentUser.role === 'wakil') {
-        return ['dashboard', 'proker', 'history', 'berkas', 'kalender', 'template'].includes(item.id);
-      }
-      if (currentUser.role === 'sekre') {
-        return ['dashboard', 'proker', 'history', 'berkas', 'template', 'kalender'].includes(item.id);
-      }
-      if (currentUser.role === 'bendahara') {
-        return ['dashboard', 'anggaran', 'history'].includes(item.id);
-      }
-    }
-    return true; // fallback
+    // Untuk seluruh akun terdaftar (baik DPM maupun User Ormawa: BEM, HIMTI, HIMSISFO):
+    // Seluruh modul (Dashboard, Proker, Histori, Anggaran, Berkas, Template, Audit, Kalender, SP)
+    // dapat diakses secara penuh sesuai ormawa masing-masing.
+    return true;
   });
 
   return (
@@ -186,10 +168,11 @@ export default function Sidebar({ isOpen, onClose }) {
             const Icon = item.icon;
             const isActive = activeTab === item.id || currentPathTab === item.id;
             return (
-              <button
+              <Link
                 key={item.id}
+                to={`/${item.id}`}
                 onClick={() => handleSelectTab(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer touch-manipulation select-none ${
                   isActive
                     ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100/80 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
@@ -204,7 +187,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     {item.badge.text}
                   </span>
                 )}
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -280,10 +263,10 @@ export default function Sidebar({ isOpen, onClose }) {
     </aside>
 
       {/* Mobile sidebar — fixed overlay drawer, only on < lg */}
-      <aside className={`lg:hidden fixed left-0 top-0 w-[280px] h-screen bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 select-none z-50 overflow-hidden sidebar-drawer ${
+      <aside className={`lg:hidden fixed left-0 top-0 w-[280px] h-screen h-[100dvh] bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 z-50 overflow-hidden sidebar-drawer ${
         isOpen ? 'sidebar-drawer-open opacity-100 pointer-events-auto visible' : 'sidebar-drawer-closed opacity-0 pointer-events-none invisible'
       }`}>
-        <div className="flex-1 overflow-y-auto flex flex-col">
+        <div className="flex-1 overflow-y-auto flex flex-col min-h-0 pb-4">
           {/* Institutional Branding with Close Button */}
           <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3 overflow-hidden">
@@ -297,9 +280,10 @@ export default function Sidebar({ isOpen, onClose }) {
               </div>
             </div>
             <button
+              type="button"
               onClick={onClose}
               aria-label="Tutup Menu"
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -314,10 +298,11 @@ export default function Sidebar({ isOpen, onClose }) {
               const Icon = item.icon;
               const isActive = activeTab === item.id || currentPathTab === item.id;
               return (
-                <button
+                <Link
                   key={item.id}
+                  to={`/${item.id}`}
                   onClick={() => handleSelectTab(item.id)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer touch-manipulation select-none ${
                     isActive
                       ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100/80 shadow-2xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
@@ -332,7 +317,7 @@ export default function Sidebar({ isOpen, onClose }) {
                       {item.badge.text}
                     </span>
                   )}
-                </button>
+                </Link>
               );
             })}
           </div>

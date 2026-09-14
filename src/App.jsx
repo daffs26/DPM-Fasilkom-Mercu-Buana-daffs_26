@@ -216,7 +216,7 @@ export default function App() {
   // Authenticated Routing: Dashboard and Sub-pages
   return (
     <>
-    <div className="flex h-screen overflow-hidden bg-[#F8FAFC] text-slate-900 font-sans selection:bg-slate-900 selection:text-amber-400">
+    <div className="flex h-screen h-[100dvh] overflow-hidden bg-[#F8FAFC] text-slate-900 font-sans selection:bg-slate-900 selection:text-amber-400">
       {isSidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm overlay-backdrop lg:hidden"
@@ -227,7 +227,7 @@ export default function App() {
 
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 h-screen h-[100dvh] overflow-y-auto">
         <Header 
           onOpenAddProker={() => {
             if (currentPathTab === 'kalender' && calendarSelectedDate) {

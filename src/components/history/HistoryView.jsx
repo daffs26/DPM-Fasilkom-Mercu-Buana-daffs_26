@@ -65,13 +65,15 @@ export default function HistoryView() {
     return counts;
   }, [prokerLogs]);
 
-  const ormawaOptions = [
-    { id: 'all', label: 'Semua Ormawa' },
-    { id: 'dpm', label: 'DPM' },
-    { id: 'bem', label: 'BEM' },
-    { id: 'himsisfo', label: 'Himsisfo' },
-    { id: 'himti', label: 'Himti' }
-  ];
+  const ormawaOrder = ['dpm', 'bem', 'himti', 'himsisfo'];
+  const sortedOrmawas = useMemo(() => {
+    return [...ormawas].sort((a, b) => {
+      const idxA = ormawaOrder.indexOf(a.id);
+      const idxB = ormawaOrder.indexOf(b.id);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return 0;
+    });
+  }, [ormawas]);
 
   return (
     <div className="space-y-5 w-full max-w-5xl mx-auto">
@@ -87,24 +89,44 @@ export default function HistoryView() {
         </div>
 
         {/* Filter Entitas Ormawa Sederhana */}
-        <div className="flex items-center gap-1.5 overflow-x-auto bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 shrink-0 self-start sm:self-auto">
-          {ormawaOptions.map((item) => {
-            const isSelected = selectedOrmawaFilter === item.id;
-            const count = ormawaCounts[item.id] || 0;
+        <div className="w-full sm:w-auto overflow-x-auto hide-scrollbar flex items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs shrink-0 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setSelectedOrmawaFilter('all')}
+            className={`whitespace-nowrap shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              selectedOrmawaFilter === 'all'
+                ? 'bg-white text-slate-900 shadow-2xs font-extrabold border border-slate-200/60'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent'
+            }`}
+          >
+            <span>Semua Ormawa</span>
+            <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
+              selectedOrmawaFilter === 'all' ? 'bg-slate-100 text-slate-900' : 'bg-slate-200/70 text-slate-600'
+            }`}>
+              {prokerLogs.length}
+            </span>
+          </button>
+
+          {sortedOrmawas.map((o) => {
+            const isSelected = selectedOrmawaFilter === o.id;
+            const count = ormawaCounts[o.id] || 0;
             return (
               <button
-                key={item.id}
+                key={o.id}
                 type="button"
-                onClick={() => setSelectedOrmawaFilter(item.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                onClick={() => setSelectedOrmawaFilter(o.id)}
+                className={`whitespace-nowrap shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white text-slate-900 shadow-2xs font-extrabold border border-slate-200/60'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent'
                 }`}
               >
-                <span>{item.label}</span>
-                <span className={`text-[10px] font-extrabold px-1.5 py-0.2 rounded-full ${
-                  isSelected ? 'bg-slate-100 text-slate-800' : 'bg-slate-200/60 text-slate-500'
+                <div className="w-4 h-4 rounded bg-white p-0.5 border border-slate-100 flex items-center justify-center shrink-0 shadow-3xs">
+                  <img src={o.logo} alt={o.shortName} className="w-full h-full object-contain" />
+                </div>
+                <span>{o.shortName}</span>
+                <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
+                  isSelected ? 'bg-slate-100 text-slate-900' : 'bg-slate-200/70 text-slate-600'
                 }`}>
                   {count}
                 </span>
@@ -117,7 +139,7 @@ export default function HistoryView() {
       {/* 2. Bilah Filter Minimalis Terpadu & Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 shadow-soft">
         {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto">
+        <div className="w-full sm:w-auto overflow-x-auto hide-scrollbar flex items-center gap-1">
           {[
             { id: 'all', label: 'Semua', count: prokerLogs.length, dot: 'bg-slate-400' },
             { id: 'added', label: 'Dibuat', count: totalAdded, dot: 'bg-emerald-500' },
@@ -129,7 +151,7 @@ export default function HistoryView() {
                 key={tab.id}
                 type="button"
                 onClick={() => setTypeFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                className={`whitespace-nowrap shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
                   isSelected
                     ? 'bg-transparent text-slate-900 border border-slate-300 shadow-2xs font-extrabold'
                     : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-transparent'
