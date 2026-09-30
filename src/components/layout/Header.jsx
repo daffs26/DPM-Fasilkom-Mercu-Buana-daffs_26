@@ -20,7 +20,6 @@ import {
   ChevronDown, 
   X, 
   Building2, 
-  Filter, 
   Check, 
   LogOut, 
   User, 
@@ -31,12 +30,149 @@ import {
   BellRing,
   CheckCheck,
   Inbox,
-  Trash2,
-  KeyRound,
-  FileText
+  Trash2
 } from 'lucide-react';
-import ProfileModal from './components/ProfileModal';
-import KelolaHapusProkerModal from '@/components/proker/components/KelolaHapusProkerModal';
+import ProfileModal from './ProfileModal';
+import KelolaHapusProkerModal from '@/components/proker/KelolaHapusProkerModal';
+
+const ORMAWA_ORDER = ['dpm', 'bem', 'himti', 'himsisfo'];
+
+function ProfileMenuDropdown({ 
+  currentUser, 
+  isDPMAdmin, 
+  pendingAccountsCount, 
+  pendingDeletionCount, 
+  onOpenProfile, 
+  onOpenApproval, 
+  onOpenDeletion, 
+  onLogout 
+}) {
+  return (
+    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 space-y-1">
+      <div className="px-3 py-2 border-b border-slate-100 mb-1">
+        <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.name}</p>
+        <p className="text-[10px] text-slate-500 capitalize">
+          {currentUser?.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser?.role} ${currentUser?.ormawaId}`}
+        </p>
+      </div>
+
+      {currentUser?.role !== 'guest' && (
+        <button 
+          onClick={onOpenProfile} 
+          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+        >
+          <User className="w-4 h-4 text-blue-600" />
+          <span>Profil Saya &amp; Password</span>
+        </button>
+      )}
+
+      {isDPMAdmin && pendingAccountsCount > 0 && (
+        <button 
+          onClick={onOpenApproval} 
+          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50 rounded-xl transition cursor-pointer"
+        >
+          <Users className="w-4 h-4" />
+          <span>Validasi Akun ({pendingAccountsCount})</span>
+        </button>
+      )}
+
+      {isDPMAdmin && pendingDeletionCount > 0 && (
+        <button 
+          onClick={onOpenDeletion} 
+          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 rounded-xl transition cursor-pointer"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span>Permohonan Hapus ({pendingDeletionCount})</span>
+        </button>
+      )}
+
+      <button 
+        onClick={onLogout} 
+        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
+      >
+        <LogOut className="w-4 h-4" />
+        <span>{currentUser?.role === 'guest' ? 'Keluar Mode Tamu' : 'Keluar Akun'}</span>
+      </button>
+    </div>
+  );
+}
+
+function NotificationMenuDropdown({ 
+  userNotifications, 
+  unreadNotifCount, 
+  onMarkAllRead, 
+  onNotificationClick,
+  isMobile = false 
+}) {
+  return (
+    <div className={isMobile 
+      ? "fixed left-3 right-3 sm:left-auto sm:right-0 top-16 sm:top-full mt-1 sm:w-80 bg-white rounded-2xl border border-slate-200/90 shadow-2xl z-50 overflow-hidden"
+      : "absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl border border-slate-200/90 shadow-2xl z-50 overflow-hidden"
+    }>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/70">
+        <div className="flex items-center gap-1.5">
+          <Bell className="w-4 h-4 text-slate-700" />
+          <span className="text-xs font-bold text-slate-900 tracking-tight">Notifikasi</span>
+          {unreadNotifCount > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold tabular-nums">
+              {unreadNotifCount} baru
+            </span>
+          )}
+        </div>
+        {unreadNotifCount > 0 && (
+          <button
+            type="button"
+            onClick={onMarkAllRead}
+            className="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 cursor-pointer"
+          >
+            <CheckCheck className="w-3.5 h-3.5" />
+            <span>Tandai dibaca</span>
+          </button>
+        )}
+      </div>
+
+      <div className={isMobile ? "max-h-72 overflow-y-auto divide-y divide-slate-100" : "max-h-80 overflow-y-auto divide-y divide-slate-100"}>
+        {userNotifications.length === 0 ? (
+          <div className="text-center py-8 px-4 text-slate-400 space-y-1">
+            <Inbox className="w-8 h-8 mx-auto text-slate-300" />
+            <p className="text-xs font-semibold">Belum ada notifikasi baru</p>
+            <p className="text-[10px]">Aktivitas seputar proker dan pengawasan akan muncul di sini.</p>
+          </div>
+        ) : (
+          userNotifications.map((notif) => (
+            <div
+              key={notif.id}
+              onClick={() => onNotificationClick(notif)}
+              className={`p-3.5 transition cursor-pointer hover:bg-slate-50 flex items-start gap-3 ${
+                !notif.isRead ? 'bg-blue-50/40' : 'bg-white'
+              }`}
+            >
+              <div className="mt-0.5 shrink-0">
+                <span className={`w-2 h-2 rounded-full block mt-1 ${!notif.isRead ? 'bg-blue-600' : 'bg-slate-300'}`} />
+              </div>
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <h5 className={`text-xs ${!notif.isRead ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
+                  {notif.title}
+                </h5>
+                <p className="text-[11px] text-slate-500 leading-snug">
+                  {notif.message}
+                </p>
+                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+                  <span>{notif.time || notif.date}</span>
+                  {notif.linkTab && (
+                    <span className="text-blue-600 font-bold hover:underline">
+                      Buka {notif.linkTab.toUpperCase()} &rarr;
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar }) {
   const navigate = useNavigate();
@@ -46,8 +182,6 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
     setSelectedOrmawaFilter,
     searchQuery,
     setSearchQuery,
-    prokers,
-    activeTab,
     setActiveTab,
     currentUser,
     logout,
@@ -58,31 +192,46 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
     deletionRequests,
     markNotificationAsRead,
     markAllNotificationsAsRead
-  } = useStore(useShallow(state => ({ ormawas: state.ormawas, selectedOrmawaFilter: state.selectedOrmawaFilter, setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, searchQuery: state.searchQuery, setSearchQuery: state.setSearchQuery, prokers: state.prokers, activeTab: state.activeTab, setActiveTab: state.setActiveTab, currentUser: state.currentUser, logout: state.logout, pendingAccounts: state.pendingAccounts, approveAccount: state.approveAccount, rejectAccount: state.rejectAccount, notifications: state.notifications, deletionRequests: state.deletionRequests, markNotificationAsRead: state.markNotificationAsRead, markAllNotificationsAsRead: state.markAllNotificationsAsRead })));
+  } = useStore(useShallow(state => ({ 
+    ormawas: state.ormawas, 
+    selectedOrmawaFilter: state.selectedOrmawaFilter, 
+    setSelectedOrmawaFilter: state.setSelectedOrmawaFilter, 
+    searchQuery: state.searchQuery, 
+    setSearchQuery: state.setSearchQuery, 
+    setActiveTab: state.setActiveTab, 
+    currentUser: state.currentUser, 
+    logout: state.logout, 
+    pendingAccounts: state.pendingAccounts, 
+    approveAccount: state.approveAccount, 
+    rejectAccount: state.rejectAccount, 
+    notifications: state.notifications, 
+    deletionRequests: state.deletionRequests, 
+    markNotificationAsRead: state.markNotificationAsRead, 
+    markAllNotificationsAsRead: state.markAllNotificationsAsRead 
+  })));
 
   const [isOrmawaDropdownOpen, setIsOrmawaDropdownOpen] = useState(false);
   const [isDesktopOrmawaOpen, setIsDesktopOrmawaOpen] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isManageDeletionOpen, setIsManageDeletionOpen] = useState(false);
 
-  const searchRef = useRef(null);
   const dropdownRef = useRef(null);
   const desktopDropdownRef = useRef(null);
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
+  const mobileInputRef = useRef(null);
 
-  const overdueCount = prokers.filter(p => p.status === 'lpj_overdue').length;
   const activeOrmawa = ormawas.find(o => o.id === selectedOrmawaFilter);
 
-  // Filter notifikasi sesuai role & ormawa pengguna aktif
   const userNotifications = useMemo(() => {
     if (!currentUser) return [];
     const userOrmawa = currentUser.ormawaId;
     return (notifications || []).filter(n => {
+      // Jika notifikasi sudah diklik / dibaca, jangan tampilkan lagi di dropdown
+      if (n.isRead) return false;
       if (userOrmawa === 'dpm') {
         return n.targetOrmawaId === 'dpm' || n.targetOrmawaId === 'all';
       }
@@ -90,14 +239,13 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
     });
   }, [notifications, currentUser]);
 
-  const unreadNotifCount = userNotifications.filter(n => !n.isRead).length;
+  const unreadNotifCount = userNotifications.length;
   const pendingDeletionCount = (deletionRequests || []).filter(r => r.status === 'pending').length;
 
-  const ormawaOrder = ['dpm', 'bem', 'himti', 'himsisfo'];
   const sortedOrmawas = useMemo(() => {
     return [...ormawas].sort((a, b) => {
-      const idxA = ormawaOrder.indexOf(a.id);
-      const idxB = ormawaOrder.indexOf(b.id);
+      const idxA = ORMAWA_ORDER.indexOf(a.id);
+      const idxB = ORMAWA_ORDER.indexOf(b.id);
       if (idxA !== -1 && idxB !== -1) return idxA - idxB;
       return 0;
     });
@@ -105,9 +253,6 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setIsSearchFocused(false);
-      }
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsOrmawaDropdownOpen(false);
       }
@@ -121,83 +266,79 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
         setIsNotificationsOpen(false);
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const mobileInputRef = useRef(null);
   const handleCloseSearch = () => {
     setSearchQuery('');
-    setIsSearchFocused(false);
     if (mobileInputRef.current) mobileInputRef.current.blur();
   };
 
-  const predictiveSuggestions = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return [];
-    const corpus = ['Proposal Kegiatan', 'Laporan Pertanggungjawaban (LPJ)', 'Sidang Umum Mahasiswa', 'Surat Peringatan (SP)', 'Surat Izin Dispensasi', 'Proposal Sponsor & Kerjasama', 'Surat Izin Peminjaman Ruangan', 'Audit LPJ Ormawa', 'Review Proposal DPM', 'Rancangan Anggaran Biaya (RAB)', 'Alokasi Anggaran Ormawa', 'Serapan Dana Kemahasiswaan', 'Rundown Acara', 'Seminar Nasional', 'Workshop Teknologi', 'Malam Keakraban (Makrab)', 'Latihan Kepemimpinan (LKMM-TD)', 'Tech Fair & Expo', 'Musyawarah Besar', 'Bakti Sosial', 'Webinar Fasilkom'];
-    ormawas.forEach(o => { if (o.shortName && !corpus.includes(o.shortName)) corpus.push(o.shortName); if (o.name && !corpus.includes(o.name)) corpus.push(o.name); });
-    prokers.forEach(p => { if (p.title && !corpus.includes(p.title)) corpus.push(p.title); if (p.divisi && !corpus.includes(p.divisi)) corpus.push(p.divisi); if (p.pic && !corpus.includes(p.pic)) corpus.push(p.pic); });
-    const exactPrefix = [], wordPrefix = [], contains = [];
-    corpus.forEach(item => {
-      const itemLower = item.toLowerCase();
-      if (itemLower.startsWith(q)) exactPrefix.push(item);
-      else {
-        const words = itemLower.split(/[\s\-_\/()]+/);
-        if (words.some(w => w.startsWith(q))) wordPrefix.push(item);
-        else if (itemLower.includes(q)) contains.push(item);
-      }
-    });
-    return [...exactPrefix, ...wordPrefix, ...contains].slice(0, 5);
-  }, [searchQuery, prokers, ormawas]);
+  const handleNotificationClick = (notif) => {
+    markNotificationAsRead(notif.id);
+    if (notif.linkTab) {
+      setActiveTab(notif.linkTab);
+      navigate(`/${notif.linkTab}`);
+    }
+    setIsNotificationsOpen(false);
+  };
+
+  const handleLogout = () => {
+    if (window.confirm(currentUser?.role === 'guest' ? 'Keluar dari mode tamu publik?' : 'Yakin ingin keluar?')) {
+      logout();
+    }
+  };
 
   const isDPMAdmin = currentUser?.ormawaId === 'dpm' && currentUser?.role !== 'guest' && (currentUser?.role === 'ketua' || currentUser?.role === 'wakil');
 
   return (
     <header className="bg-white border-b border-slate-200/80 sticky top-0 z-20 px-3 sm:px-6 lg:px-8 py-3 sm:py-3.5">
-      <div className="lg:hidden space-y-2.5">
-        <div className="flex items-center justify-between gap-2">
+      {/* Mobile Layout */}
+      <div className="lg:hidden space-y-3">
+        <div className="flex items-center justify-between gap-2.5">
           <div className="flex items-center gap-2">
-            <button onClick={onToggleSidebar} className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition shrink-0 -ml-1">
-              <Menu className="w-5 h-5" />
+            <button 
+              onClick={onToggleSidebar} 
+              className="w-10 h-10 min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-700 transition shrink-0 cursor-pointer active:scale-95"
+              title="Buka Navigasi"
+            >
+              <Menu className="w-5 h-5 stroke-[2]" />
             </button>
-            <h2 className="text-sm font-extrabold text-slate-900 tracking-normal">AUDITMAWA</h2>
+            <h2 className="text-sm font-black text-slate-900 tracking-tight">AUDITMAWA</h2>
           </div>
+
           <div className="flex items-center gap-2">
             {(currentUser?.ormawaId === 'dpm' || currentUser?.role === 'guest') && (
               <div className="relative" ref={dropdownRef}>
                 <button 
                   type="button" 
                   onClick={() => setIsOrmawaDropdownOpen(prev => !prev)} 
-                  className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white shadow-2xs cursor-pointer transition"
+                  className="min-h-[40px] h-10 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white shadow-2xs cursor-pointer transition active:scale-95"
                   title="Filter Ormawa"
                 >
                   {activeOrmawa ? (
                     <div className="flex items-center gap-1.5">
-                      <div className="w-3.5 h-3.5 bg-white rounded-sm p-0.5 flex items-center justify-center">
+                      <div className="w-3.5 h-3.5 bg-white rounded-sm p-0.5 flex items-center justify-center shrink-0">
                         <img src={activeOrmawa.logo} alt={activeOrmawa.shortName} className="w-full h-full object-contain" />
                       </div>
-                      <span className="max-w-[72px] sm:max-w-none truncate">{activeOrmawa.shortName}</span>
+                      <span className="max-w-[70px] truncate tracking-tight">{activeOrmawa.shortName}</span>
                     </div>
                   ) : (
-                    <>
-                      <span className="hidden sm:inline">Semua Ormawa</span>
-                      <span className="sm:hidden">Semua</span>
-                    </>
+                    <span className="tracking-tight">Ormawa</span>
                   )}
                   <ChevronDown className={`w-3.5 h-3.5 text-blue-200 transition-transform ${isOrmawaDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isOrmawaDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-2xl border border-slate-200/90 shadow-xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
                     <button 
                       type="button" 
                       onClick={() => { setSelectedOrmawaFilter('all'); setIsOrmawaDropdownOpen(false); }} 
-                      className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                      className={`w-full min-h-[38px] flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
                         selectedOrmawaFilter === 'all' ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
-                      <span>Semua Ormawa</span>
+                      <span className="tracking-tight">Semua Ormawa</span>
                       {selectedOrmawaFilter === 'all' && <Check className="w-3.5 h-3.5 text-blue-600" />}
                     </button>
                     {sortedOrmawas.map(o => (
@@ -205,7 +346,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                         key={o.id} 
                         type="button" 
                         onClick={() => { setSelectedOrmawaFilter(o.id); setIsOrmawaDropdownOpen(false); }} 
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        className={`w-full min-h-[38px] flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
                           selectedOrmawaFilter === o.id ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-700 hover:bg-slate-50'
                         }`}
                       >
@@ -213,7 +354,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                           <div className="w-5 h-5 rounded-md bg-white p-0.5 border border-slate-100 flex items-center justify-center shrink-0">
                             <img src={o.logo} alt={o.shortName} className="w-full h-full object-contain" />
                           </div>
-                          <span className="truncate">{o.shortName}</span>
+                          <span className="truncate tracking-tight">{o.shortName}</span>
                         </div>
                         {selectedOrmawaFilter === o.id && <Check className="w-3.5 h-3.5 text-white" />}
                       </button>
@@ -223,12 +364,11 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
               </div>
             )}
 
-            {/* Mobile Notification Bell */}
             <div className="relative" ref={notificationRef}>
               <button
                 type="button"
                 onClick={() => setIsNotificationsOpen(prev => !prev)}
-                className="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
+                className="w-10 h-10 min-h-[40px] min-w-[40px] relative flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer active:scale-95"
                 title="Notifikasi"
               >
                 {unreadNotifCount > 0 ? (
@@ -237,113 +377,83 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                   <Bell className="w-4 h-4 text-slate-500" />
                 )}
                 {unreadNotifCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white text-[9px] font-extrabold flex items-center justify-center animate-pulse">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white text-[9px] font-extrabold flex items-center justify-center animate-pulse tabular-nums">
                     {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
                   </span>
                 )}
               </button>
 
               {isNotificationsOpen && (
-                <div className="fixed sm:absolute right-2 sm:right-0 top-14 sm:top-full mt-1 w-[92vw] sm:w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-slate-100 bg-slate-50/70">
-                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <Bell className="w-3.5 h-3.5" />
-                      <span>Notifikasi ({unreadNotifCount})</span>
-                    </span>
-                    {unreadNotifCount > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => markAllNotificationsAsRead(currentUser?.ormawaId)}
-                        className="text-[10px] text-blue-600 hover:underline font-bold"
-                      >
-                        Tandai dibaca
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
-                    {userNotifications.length === 0 ? (
-                      <div className="py-6 text-center text-slate-400 text-xs">Belum ada notifikasi</div>
-                    ) : (
-                      userNotifications.map((n) => (
-                        <div
-                          key={n.id}
-                          onClick={() => {
-                            markNotificationAsRead(n.id);
-                            if (n.linkTab) {
-                              setActiveTab(n.linkTab);
-                              navigate(`/${n.linkTab}`);
-                            }
-                            setIsNotificationsOpen(false);
-                          }}
-                          className={`p-3 text-left transition cursor-pointer ${!n.isRead ? 'bg-blue-50/40' : 'hover:bg-slate-50'}`}
-                        >
-                          <h5 className="text-xs font-bold text-slate-900">{n.title}</h5>
-                          <p className="text-[11px] text-slate-500 leading-snug mt-0.5">{n.message}</p>
-                          <span className="text-[9px] text-slate-400 block mt-1">{n.time || n.date}</span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+                <NotificationMenuDropdown
+                  userNotifications={userNotifications}
+                  unreadNotifCount={unreadNotifCount}
+                  onMarkAllRead={() => markAllNotificationsAsRead(currentUser?.ormawaId)}
+                  onNotificationClick={handleNotificationClick}
+                  isMobile
+                />
               )}
             </div>
 
             <div className="relative" ref={profileRef}>
-              <button onClick={() => setIsProfileOpen(prev => !prev)} className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+              <button 
+                onClick={() => setIsProfileOpen(prev => !prev)} 
+                className="w-10 h-10 min-h-[40px] min-w-[40px] rounded-full bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center shadow-xs cursor-pointer active:scale-95"
+              >
                 {currentUser?.name?.substring(0, 2).toUpperCase() || 'US'}
               </button>
               {isProfileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 space-y-1">
-                  <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                    <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.name}</p>
-                    <p className="text-[10px] text-slate-500 capitalize">
-                      {currentUser?.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser?.role} ${currentUser?.ormawaId}`}
-                    </p>
-                  </div>
-                  {currentUser?.role !== 'guest' && (
-                    <button 
-                      onClick={() => { setIsProfileModalOpen(true); setIsProfileOpen(false); }} 
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition"
-                    >
-                      <User className="w-4 h-4 text-blue-600" />
-                      <span>Profil Saya &amp; Password</span>
-                    </button>
-                  )}
-                  {isDPMAdmin && pendingAccounts.length > 0 && (
-                    <button onClick={() => { setIsApprovalModalOpen(true); setIsProfileOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50 rounded-xl transition">
-                      <Users className="w-4 h-4" />
-                      <span>Validasi Akun ({pendingAccounts.length})</span>
-                    </button>
-                  )}
-                  {isDPMAdmin && pendingDeletionCount > 0 && (
-                    <button onClick={() => { setIsManageDeletionOpen(true); setIsProfileOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 rounded-xl transition">
-                      <Trash2 className="w-4 h-4" />
-                      <span>Permohonan Hapus ({pendingDeletionCount})</span>
-                    </button>
-                  )}
-                  <button onClick={() => { if (window.confirm(currentUser?.role === 'guest' ? 'Keluar dari mode tamu publik?' : 'Yakin ingin keluar?')) logout(); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition">
-                    <LogOut className="w-4 h-4" />
-                    <span>{currentUser?.role === 'guest' ? 'Keluar Mode Tamu' : 'Keluar Akun'}</span>
-                  </button>
-                </div>
+                <ProfileMenuDropdown
+                  currentUser={currentUser}
+                  isDPMAdmin={isDPMAdmin}
+                  pendingAccountsCount={pendingAccounts.length}
+                  pendingDeletionCount={pendingDeletionCount}
+                  onOpenProfile={() => { setIsProfileModalOpen(true); setIsProfileOpen(false); }}
+                  onOpenApproval={() => { setIsApprovalModalOpen(true); setIsProfileOpen(false); }}
+                  onOpenDeletion={() => { setIsManageDeletionOpen(true); setIsProfileOpen(false); }}
+                  onLogout={handleLogout}
+                />
               )}
             </div>
           </div>
         </div>
-        <div className="relative" ref={searchRef}>
-          <div className="relative flex items-center rounded-full bg-slate-50 border border-slate-200/90 shadow-2xs">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5" />
-            <input ref={mobileInputRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setIsSearchFocused(true)} placeholder="Cari..." className="w-full pl-9 pr-9 py-2 text-xs bg-transparent rounded-full" />
-            <button type="button" onClick={handleCloseSearch} className="absolute right-2.5 p-1 text-slate-400 hover:text-slate-700"><X className="w-3.5 h-3.5" /></button>
+
+        <div className="relative">
+          <div className="relative flex items-center rounded-2xl bg-slate-50 border border-slate-200/90 shadow-2xs focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input 
+              ref={mobileInputRef} 
+              type="text" 
+              value={searchQuery} 
+              onChange={(e) => setSearchQuery(e.target.value)} 
+              placeholder="Cari proker, dokumen, PIC..." 
+              className="w-full min-h-[40px] h-10 pl-10 pr-9 text-xs bg-transparent rounded-2xl focus:outline-none tracking-normal font-medium text-slate-800 placeholder:text-slate-400" 
+            />
+            {searchQuery && (
+              <button 
+                type="button" 
+                onClick={handleCloseSearch} 
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 rounded-md transition cursor-pointer"
+                title="Hapus pencarian"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Desktop Layout */}
       <div className="hidden lg:block">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-extrabold text-slate-900 truncate">Sistem Pengawasan DPM FASILKOM</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Portal audit &amp; akuntabilitas</p>
+          <div className="shrink-0 min-w-0">
+            <h2 className="text-xs xl:text-sm font-extrabold text-slate-900 tracking-tight whitespace-nowrap">
+              Sistem Pengawasan DPM FASILKOM
+            </h2>
+            <p className="text-[10px] xl:text-[11px] text-slate-500 mt-0.5 whitespace-nowrap">
+              Portal audit &amp; akuntabilitas
+            </p>
           </div>
+
           <div className="flex items-center gap-2.5">
             {(currentUser?.ormawaId === 'dpm' || currentUser?.role === 'guest') && (
               <div className="relative" ref={desktopDropdownRef}>
@@ -404,12 +514,27 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
               </div>
             )}
 
-            <div className="relative w-64 xl:w-72">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <Input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Cari proker, dokumen..." className="rounded-full pl-9 pr-4 py-2 text-xs bg-slate-50" />
+            <div className="relative w-44 xl:w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input 
+                type="text" 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                placeholder="Cari proker, dokumen..." 
+                className="w-full h-9 rounded-full border border-slate-200/90 bg-slate-50 pl-10 pr-8 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs font-medium" 
+              />
+              {searchQuery && (
+                <button 
+                  type="button" 
+                  onClick={handleCloseSearch} 
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 rounded-md transition cursor-pointer"
+                  title="Hapus pencarian"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
-            {/* Desktop Notification Bell */}
             <div className="relative" ref={notificationRef}>
               <button
                 type="button"
@@ -430,92 +555,26 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
               </button>
 
               {isNotificationsOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/70">
-                    <div className="flex items-center gap-1.5">
-                      <Bell className="w-4 h-4 text-slate-700" />
-                      <span className="text-xs font-bold text-slate-900">Notifikasi</span>
-                      {unreadNotifCount > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">
-                          {unreadNotifCount} baru
-                        </span>
-                      )}
-                    </div>
-                    {unreadNotifCount > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => markAllNotificationsAsRead(currentUser?.ormawaId)}
-                        className="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 cursor-pointer"
-                      >
-                        <CheckCheck className="w-3.5 h-3.5" />
-                        <span>Tandai dibaca</span>
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                    {userNotifications.length === 0 ? (
-                      <div className="text-center py-8 px-4 text-slate-400 space-y-1">
-                        <Inbox className="w-8 h-8 mx-auto text-slate-300" />
-                        <p className="text-xs font-semibold">Belum ada notifikasi baru</p>
-                        <p className="text-[10px]">Aktivitas seputar proker dan pengawasan akan muncul di sini.</p>
-                      </div>
-                    ) : (
-                      userNotifications.map((notif) => (
-                        <div
-                          key={notif.id}
-                          onClick={() => {
-                            markNotificationAsRead(notif.id);
-                            if (notif.linkTab) {
-                              setActiveTab(notif.linkTab);
-                              navigate(`/${notif.linkTab}`);
-                            }
-                            setIsNotificationsOpen(false);
-                          }}
-                          className={`p-3.5 transition cursor-pointer hover:bg-slate-50 flex items-start gap-3 ${
-                            !notif.isRead ? 'bg-blue-50/40' : 'bg-white'
-                          }`}
-                        >
-                          <div className="mt-0.5 shrink-0">
-                            {!notif.isRead ? (
-                              <span className="w-2 h-2 rounded-full bg-blue-600 block mt-1" />
-                            ) : (
-                              <span className="w-2 h-2 rounded-full bg-slate-300 block mt-1" />
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1 space-y-0.5">
-                            <h5 className={`text-xs ${!notif.isRead ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
-                              {notif.title}
-                            </h5>
-                            <p className="text-[11px] text-slate-500 leading-snug">
-                              {notif.message}
-                            </p>
-                            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
-                              <span>{notif.time || notif.date}</span>
-                              {notif.linkTab && (
-                                <span className="text-blue-600 font-bold hover:underline">
-                                  Buka {notif.linkTab.toUpperCase()} &rarr;
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+                <NotificationMenuDropdown
+                  userNotifications={userNotifications}
+                  unreadNotifCount={unreadNotifCount}
+                  onMarkAllRead={() => markAllNotificationsAsRead(currentUser?.ormawaId)}
+                  onNotificationClick={handleNotificationClick}
+                />
               )}
             </div>
 
             {currentUser?.role !== 'guest' && (
               <>
-                <button onClick={onOpenIssueSP} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 cursor-pointer">
+                <button onClick={onOpenIssueSP} className="flex items-center gap-1.5 px-2.5 xl:px-3 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 cursor-pointer">
                   <AlertOctagon className="w-3.5 h-3.5" />
-                  <span>Cetak SP</span>
+                  <span className="hidden xl:inline">Cetak SP</span>
+                  <span className="xl:hidden">SP</span>
                 </button>
                 <Button onClick={onOpenAddProker} size="sm" className="rounded-xl flex items-center gap-1.5 cursor-pointer">
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Tambah Proker</span>
+                  <span className="hidden xl:inline">Tambah Proker</span>
+                  <span className="xl:hidden">Proker</span>
                 </Button>
               </>
             )}
@@ -525,39 +584,16 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                 {currentUser?.name?.substring(0, 2).toUpperCase() || 'US'}
               </button>
               {isProfileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 space-y-1">
-                  <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                    <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.name}</p>
-                    <p className="text-[10px] text-slate-500 capitalize">
-                      {currentUser?.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser?.role} ${currentUser?.ormawaId}`}
-                    </p>
-                  </div>
-                  {currentUser?.role !== 'guest' && (
-                    <button 
-                      onClick={() => { setIsProfileModalOpen(true); setIsProfileOpen(false); }} 
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
-                    >
-                      <User className="w-4 h-4 text-blue-600" />
-                      <span>Profil Saya &amp; Password</span>
-                    </button>
-                  )}
-                  {isDPMAdmin && pendingAccounts.length > 0 && (
-                    <button onClick={() => { setIsApprovalModalOpen(true); setIsProfileOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50 rounded-xl transition cursor-pointer">
-                      <Users className="w-4 h-4" />
-                      <span>Validasi Akun ({pendingAccounts.length})</span>
-                    </button>
-                  )}
-                  {isDPMAdmin && pendingDeletionCount > 0 && (
-                    <button onClick={() => { setIsManageDeletionOpen(true); setIsProfileOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 rounded-xl transition cursor-pointer">
-                      <Trash2 className="w-4 h-4" />
-                      <span>Permohonan Hapus ({pendingDeletionCount})</span>
-                    </button>
-                  )}
-                  <button onClick={() => { if (window.confirm(currentUser?.role === 'guest' ? 'Keluar dari mode tamu publik?' : 'Yakin ingin keluar?')) logout(); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer">
-                    <LogOut className="w-4 h-4" />
-                    <span>{currentUser?.role === 'guest' ? 'Keluar Mode Tamu' : 'Keluar Akun'}</span>
-                  </button>
-                </div>
+                <ProfileMenuDropdown
+                  currentUser={currentUser}
+                  isDPMAdmin={isDPMAdmin}
+                  pendingAccountsCount={pendingAccounts.length}
+                  pendingDeletionCount={pendingDeletionCount}
+                  onOpenProfile={() => { setIsProfileModalOpen(true); setIsProfileOpen(false); }}
+                  onOpenApproval={() => { setIsApprovalModalOpen(true); setIsProfileOpen(false); }}
+                  onOpenDeletion={() => { setIsManageDeletionOpen(true); setIsProfileOpen(false); }}
+                  onLogout={handleLogout}
+                />
               )}
             </div>
           </div>
@@ -599,13 +635,11 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
         </DialogContent>
       </Dialog>
 
-      {/* Modal Profil Pengurus */}
       <ProfileModal 
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
       />
 
-      {/* Modal Manajemen Permohonan Hapus Proker */}
       <KelolaHapusProkerModal 
         isOpen={isManageDeletionOpen} 
         onClose={() => setIsManageDeletionOpen(false)} 

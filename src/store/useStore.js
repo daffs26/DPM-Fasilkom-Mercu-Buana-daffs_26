@@ -964,7 +964,7 @@ export const useStore = create(
           const newLog = createLogEntry({
             ormawaId: proker.ormawaId,
             type: 'lpj_approved',
-            title: `Audit Selesai: ${proker.title} — Nilai ${totalScore} (${predikat})`,
+            title: `Audit Selesai: ${proker.title} - Nilai ${totalScore} (${predikat})`,
             description: `DPM resmi mengesahkan LPJ ${proker.title} dengan predikat ${predikat} (Skor: ${totalScore}/100). Catatan: "${auditDetails.catatanDPM}"`,
             actor: (get().currentUser?.name || 'Sistem'),
             formattedDate: get().getFormattedDate()
@@ -997,7 +997,7 @@ export const useStore = create(
           ormawaId: spPayload.ormawaId,
           ormawaName: get().ormawas.find(o => o.id === spPayload.ormawaId)?.name || 'Ormawa',
           level: spPayload.level,
-          title: `Surat Peringatan ${spPayload.level} (SP ${spPayload.level}) — ${spPayload.prokerTitle}`,
+          title: `Surat Peringatan ${spPayload.level} (SP ${spPayload.level}) - ${spPayload.prokerTitle}`,
           reason: spPayload.reason,
           prokerId: spPayload.prokerId,
           prokerTitle: spPayload.prokerTitle,
@@ -1169,6 +1169,7 @@ export const useStore = create(
           updatedAt: new Date().toISOString().split('T')[0],
           isOfficial: false,
           isCustom: true,
+          periode: newTemplate.periode || '2026/2027',
           author: newTemplate.author || (get().currentUser?.name || 'Sistem'),
           description: newTemplate.description || '',
           tags: newTemplate.tags || ['Custom', 'Template Baru'],
@@ -1195,9 +1196,23 @@ export const useStore = create(
       },
 
       deleteTemplate: (templateId) => {
-        set((state) => ({
-          templates: state.templates.filter(t => t.id !== templateId)
-        }));
+        set((state) => {
+          const target = state.templates.find(t => t.id === templateId);
+          return {
+            templates: state.templates.filter(t => t.id !== templateId),
+            activityLogs: target ? [
+              createLogEntry({
+                ormawaId: 'dpm',
+                type: 'template_deleted',
+                title: `Template Dihapus: ${target.title}`,
+                description: `Template dokumen "${target.title}" telah dihapus dari sistem oleh ${(get().currentUser?.name || 'Sistem')}.`,
+                actor: (get().currentUser?.name || 'Sistem'),
+                formattedDate: get().getFormattedDate()
+              }),
+              ...state.activityLogs
+            ] : state.activityLogs
+          };
+        });
       },
 
       updateTemplate: (templateId, updatedData) => {
@@ -1409,7 +1424,7 @@ export const useStore = create(
       // Tracking read status for Histori Proker notification badge
       lastReadHistoryCount: 0,
       markHistoryAsRead: () => {
-        const count = get().activityLogs.filter(l => l.type === 'proker_added' || l.type === 'proker_deleted').length;
+        const count = get().activityLogs.filter(l => l.type && (l.type.startsWith('proker_') || l.type.startsWith('proposal_') || l.type.startsWith('lpj_'))).length;
         set({ lastReadHistoryCount: count });
       },
 

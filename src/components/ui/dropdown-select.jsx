@@ -77,7 +77,7 @@ export default function DropdownSelect({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-slate-50 hover:bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 flex items-center justify-between gap-2 transition focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white shadow-2xs ${
+        className={`w-full min-h-[42px] bg-slate-50 hover:bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-semibold tracking-normal text-slate-800 flex items-center justify-between gap-2 transition focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white shadow-2xs active:scale-[0.99] ${
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         } ${triggerClassName}`}
       >
@@ -85,15 +85,15 @@ export default function DropdownSelect({
           {selectedOption ? (
             <>
               {selectedOption.icon && <span>{selectedOption.icon}</span>}
-              <span>{selectedOption.label}</span>
+              <span className="tracking-tight">{selectedOption.label}</span>
               {selectedOption.badge && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold">
+                <span className="text-[10px] tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold tabular-nums">
                   {selectedOption.badge}
                 </span>
               )}
             </>
           ) : (
-            <span className="text-slate-400 font-normal">{placeholder}</span>
+            <span className="text-slate-400 font-normal tracking-normal">{placeholder}</span>
           )}
         </span>
 
@@ -111,10 +111,10 @@ export default function DropdownSelect({
             align === 'right' ? 'right-0' : 'left-0'
           } ${
             placement === 'top' ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
-          } z-50 min-w-full w-full bg-white rounded-2xl p-1.5 shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150 select-none max-h-64 overflow-y-auto ${contentClassName}`}
+          } z-50 min-w-full w-full bg-white rounded-2xl p-1.5 shadow-xl border border-slate-200/90 animate-in fade-in zoom-in-95 duration-150 select-none max-h-64 overflow-y-auto ${contentClassName}`}
         >
           {normalizedOptions.length === 0 ? (
-            <div className="px-3 py-2 text-xs text-slate-400 text-center">
+            <div className="px-3 py-2.5 text-xs text-slate-400 text-center font-medium">
               Tidak ada pilihan
             </div>
           ) : (
@@ -128,17 +128,17 @@ export default function DropdownSelect({
                     ref={isSelected ? selectedItemRef : null}
                     type="button"
                     onClick={() => handleSelect(opt.value)}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-medium text-left flex items-center justify-between gap-2 transition-colors cursor-pointer ${
+                    className={`w-full min-h-[40px] px-3.5 py-2.5 rounded-xl text-xs font-medium text-left flex items-center justify-between gap-2 transition-colors cursor-pointer active:scale-[0.99] ${
                       isSelected
-                        ? 'bg-blue-50 text-blue-600 font-bold ring-1 ring-blue-200/60'
+                        ? 'bg-blue-50 text-blue-700 font-bold ring-1 ring-blue-200/80 shadow-2xs'
                         : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                     }`}
                   >
                     <span className="flex items-center gap-2 truncate">
                       {opt.icon && <span>{opt.icon}</span>}
-                      <span className="truncate">{opt.label}</span>
+                      <span className="truncate tracking-tight">{opt.label}</span>
                       {opt.badge && (
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-bold ${
+                        <span className={`text-[10px] tracking-wider px-2 py-0.5 rounded-md font-bold tabular-nums ${
                           isSelected ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
                         }`}>
                           {opt.badge}

@@ -29,16 +29,23 @@ const FORMAT_OPTIONS = [
   { value: 'XLSX', label: 'Microsoft Excel (.xlsx)' }
 ];
 
+const PERIODE_OPTIONS = [
+  { value: '2025/2026', label: 'Periode 2025/2026' },
+  { value: '2026/2027', label: 'Periode 2026/2027' }
+];
+
 export default function UploadTemplateModal({ isOpen, onClose }) {
   const { addTemplate, currentUserName } = useStore(useShallow(state => ({ addTemplate: state.addTemplate, currentUserName: state.currentUserName })));
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Perizinan & Dispensasi');
+  const [periode, setPeriode] = useState('2026/2027');
   const [format, setFormat] = useState('DOCX');
   const [author, setAuthor] = useState('DPM FASILKOM UMB');
   const [description, setDescription] = useState('');
   const [contentPreview, setContentPreview] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   if (!isOpen) return null;
 
@@ -61,9 +68,10 @@ export default function UploadTemplateModal({ isOpen, onClose }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) {
-      alert('Mohon isi Judul Template Dokumen!');
+      setErrorMessage('Mohon isi Judul Template Dokumen terlebih dahulu.');
       return;
     }
+    setErrorMessage('');
 
     let categorySlug = 'dispensasi';
     if (category.includes('Persidangan')) categorySlug = 'persidangan';
@@ -75,6 +83,7 @@ export default function UploadTemplateModal({ isOpen, onClose }) {
       title: title.trim(),
       category,
       categorySlug,
+      periode,
       format,
       fileSize: selectedFile ? selectedFile.size : '180 KB',
       author: author.trim() || currentUserName,
@@ -89,6 +98,7 @@ export default function UploadTemplateModal({ isOpen, onClose }) {
     setDescription('');
     setContentPreview('');
     setSelectedFile(null);
+    setErrorMessage('');
     onClose();
   };
 
@@ -126,8 +136,15 @@ export default function UploadTemplateModal({ isOpen, onClose }) {
             />
           </div>
 
-          {/* Kategori & Format Berkas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-semibold text-xs flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          {/* Kategori, Berkas Periode & Format Berkas */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <div>
               <label className="font-bold text-slate-700 block mb-1.5">
                 Kategori Dokumen
@@ -137,7 +154,21 @@ export default function UploadTemplateModal({ isOpen, onClose }) {
                 onChange={(val) => setCategory(val)}
                 options={CATEGORY_OPTIONS}
                 className="w-full"
-                triggerClassName="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 flex items-center justify-between"
+                triggerClassName="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 flex items-center justify-between"
+                contentClassName="w-full min-w-full z-[100] shadow-xl"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-slate-700 block mb-1.5">
+                Berkas Periode
+              </label>
+              <DropdownSelect
+                value={periode}
+                onChange={(val) => setPeriode(val)}
+                options={PERIODE_OPTIONS}
+                className="w-full"
+                triggerClassName="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 flex items-center justify-between"
                 contentClassName="w-full min-w-full z-[100] shadow-xl"
               />
             </div>
@@ -151,7 +182,7 @@ export default function UploadTemplateModal({ isOpen, onClose }) {
                 onChange={(val) => setFormat(val)}
                 options={FORMAT_OPTIONS}
                 className="w-full"
-                triggerClassName="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 flex items-center justify-between"
+                triggerClassName="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 flex items-center justify-between"
                 contentClassName="w-full min-w-full z-[100] shadow-xl"
               />
             </div>

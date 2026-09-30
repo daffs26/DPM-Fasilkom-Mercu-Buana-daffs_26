@@ -88,7 +88,7 @@ export async function exportFinancialWorkbook({
       { value: 'DEWAN PERWAKILAN MAHASISWA FAKULTAS ILMU KOMPUTER (DPM FASILKOM)', fontWeight: 'bold', fontSize: 13, color: '#0F172A', span: 8 }
     ],
     [
-      { value: 'UNIVERSITAS MERCU BUANA — LAPORAN REKAPITULASI PENGAWASAN ANGGARAN & LPJ ORMAWA', fontWeight: 'bold', fontSize: 11, color: '#475569', span: 8 }
+      { value: 'UNIVERSITAS MERCU BUANA - LAPORAN REKAPITULASI PENGAWASAN ANGGARAN & LPJ ORMAWA', fontWeight: 'bold', fontSize: 11, color: '#475569', span: 8 }
     ],
     [
       { value: `Tanggal Dokumen: ${today}  |  Tahun Akademik: 2026/2027  |  Entitas: ${filterText}`, fontSize: 9, color: '#64748B', span: 8 }

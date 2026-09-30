@@ -21,14 +21,14 @@ const TemplateView = lazy(() => import('./components/template/TemplateDokumenVie
 const AnggaranView = lazy(() => import('./components/anggaran/AnggaranView'));
 
 // Modals loaded on-demand (Disederhanakan & Lokasi Per Fitur)
-const AddProkerModal = lazy(() => import('./components/proker/components/TambahProkerModal'));
-const ReviewProposalModal = lazy(() => import('./components/proker/components/ReviewProposalModal'));
-const DetailProkerModal = lazy(() => import('./components/proker/components/DetailProkerModal'));
-const AuditLPJModal = lazy(() => import('./components/audit/components/AuditLpjModal'));
-const IssueSPModal = lazy(() => import('./components/sp/components/TerbitkanSPModal'));
+const AddProkerModal = lazy(() => import('./components/proker/TambahProkerModal'));
+const ReviewProposalModal = lazy(() => import('./components/proker/ReviewProposalModal'));
+const DetailProkerModal = lazy(() => import('./components/proker/DetailProkerModal'));
+const AuditLPJModal = lazy(() => import('./components/audit/AuditLpjModal'));
+const IssueSPModal = lazy(() => import('./components/sp/TerbitkanSPModal'));
 const PrintDocModal = lazy(() => import('./components/print/PrintDocModal'));
-const SetPaguModal = lazy(() => import('./components/anggaran/components/AturPaguModal'));
-const AddTransactionModal = lazy(() => import('./components/anggaran/components/TambahTransaksiModal'));
+const SetPaguModal = lazy(() => import('./components/anggaran/AturPaguModal'));
+const AddTransactionModal = lazy(() => import('./components/anggaran/TambahTransaksiModal'));
 
 import {
   DashboardSkeleton,
@@ -272,6 +272,7 @@ export default function App() {
                   <Route path="/history" element={
                     <HistoryView 
                       onOpenAddProker={() => handleOpenAddProker('')}
+                      onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
                     />
                   } />
 

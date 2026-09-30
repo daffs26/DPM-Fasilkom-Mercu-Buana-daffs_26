@@ -22,6 +22,8 @@ dist-ssr
 .qoder/
 .gemini/
 .ai/
+.cursor/
+.codegraph/
 scratch/
 *.prompt
 *.agent

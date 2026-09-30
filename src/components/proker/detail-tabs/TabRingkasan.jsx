@@ -2,7 +2,7 @@ import React from 'react';
 import { useStore } from '@/store/useStore';
 import { 
   FileText, 
-  Sparkles, 
+  Target, 
   Edit3, 
   Trash2, 
   Plus, 
@@ -32,8 +32,8 @@ export default function DetailOverviewTab({
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
         <div>
-          <h4 className="font-extrabold text-xs text-slate-900">Deskripsi &amp; Target Tujuan Acara</h4>
-          <p className="text-[11px] text-slate-500">
+          <h4 className="font-extrabold text-xs text-slate-900 tracking-tight">Deskripsi &amp; Target Tujuan Acara</h4>
+          <p className="text-[11px] text-slate-500 tracking-normal mt-0.5">
             {isGuest ? 'Penjelasan dan target tujuan kegiatan ormawa.' : 'Anda dapat mengubah dan menyesuaikan penjelasan serta butir tujuan kegiatan.'}
           </p>
         </div>
@@ -42,10 +42,10 @@ export default function DetailOverviewTab({
             <button
               type="button"
               onClick={() => setIsEditingDeskripsi(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer self-start sm:self-auto"
+              className="min-h-[38px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer self-start sm:self-auto active:scale-95"
             >
               <Edit3 className="w-3.5 h-3.5 text-blue-600" />
-              <span>Ubah Deskripsi &amp; Tujuan</span>
+              <span className="tracking-tight">Ubah Deskripsi &amp; Tujuan</span>
             </button>
           )
         ) : (
@@ -57,17 +57,17 @@ export default function DetailOverviewTab({
                 setTujuanItems(proker.tujuan || defaultTujuan);
                 setIsEditingDeskripsi(false);
               }}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
+              className="min-h-[38px] px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 transition cursor-pointer active:scale-95"
             >
               Batal
             </button>
             <button
               type="button"
               onClick={handleSaveDeskripsiTujuan}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+              className="min-h-[38px] flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer active:scale-95"
             >
               <Save className="w-3.5 h-3.5" />
-              <span>Simpan</span>
+              <span className="tracking-tight">Simpan</span>
             </button>
           </div>
         )}
@@ -77,10 +77,10 @@ export default function DetailOverviewTab({
       <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-2">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-blue-600" />
-          <h4 className="font-extrabold text-xs text-slate-900">Deskripsi &amp; Konsep Acara</h4>
+          <h4 className="font-extrabold text-xs text-slate-900 tracking-tight">Deskripsi &amp; Konsep Acara</h4>
         </div>
         {!isEditingDeskripsi ? (
-          <p className="text-slate-700 leading-relaxed text-xs whitespace-pre-line">
+          <p className="text-slate-700 leading-relaxed text-xs whitespace-pre-line tracking-normal font-normal">
             {deskripsiText}
           </p>
         ) : (
@@ -89,7 +89,7 @@ export default function DetailOverviewTab({
             value={deskripsiText}
             onChange={(e) => setDeskripsiText(e.target.value)}
             placeholder="Tuliskan latar belakang dan gambaran umum program kerja ini..."
-            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 tracking-normal"
           />
         )}
       </div>
@@ -98,10 +98,10 @@ export default function DetailOverviewTab({
       <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <h4 className="font-extrabold text-xs text-slate-900">Tujuan &amp; Output Kegiatan</h4>
+            <Target className="w-4 h-4 text-emerald-600" />
+            <h4 className="font-extrabold text-xs text-slate-900 tracking-tight">Tujuan &amp; Output Kegiatan</h4>
           </div>
-          <span className="text-[10px] font-bold text-slate-500">
+          <span className="text-[10px] font-bold text-slate-500 tabular-nums">
             {tujuanItems.length} Butir Tujuan
           </span>
         </div>

@@ -19,8 +19,7 @@ import {
   ListTodo, 
   Send, 
   AlertCircle,
-  FileCheck,
-  Sparkles
+  FileCheck
 } from 'lucide-react';
 
 export default function SubmitRevisionModal({ isOpen, onClose, proker, docType = 'proposal' }) {

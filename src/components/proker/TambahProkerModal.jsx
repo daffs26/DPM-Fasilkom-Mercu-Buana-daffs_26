@@ -21,7 +21,6 @@ import {
   DollarSign, 
   MapPin, 
   CheckCircle2, 
-  Sparkles,
   Plus,
   Trash2,
   Phone

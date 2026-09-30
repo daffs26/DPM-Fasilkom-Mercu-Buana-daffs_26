@@ -12,7 +12,6 @@ import {
   Trash2, 
   CheckSquare, 
   Square,
-  Sparkles,
   ListTodo
 } from 'lucide-react';
 
@@ -282,8 +281,8 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
                 {/* Quick Chips Preset */}
                 <div className="space-y-1.5 pt-1">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-800">
-                    <Sparkles className="w-3 h-3 text-amber-600" />
-                    <span>Rekomendasi Poin Revisi Cepat:</span>
+                    <ListTodo className="w-3.5 h-3.5 text-amber-600" />
+                    <span className="tracking-tight">Rekomendasi Poin Revisi Cepat:</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {COMMON_REVISION_PRESETS.map((preset, idx) => (

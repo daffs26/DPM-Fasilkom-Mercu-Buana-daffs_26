@@ -18,19 +18,30 @@ import {
   CheckCircle2, 
   Edit3,
   Save,
-  UploadCloud
+  UploadCloud,
+  Trash2,
+  Calendar
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 
 export default function TemplatePreviewModal({ isOpen, onClose, template }) {
-  const { templates, updateTemplate, incrementTemplateDownload } = useStore(useShallow(state => ({ templates: state.templates, updateTemplate: state.updateTemplate, incrementTemplateDownload: state.incrementTemplateDownload })));
+  const { templates, updateTemplate, deleteTemplate, incrementTemplateDownload, currentUser } = useStore(useShallow(state => ({ 
+    templates: state.templates, 
+    updateTemplate: state.updateTemplate, 
+    deleteTemplate: state.deleteTemplate,
+    incrementTemplateDownload: state.incrementTemplateDownload,
+    currentUser: state.currentUser
+  })));
+
+  const isGuest = currentUser?.role === 'guest';
   
   // Ambil data template paling mutakhir dari store berdasarkan ID
   const activeTemplate = templates.find(t => t.id === template?.id) || template;
 
   const [isCopied, setIsCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [updateMode, setUpdateMode] = useState('upload'); // 'upload' | 'text'
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
@@ -46,6 +57,7 @@ export default function TemplatePreviewModal({ isOpen, onClose, template }) {
       setEditTitle(activeTemplate.title || '');
       setEditContent(activeTemplate.contentPreview || activeTemplate.description || '');
       setIsEditing(false);
+      setIsConfirmDeleteOpen(false);
       setUpdateMode('upload');
       setUploadedFile(null);
       setIsDragging(false);
@@ -54,6 +66,14 @@ export default function TemplatePreviewModal({ isOpen, onClose, template }) {
   }, [activeTemplate?.id, isOpen]);
 
   if (!isOpen || !activeTemplate) return null;
+
+  const handleDeleteTemplate = () => {
+    if (activeTemplate) {
+      deleteTemplate(activeTemplate.id);
+      setIsConfirmDeleteOpen(false);
+      onClose();
+    }
+  };
 
   const handleStartEdit = () => {
     setEditTitle(activeTemplate.title || '');
@@ -195,6 +215,10 @@ export default function TemplatePreviewModal({ isOpen, onClose, template }) {
               <div className="flex items-center gap-1.5 flex-wrap">
                 <Badge variant="outline" className="text-[10px] font-semibold bg-white text-slate-700 border-slate-200 py-0 px-2">
                   {activeTemplate.category}
+                </Badge>
+                <Badge variant="outline" className="text-[10px] font-semibold bg-indigo-50 text-indigo-700 border-indigo-200/80 py-0 px-2 flex items-center gap-1">
+                  <Calendar className="w-2.5 h-2.5 text-indigo-500" />
+                  Periode {activeTemplate.periode || '2025/2026'}
                 </Badge>
                 {isEditing && (
                   <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
@@ -395,50 +419,87 @@ export default function TemplatePreviewModal({ isOpen, onClose, template }) {
 
         {/* Modal Footer: Info Ukuran File & Tombol Aksi Ramping */}
         <DialogFooter className="px-4 sm:px-6 py-2.5 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
-          {/* Info Ukuran File: Terlindungi & Tidak Pernah Tertutup */}
-          <div className="text-slate-500 text-xs font-medium shrink-0 flex items-center gap-1.5">
-            <span>Ukuran File: <strong className="text-slate-800 font-bold">{uploadedFile?.size || activeTemplate.fileSize}</strong></span>
-            {uploadedFile && (
-              <span className="text-blue-600 text-[10px] font-semibold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
-                Baru
+          {isConfirmDeleteOpen ? (
+            <div className="flex items-center justify-between w-full p-2.5 rounded-xl bg-rose-50 border border-rose-200">
+              <span className="text-xs font-semibold text-rose-800">
+                Hapus template "{activeTemplate.title}" dari daftar?
               </span>
-            )}
-          </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmDeleteOpen(false)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteTemplate}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-2xs cursor-pointer"
+                >
+                  Ya, Hapus
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Info Ukuran File: Terlindungi & Tidak Pernah Tertutup */}
+              <div className="text-slate-500 text-xs font-medium shrink-0 flex items-center gap-1.5">
+                <span>Ukuran File: <strong className="text-slate-800 font-bold">{uploadedFile?.size || activeTemplate.fileSize}</strong></span>
+                {uploadedFile && (
+                  <span className="text-blue-600 text-[10px] font-semibold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
+                    Baru
+                  </span>
+                )}
+              </div>
 
-          {/* Tombol Aksi: Ramping, Proporsional, Tidak Berdesakan */}
-          <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap justify-end w-full sm:w-auto">
-            {isEditing ? (
-              <>
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
-                >
-                  <X className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Batal</span>
-                </button>
+              {/* Tombol Aksi: Ramping, Proporsional, Tidak Berdesakan */}
+              <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap justify-end w-full sm:w-auto">
+                {isEditing ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+                    >
+                      <X className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Batal</span>
+                    </button>
 
-                <button
-                  type="button"
-                  onClick={handleSaveUpdate}
-                  className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Simpan Perubahan</span>
-                </button>
-              </>
-            ) : (
-              <>
-                {/* Fitur Update Template - Letaknya di KIRI button Salin Teks */}
-                <button
-                  type="button"
-                  onClick={handleStartEdit}
-                  className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 transition shrink-0"
-                  title="Update isi atau upload file template"
-                >
-                  <Edit3 className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Update Template</span>
-                </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveUpdate}
+                      className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Simpan Perubahan</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* Fitur Hapus Template */}
+                    {!isGuest && (
+                      <button
+                        type="button"
+                        onClick={() => setIsConfirmDeleteOpen(true)}
+                        className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 transition shrink-0 cursor-pointer"
+                        title="Hapus template dokumen ini"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                        <span>Hapus</span>
+                      </button>
+                    )}
+
+                    {/* Fitur Update Template - Letaknya di KIRI button Salin Teks */}
+                    <button
+                      type="button"
+                      onClick={handleStartEdit}
+                      className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 transition shrink-0"
+                      title="Update isi atau upload file template"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Update Template</span>
+                    </button>
 
                 {/* Button Salin Teks Template */}
                 <button
@@ -481,7 +542,9 @@ export default function TemplatePreviewModal({ isOpen, onClose, template }) {
               </>
             )}
           </div>
-        </DialogFooter>
+        </>
+      )}
+    </DialogFooter>
       </DialogContent>
     </Dialog>
   );

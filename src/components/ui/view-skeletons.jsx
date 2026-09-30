@@ -558,55 +558,54 @@ export function SuratPeringatanSkeleton() {
  */
 export function HistorySkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-4xl mx-auto pb-10">
       {/* Header */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div className="space-y-2">
           <Skeleton className="w-48 h-6" />
           <Skeleton className="w-72 h-4" />
         </div>
-        <Skeleton className="w-56 h-10 rounded-xl" />
+        <Skeleton className="w-64 h-10 rounded-2xl" />
       </div>
 
-      {/* Summary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <SkeletonCard className="p-4 flex items-center gap-4">
-          <Skeleton className="w-12 h-12 rounded-xl" />
-          <div className="space-y-1.5">
-            <Skeleton className="w-28 h-3.5" />
-            <Skeleton className="w-16 h-6" />
-          </div>
-        </SkeletonCard>
-        <SkeletonCard className="p-4 flex items-center gap-4">
-          <Skeleton className="w-12 h-12 rounded-xl" />
-          <div className="space-y-1.5">
-            <Skeleton className="w-28 h-3.5" />
-            <Skeleton className="w-16 h-6" />
-          </div>
-        </SkeletonCard>
-      </div>
-
-      {/* Timeline Card */}
-      <SkeletonCard className="p-6">
-        <div className="flex items-center justify-between mb-5">
-          <Skeleton className="w-40 h-5" />
-          <Skeleton className="w-20 h-7 rounded-lg" />
+      {/* Filter Tabs & Search Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-soft">
+        <div className="flex items-center gap-2">
+          <Skeleton className="w-20 h-8 rounded-xl" />
+          <Skeleton className="w-28 h-8 rounded-xl" />
+          <Skeleton className="w-24 h-8 rounded-xl" />
+          <Skeleton className="w-24 h-8 rounded-xl" />
         </div>
-        <div className="space-y-5">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex gap-4">
-              <Skeleton className="w-9 h-9 rounded-full shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <Skeleton className="w-48 h-4" />
-                  <Skeleton className="w-20 h-3" />
-                </div>
-                <Skeleton className="w-full h-3.5" />
+        <Skeleton className="w-full sm:w-64 h-8 rounded-xl" />
+      </div>
+
+      {/* Timeline Cards */}
+      <div className="space-y-0">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="relative">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <Skeleton className="w-32 h-3.5" />
+                <Skeleton className="w-20 h-5 rounded-lg" />
+              </div>
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-64 h-6" />
+                <Skeleton className="w-28 h-6 rounded-full" />
+              </div>
+              <Skeleton className="w-full h-12 rounded-lg" />
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <Skeleton className="w-36 h-7 rounded-xl" />
+                <Skeleton className="w-28 h-3.5" />
               </div>
             </div>
-          ))}
-        </div>
-      </SkeletonCard>
+            {i < 2 && (
+              <div className="flex justify-start pl-10 my-0">
+                <div className="w-[2px] h-6 bg-slate-200" />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -6,20 +6,20 @@ import {
   Plus, 
   Printer, 
   CheckCircle2, 
-  ShieldAlert, 
-  FileText, 
-  ArrowRight, 
-  Filter,
-  MessageSquare,
-  Send,
-  Clock,
-  ExternalLink
+  MessageSquare, 
+  Send 
 } from 'lucide-react';
-import KlarifikasiSPModal from './components/KlarifikasiSPModal';
-import ReviewKlarifikasiModal from './components/ReviewKlarifikasiModal';
+import KlarifikasiSPModal from './KlarifikasiSPModal';
+import ReviewKlarifikasiModal from './ReviewKlarifikasiModal';
 
 export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
-  const { suratPeringatan, ormawas, resolveSP, currentUser } = useStore(useShallow(state => ({ suratPeringatan: state.suratPeringatan, ormawas: state.ormawas, resolveSP: state.resolveSP, currentUser: state.currentUser })));
+  const { suratPeringatan, ormawas, resolveSP, currentUser } = useStore(useShallow(state => ({
+    suratPeringatan: state.suratPeringatan,
+    ormawas: state.ormawas,
+    resolveSP: state.resolveSP,
+    currentUser: state.currentUser
+  })));
+
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedSpForClarification, setSelectedSpForClarification] = useState(null);
   const [selectedSpForReview, setSelectedSpForReview] = useState(null);
@@ -37,6 +37,13 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
 
   const isGuest = currentUser?.role === 'guest';
   const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
+
+  const filterTabs = [
+    { id: 'all', label: 'Semua SP', count: suratPeringatan.length, activeCls: 'bg-slate-900 text-white shadow-xs', countActive: 'bg-white/20 text-white', countInactive: 'bg-slate-200 text-slate-700', inactiveCls: 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60' },
+    { id: 'active', label: 'SP Aktif', count: activeCount, activeCls: 'bg-rose-600 text-white shadow-xs', countActive: 'bg-white/20 text-white', countInactive: 'bg-rose-100 text-rose-700', inactiveCls: 'bg-slate-50 text-rose-700 hover:bg-rose-50 border border-slate-200/60' },
+    { id: 'clarification', label: 'Tanggapan Masuk', count: clarificationCount, activeCls: 'bg-amber-600 text-white shadow-xs', countActive: 'bg-white/20 text-white', countInactive: 'bg-amber-100 text-amber-800', inactiveCls: 'bg-slate-50 text-amber-800 hover:bg-amber-50 border border-slate-200/60' },
+    { id: 'resolved', label: 'Terselesaikan', count: resolvedCount, activeCls: 'bg-emerald-600 text-white shadow-xs', countActive: 'bg-white/20 text-white', countInactive: 'bg-emerald-100 text-emerald-700', inactiveCls: 'bg-slate-50 text-emerald-700 hover:bg-emerald-50 border border-slate-200/60' }
+  ];
 
   return (
     <div className="space-y-6">
@@ -84,71 +91,27 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
           </div>
         </div>
 
-        {/* Status Filter Tabs with Counts */}
+        {/* Status Filter Tabs */}
         <div className="flex items-center gap-2 pt-2 border-t border-slate-100 overflow-x-auto pb-1 hide-scrollbar -mx-0.5 px-0.5">
-          <button
-            onClick={() => setFilterStatus('all')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
-              filterStatus === 'all'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
-            }`}
-          >
-            <span>Semua SP</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
-              filterStatus === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-            }`}>
-              {suratPeringatan.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setFilterStatus('active')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
-              filterStatus === 'active'
-                ? 'bg-rose-600 text-white shadow-xs'
-                : 'bg-slate-50 text-rose-700 hover:bg-rose-50 border border-slate-200/60'
-            }`}
-          >
-            <span>SP Aktif</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
-              filterStatus === 'active' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-700'
-            }`}>
-              {activeCount}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setFilterStatus('clarification')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
-              filterStatus === 'clarification'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'bg-slate-50 text-amber-800 hover:bg-amber-50 border border-slate-200/60'
-            }`}
-          >
-            <span>Tanggapan Masuk</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
-              filterStatus === 'clarification' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'
-            }`}>
-              {clarificationCount}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setFilterStatus('resolved')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
-              filterStatus === 'resolved'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-slate-50 text-emerald-700 hover:bg-emerald-50 border border-slate-200/60'
-            }`}
-          >
-            <span>Terselesaikan</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
-              filterStatus === 'resolved' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
-            }`}>
-              {resolvedCount}
-            </span>
-          </button>
+          {filterTabs.map((tab) => {
+            const isSelected = filterStatus === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setFilterStatus(tab.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 ${
+                  isSelected ? tab.activeCls : tab.inactiveCls
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                  isSelected ? tab.countActive : tab.countInactive
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -159,7 +122,6 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
           const isActive = sp.status === 'active';
           const isClarification = sp.status === 'clarification_submitted';
           const isResolved = sp.status === 'resolved';
-
           const canClarify = !isGuest && !isResolved && (!isDpm || currentUser?.ormawaId === sp.ormawaId);
 
           return (
@@ -170,7 +132,6 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
               }`}
             >
               <div>
-                {/* Header SP */}
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-xl bg-slate-50 border border-slate-200 p-0.5 shrink-0 flex items-center justify-center">
@@ -192,7 +153,6 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                   </span>
                 </div>
 
-                {/* Nomor Surat & Judul */}
                 <span className="font-mono text-[10px] text-slate-600 block">
                   Nomor: {sp.noSurat}
                 </span>
@@ -200,7 +160,6 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                   {sp.title}
                 </h4>
 
-                {/* Rincian Alasan Pelanggaran */}
                 <div className="mt-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
                   <span className="font-bold text-slate-800 text-[11px] block">
                     Dasar Pertimbangan Legislatif:
@@ -213,7 +172,6 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                   </p>
                 </div>
 
-                {/* Tanggapan Ormawa (Jika ada) */}
                 {sp.clarification && (
                   <div className="mt-3 p-3 bg-blue-50/70 rounded-2xl border border-blue-200/80 text-xs space-y-1.5">
                     <div className="flex items-center justify-between">
@@ -241,49 +199,44 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                   </div>
                 )}
 
-                {/* Signer Info */}
-                <div className="mt-4 flex items-center justify-between text-[11px] text-slate-600">
+                <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-600 border-t border-slate-100/80 pt-2.5">
                   <span>Diterbitkan: <strong>{sp.date}</strong></span>
                   <span>Penandatangan: <strong>{sp.signer}</strong></span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+              <div className="mt-5 pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => onPrintDoc({ type: 'sp', ...sp })}
-                  className="flex-1 min-w-[120px] flex items-center justify-center gap-1.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                  className="min-h-[38px] flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5 text-amber-400" />
                   <span>Cetak Surat</span>
                 </button>
 
-                {/* Tombol Tinjau Tanggapan (Khusus DPM saat ada tanggapan masuk) */}
                 {isDpm && isClarification && (
                   <button
                     type="button"
                     onClick={() => setSelectedSpForReview(sp)}
-                    className="flex-1 min-w-[130px] flex items-center justify-center gap-1.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                    className="min-h-[38px] flex items-center justify-center gap-1.5 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>Tinjau Tanggapan</span>
                   </button>
                 )}
 
-                {/* Tombol Ajukan Klarifikasi (Khusus Ormawa pada SP aktif) */}
                 {canClarify && (
                   <button
                     type="button"
                     onClick={() => setSelectedSpForClarification(sp)}
-                    className="flex-1 min-w-[130px] flex items-center justify-center gap-1.5 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-xl text-xs font-bold transition cursor-pointer"
+                    className="min-h-[38px] flex items-center justify-center gap-1.5 py-2.5 px-3 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-xl text-xs font-bold transition cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5 text-amber-600" />
                     <span>{sp.clarification ? 'Update Tanggapan' : 'Beri Klarifikasi'}</span>
                   </button>
                 )}
 
-                {/* Tombol Tandai Selesai (Khusus DPM langsung tanpa klarifikasi atau resolusi manual) */}
                 {isDpm && isActive && (
                   <button
                     type="button"
@@ -292,7 +245,7 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                         resolveSP(sp.id);
                       }
                     }}
-                    className="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition cursor-pointer"
+                    className="min-h-[38px] flex items-center justify-center px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition cursor-pointer"
                     title="Selesaikan SP secara langsung"
                   >
                     Tandai Selesai
@@ -334,14 +287,12 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
         </div>
       )}
 
-      {/* Modal Klarifikasi SP oleh Ormawa */}
       <KlarifikasiSPModal
         isOpen={Boolean(selectedSpForClarification)}
         onClose={() => setSelectedSpForClarification(null)}
         sp={selectedSpForClarification}
       />
 
-      {/* Modal Tinjau Klarifikasi SP oleh DPM */}
       <ReviewKlarifikasiModal
         isOpen={Boolean(selectedSpForReview)}
         onClose={() => setSelectedSpForReview(null)}

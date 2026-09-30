@@ -14,7 +14,8 @@ import {
   FileText, 
   User, 
   Wallet,
-  FileCheck
+  FileCheck,
+  Camera
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -25,6 +26,7 @@ import DetailOverviewTab from './detail-tabs/TabRingkasan';
 import DetailPanitiaTab from './detail-tabs/TabPanitia';
 import DetailRundownTab from './detail-tabs/TabRundown';
 import DetailRabTab from './detail-tabs/TabRAB';
+import DetailDokumentasiTab from './detail-tabs/TabDokumentasi';
 import DetailLpjTab from './detail-tabs/TabLPJ';
 import ReceiptPreviewModal from './detail-tabs/PreviewKwitansiModal';
 
@@ -120,6 +122,9 @@ export default function DetailProkerModal({
   const [previewRabReceipt, setPreviewRabReceipt] = useState(null);
   const rabReceiptInputRef = useRef(null);
 
+  // Local states for Dokumentasi (Foto & Video)
+  const [mediaItems, setMediaItems] = useState(proker?.documentation || proker?.media || []);
+
   const handleRabReceiptChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -162,6 +167,7 @@ export default function DetailProkerModal({
       setPanitiaItems(proker.kepanitiaan || defaultPanitia);
       setRundownItems(proker.rundown || defaultRundown);
       setRabItems(proker.rabBreakdown || defaultRabBreakdown);
+      setMediaItems(proker.documentation || proker.media || []);
       setIsEditingDeskripsi(false);
       setIsAddingPanitia(false);
       setIsAddingRundown(false);
@@ -383,24 +389,37 @@ export default function DetailProkerModal({
     });
   };
 
+  // --- Handlers: Dokumentasi (Foto & Video) ---
+  const handleAddMedia = (newMedia) => {
+    const updated = [newMedia, ...mediaItems];
+    setMediaItems(updated);
+    updateProkerDetails(proker.id, { documentation: updated });
+  };
+
+  const handleDeleteMedia = (mediaId) => {
+    const updated = mediaItems.filter(m => m.id !== mediaId);
+    setMediaItems(updated);
+    updateProkerDetails(proker.id, { documentation: updated });
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="w-[96vw] sm:max-w-3xl p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xl max-h-[92vh] flex flex-col">
+        <DialogContent className="w-[96vw] sm:max-w-3xl p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xl max-h-[92dvh] flex flex-col">
           {/* Header Proker */}
           <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2 shrink-0">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${ormawa.color?.bg || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full border ${ormawa.color?.bg || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
                   {ormawa.shortName}
                 </span>
                 <span className="text-xs text-slate-500 font-medium">Divisi: {proker.divisi || 'BPH'}</span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadge.color}`}>
+                <span className={`text-[10px] font-bold tracking-tight px-2 py-0.5 rounded-full border ${statusBadge.color}`}>
                   {statusBadge.label}
                 </span>
               </div>
 
-              <span className="text-xs font-black text-slate-900 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
+              <span className="text-xs font-black text-slate-900 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs tabular-nums">
                 Anggaran: {formatRupiah(totalRabCurrent)}
               </span>
             </div>
@@ -412,31 +431,32 @@ export default function DetailProkerModal({
             {/* Quick Meta Chips */}
             <div className="flex items-center gap-2 sm:gap-4 text-xs text-slate-600 flex-wrap pt-0.5">
               <span className="flex items-center gap-1.5 font-medium">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                <span>{proker.startDate} {proker.endDate && proker.endDate !== proker.startDate ? `s/d ${proker.endDate}` : ''}</span>
+                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="tracking-tight">{proker.startDate} {proker.endDate && proker.endDate !== proker.startDate ? `s/d ${proker.endDate}` : ''}</span>
               </span>
               <span className="flex items-center gap-1.5 font-medium">
-                <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                <span>{proker.location || 'Kampus Fasilkom'}</span>
+                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="tracking-tight">{proker.location || 'Kampus Fasilkom'}</span>
               </span>
               <span className="flex items-center gap-1.5 font-medium">
-                <Users className="w-3.5 h-3.5 text-slate-400" />
-                <span>{proker.targetPeserta || 0} Target Peserta</span>
+                <Users className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="tabular-nums tracking-tight">{proker.targetPeserta || 0} Target Peserta</span>
               </span>
               <span className="flex items-center gap-1.5 font-medium">
-                <User className="w-3.5 h-3.5 text-slate-400" />
-                <span>PJ: {proker.pic || '-'}</span>
+                <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="tracking-tight">PJ: {proker.pic || '-'}</span>
               </span>
             </div>
           </DialogHeader>
 
           {/* Tab Bar Navigation */}
-          <div className="px-3 sm:px-6 border-b border-slate-200/80 bg-white flex items-center gap-1 overflow-x-auto hide-scrollbar shrink-0">
+          <div className="px-3 sm:px-6 border-b border-slate-200/80 bg-white flex items-center gap-1 overflow-x-auto hide-scrollbar shrink-0 select-none">
             {[
               { id: 'deskripsi', label: 'Deskripsi & Tujuan', icon: FileText },
               { id: 'panitia', label: 'Kepanitiaan', icon: Users, badge: panitiaItems.length },
               { id: 'rundown', label: 'Rundown Acara', icon: Clock, badge: rundownItems.length },
               { id: 'rab', label: 'RAB & Anggaran', icon: Wallet },
+              { id: 'media', label: 'Dokumentasi & Media', icon: Camera, badge: mediaItems.length },
               { id: 'lpj', label: 'LPJ & Proposal', icon: FileCheck, highlight: isLPJOverdue }
             ].map(tab => {
               const Icon = tab.icon;
@@ -446,16 +466,16 @@ export default function DetailProkerModal({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-2.5 sm:py-3 px-2.5 sm:px-3 text-xs font-bold border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  className={`min-h-[44px] py-2.5 sm:py-3 px-3 text-xs font-bold border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 cursor-pointer active:scale-95 ${
                     isActive 
                       ? 'border-slate-900 text-slate-900' 
                       : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-900' : 'text-slate-400'}`} />
-                  <span>{tab.label}</span>
+                  <span className="tracking-tight">{tab.label}</span>
                   {tab.badge !== undefined && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tabular-nums ${
                       isActive ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
                     }`}>
                       {tab.badge}
@@ -470,7 +490,7 @@ export default function DetailProkerModal({
           </div>
 
           {/* Tab Contents */}
-          <div className="p-3.5 sm:p-6 text-xs max-h-[calc(90vh-180px)] overflow-y-auto space-y-4">
+          <div className="flex-1 p-4 sm:p-6 text-xs overflow-y-auto space-y-4">
             {activeTab === 'deskripsi' && (
               <DetailOverviewTab
                 proker={proker}
@@ -544,6 +564,15 @@ export default function DetailProkerModal({
               />
             )}
 
+            {activeTab === 'media' && (
+              <DetailDokumentasiTab
+                proker={proker}
+                mediaItems={mediaItems}
+                onAddMedia={handleAddMedia}
+                onDeleteMedia={handleDeleteMedia}
+              />
+            )}
+
             {activeTab === 'lpj' && (
               <DetailLpjTab
                 proker={proker}
@@ -558,14 +587,14 @@ export default function DetailProkerModal({
           </div>
 
           {/* Modal Footer */}
-          <DialogFooter className="px-4 sm:px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between gap-2">
-            <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+          <DialogFooter className="px-4 sm:px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between gap-2 shrink-0">
+            <span className="text-[11px] text-slate-400 font-medium hidden sm:inline tracking-normal">
               AUDITMAWA DPM FASILKOM • Rincian Program Kerja
             </span>
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition shadow-xs cursor-pointer text-center"
+              className="w-full sm:w-auto min-h-[40px] h-10 px-5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition shadow-xs cursor-pointer text-center active:scale-95 tracking-tight"
             >
               Tutup
             </button>

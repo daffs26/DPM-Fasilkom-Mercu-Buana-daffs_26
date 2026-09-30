@@ -10,6 +10,7 @@ export const INITIAL_TEMPLATES = [
     fileSize: '148 KB',
     downloadCount: 42,
     updatedAt: '2026-08-15',
+    periode: '2025/2026',
     isOfficial: true,
     isCustom: false,
     author: 'DPM FASILKOM UMB',
@@ -66,12 +67,13 @@ NIM. 41824010013`
   {
     id: 'tpl-sidang-umum',
     title: 'Dokumen & Tata Tertib Sidang Umum',
-    category: 'Persidangan',
+    category: 'Persidangan Ormawa',
     categorySlug: 'persidangan',
     format: 'DOCX',
     fileSize: '320 KB',
     downloadCount: 29,
     updatedAt: '2026-07-20',
+    periode: '2025/2026',
     isOfficial: true,
     isCustom: false,
     author: 'Komisi Legislasi DPM FASILKOM',
@@ -126,6 +128,7 @@ Presidium III (Anggota)   : [NAMA_PRESIDIUM_3] (NIM. [NIM_3])`
     fileSize: '410 KB',
     downloadCount: 68,
     updatedAt: '2026-08-01',
+    periode: '2025/2026',
     isOfficial: true,
     isCustom: false,
     author: 'Biro Kemitraan DPM & BEM',
@@ -178,6 +181,7 @@ NIM. [NIM_KETUA]                         NIM. [NIM_SPONSOR]`
     fileSize: '165 KB',
     downloadCount: 54,
     updatedAt: '2026-08-10',
+    periode: '2026/2027',
     isOfficial: true,
     isCustom: false,
     author: 'Bagian Sarana Prasarana Fasilkom',
@@ -233,6 +237,7 @@ Kepala Subbagian Umum & Sarpras Kampus Meruya UMB
     fileSize: '480 KB',
     downloadCount: 76,
     updatedAt: '2026-08-25',
+    periode: '2025/2026',
     isOfficial: true,
     isCustom: false,
     author: 'Komisi Audit Keuangan DPM FASILKOM',
@@ -294,6 +299,7 @@ LAMPIRAN WAJIB:
     fileSize: '155 KB',
     downloadCount: 38,
     updatedAt: '2026-08-18',
+    periode: '2026/2027',
     isOfficial: true,
     isCustom: false,
     author: 'DPM & BEM FASILKOM',
@@ -338,6 +344,169 @@ Panitia Pelaksana [NAMA_PROGRAM_KERJA]
 Ketua Pelaksana,                         Koordinator Divisi Acara,
 [NAMA_KETUA_PELAKSANA]                   [NAMA_KOORDINATOR_ACARA]
 NIM. [NIM_KETUA]                         NIM. [NIM_ACARA]`
+  },
+  {
+    id: 'tpl-izin-kegiatan-2026',
+    title: 'Surat Permohonan Izin Kegiatan Ormawa Kampus',
+    category: 'Perizinan & Dispensasi',
+    categorySlug: 'dispensasi',
+    format: 'DOCX',
+    fileSize: '162 KB',
+    downloadCount: 28,
+    updatedAt: '2026-09-02',
+    periode: '2026/2027',
+    isOfficial: true,
+    isCustom: false,
+    author: 'Biro Administrasi DPM FASILKOM',
+    description: 'Format baku pengajuan perizinan acara ormawa ke pimpinan Fakultas Ilmu Komputer UMB untuk periode 2026/2027.',
+    tags: ['Izin Kegiatan', 'Proposal Acara', 'Dekanat', '2026/2027'],
+    fields: [
+      '[Nama Ormawa]',
+      '[Nama Kegiatan]',
+      '[Tanggal & Lokasi Kegiatan]',
+      '[Jumlah Peserta Estimasi]',
+      '[Penanggung Jawab Acara]'
+    ],
+    contentPreview: `SURAT PERMOHONAN IZIN KEGIATAN KEMAHASISWAAN
+Nomor: [NOMOR_SURAT]/IZIN/[ORMAWA]/FASILKOM-UMB/2026
+
+Kepada Yth.
+Wakil Dekan Bidang Kemahasiswaan & Kerjasama
+Fakultas Ilmu Komputer Universitas Mercu Buana
+Di Tempat
+
+Dengan hormat,
+Dalam rangka pelaksanaan program kerja [NAMA_ORMAWA] Periode 2026/2027, kami bermaksud menyelenggarakan kegiatan kemahasiswaan:
+
+Nama Kegiatan  : [NAMA_KEGIATAN]
+Waktu          : [WAKTU_PELAKSANAAN]
+Tempat         : [TEMPAT_PELAKSANAAN]
+Target Peserta : [TARGET_PESERTA] Mahasiswa
+
+Sehubungan dengan hal tersebut, kami memohon izin dan dukungan dari pihak Dekanat demi kelancaran kegiatan ini.
+
+Demikian permohonan ini kami sampaikan. Atas perhatian dan izin yang diberikan, kami ucapkan terima kasih.
+
+Hormat kami,
+Ketua [NAMA_ORMAWA]                      Ketua Pelaksana
+[NAMA_KETUA]                             [NAMA_KETUA_PELAKSANA]`
+  },
+  {
+    id: 'tpl-ba-sidang-pleno-2026',
+    title: 'Berita Acara & Lembar Pengesahan Sidang Pleno',
+    category: 'Persidangan Ormawa',
+    categorySlug: 'persidangan',
+    format: 'DOCX',
+    fileSize: '215 KB',
+    downloadCount: 21,
+    updatedAt: '2026-09-08',
+    periode: '2026/2027',
+    isOfficial: true,
+    isCustom: false,
+    author: 'Komisi Legislasi DPM FASILKOM',
+    description: 'Format berita acara resmi ketetapan hasil rapat koordinasi dan sidang pleno ormawa Fasilkom UMB periode 2026/2027.',
+    tags: ['Berita Acara', 'Sidang Pleno', 'Pengesahan', 'DPM', '2026/2027'],
+    fields: [
+      '[Nama Forum Persidangan]',
+      '[Hari dan Tanggal Sidang]',
+      '[Hasil Musyawarah]',
+      '[Tanda Tangan Presidium Sidang]'
+    ],
+    contentPreview: `BERITA ACARA SIDANG PLENO KEMAHASISWAAN
+FAKULTAS ILMU KOMPUTER UNIVERSITAS MERCU BUANA
+PERIODE 2026/2027
+
+Pada hari ini [HARI], tanggal [TANGGAL_LENGKAP], telah dilaksanakan Sidang Pleno Kemahasiswaan bertempat di [RUANG_SIDANG].
+
+Berdasarkan hasil musyawarah dan pembahasan bersama seluruh delegasi, disepakati ketetapan sebagai berikut:
+1. Menyetujui dan mengesahkan seluruh agenda kegiatan kerja berjalan.
+2. Menetapkan rekomendasi teknis perbaikan administrasi dan tata kelola ormawa.
+
+Demikian berita acara ini dibuat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana mestinya.
+
+Presidium Sidang:
+1. [NAMA_PRESIDIUM_1] (Ketua)
+2. [NAMA_PRESIDIUM_2] (Sekretaris)
+3. [NAMA_PRESIDIUM_3] (Anggota)`
+  },
+  {
+    id: 'tpl-mou-kemitraan-2026',
+    title: 'Perjanjian Kerjasama & MoU Kemitraan Ormawa',
+    category: 'Sponsorship & Kemitraan',
+    categorySlug: 'sponsorship',
+    format: 'DOCX',
+    fileSize: '295 KB',
+    downloadCount: 26,
+    updatedAt: '2026-09-15',
+    periode: '2026/2027',
+    isOfficial: true,
+    isCustom: false,
+    author: 'Biro Kemitraan DPM & BEM',
+    description: 'Draf nota kesepahaman (MoU) resmi antara pihak Ormawa dan Mitra Perusahaan/Sponsor untuk program kerja periode 2026/2027.',
+    tags: ['MoU', 'Sponsorship', 'Kerjasama Mitra', '2026/2027'],
+    fields: [
+      '[Pihak Pertama / Ormawa]',
+      '[Pihak Kedua / Perusahaan Mitra]',
+      '[Bentuk Kerjasama & Benefit]',
+      '[Jangka Waktu Perjanjian]'
+    ],
+    contentPreview: `SURAT PERJANJIAN KERJASAMA (MEMORANDUM OF UNDERSTANDING)
+ANTARA
+[NAMA_ORMAWA] FAKULTAS ILMU KOMPUTER UNIVERSITAS MERCU BUANA
+DENGAN
+[NAMA_PERUSAHAAN_MITRA]
+Nomor: [NOMOR_MOU]/MOU/FASILKOM-UMB/2026
+
+Pada hari ini [HARI], [TANGGAL], kami yang bertanda tangan di bawah ini:
+1. Pihak Pertama: [NAMA_WAKIL_ORMAWA], bertindak untuk dan atas nama [NAMA_ORMAWA].
+2. Pihak Kedua: [NAMA_WAKIL_PERUSAHAAN], bertindak untuk dan atas nama [NAMA_PERUSAHAAN_MITRA].
+
+Kedua belah pihak sepakat mengadakan kerjasama kemitraan sponsorship dalam program [NAMA_PROGRAM_KERJA] dengan ketentuan hak dan kewajiban sebagaimana tercantum dalam pasal-pasal perjanjian ini.
+
+Pihak Pertama,                            Pihak Kedua,
+[NAMA_WAKIL_ORMAWA]                       [NAMA_WAKIL_PERUSAHAAN]`
+  },
+  {
+    id: 'tpl-lpj-komprehensif-2026',
+    title: 'Format LPJ Terpadu & Audit Keuangan Ormawa',
+    category: 'LPJ & Keuangan',
+    categorySlug: 'lpj',
+    format: 'DOCX',
+    fileSize: '510 KB',
+    downloadCount: 35,
+    updatedAt: '2026-09-18',
+    periode: '2026/2027',
+    isOfficial: true,
+    isCustom: false,
+    author: 'Komisi Audit Keuangan DPM FASILKOM',
+    description: 'Format LPJ terstandarisasi untuk periode kepengurusan 2026/2027 dilengkapi modul evaluasi kendala dan verifikasi kuitansi digital.',
+    tags: ['LPJ', 'Audit Keuangan', '2026/2027', 'Akuntabilitas'],
+    fields: [
+      '[Ringkasan Eksekutif]',
+      '[Tabel Realisasi Biaya]',
+      '[Evaluasi Per Divisi]',
+      '[Lampiran Bukti Pengeluaran]'
+    ],
+    contentPreview: `FORMAT LAPORAN PERTANGGUNGJAWABAN (LPJ) TERPADU
+KOMISI AUDIT KEUANGAN DPM FASILKOM UNIVERSITAS MERCU BUANA
+PERIODE 2026/2027
+
+I. RINGKASAN EKSEKUTIF PELAKSANAAN KEGIATAN
+Nama Kegiatan: [NAMA_KEGIATAN]
+Waktu Pelaksanaan: [WAKTU_PELAKSANAAN]
+Total Anggaran Diajukan: Rp [NOMINAL_RAB]
+Total Realisasi Pengeluaran: Rp [NOMINAL_REALISASI]
+Sisa Saldo Kas: Rp [SISA_SALDO]
+
+II. BUKU KAS PENGELUARAN REALISASI
+(Daftar transaksi pengeluaran wajib disertai nomor bukti dan kuitansi digital)
+
+III. EVALUASI DAN REKOMENDASI KEPENGURUSAN
+Catatan perbaikan dan rekomendasi tindak lanjut bagi program berikutnya.
+
+Mengetahui,
+Bendahara Pelaksana                       Ketua Pelaksana
+[NAMA_BENDAHARA]                          [NAMA_KETUA]`
   }
 ];
 
@@ -348,4 +517,10 @@ export const TEMPLATE_CATEGORIES = [
   { id: 'sponsorship', label: 'Sponsorship & Kemitraan', icon: 'Handshake' },
   { id: 'ruangan', label: 'Sarana & Peminjaman Ruangan', icon: 'Building' },
   { id: 'lpj', label: 'LPJ & Keuangan', icon: 'FileSpreadsheet' }
+];
+
+export const TEMPLATE_PERIODES = [
+  { id: 'all', label: 'Semua Periode' },
+  { id: '2025/2026', label: 'Periode 2025/2026' },
+  { id: '2026/2027', label: 'Periode 2026/2027' }
 ];
