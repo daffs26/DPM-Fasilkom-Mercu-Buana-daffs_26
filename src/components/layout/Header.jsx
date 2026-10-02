@@ -33,7 +33,7 @@ import {
   Trash2
 } from 'lucide-react';
 import ProfileModal from './ProfileModal';
-import KelolaHapusProkerModal from '@/components/proker/KelolaHapusProkerModal';
+import { KelolaHapusProkerModal } from '@/components/proker/ProkerHapusModal';
 
 const ORMAWA_ORDER = ['dpm', 'bem', 'himti', 'himsisfo'];
 

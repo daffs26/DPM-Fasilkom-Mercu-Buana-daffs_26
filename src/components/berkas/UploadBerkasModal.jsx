@@ -22,6 +22,7 @@ import {
   FileCheck2,
   Files
 } from 'lucide-react';
+import { formatDateIndo } from '@/utils/formatters';
 
 export default function UploadBerkasModal({ isOpen, onClose, defaultOrmawaId = 'bem' }) {
   const { ormawas, prokers, uploadProposal, uploadLPJ, uploadOtherDoc, addProker, currentUser } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, uploadProposal: state.uploadProposal, uploadLPJ: state.uploadLPJ, uploadOtherDoc: state.uploadOtherDoc, addProker: state.addProker, currentUser: state.currentUser })));
@@ -155,55 +156,75 @@ export default function UploadBerkasModal({ isOpen, onClose, defaultOrmawaId = '
     onClose();
   };
 
+  const currentOrmawaObj = ormawas.find(o => o.id === ormawaId);
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-xl p-0 overflow-hidden rounded-3xl">
-        {/* Header */}
-        <DialogHeader className="px-6 pt-5 pb-3 border-b border-slate-100 bg-slate-50/50 space-y-1.5">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
-              DPM FASILKOM UMB
-            </Badge>
-            <span className="text-xs text-slate-600 font-medium">Transparansi Berkas</span>
-          </div>
-          <DialogTitle className="text-lg font-bold text-slate-900 tracking-tight">
-            Form Upload Berkas Ormawa
-          </DialogTitle>
-          <DialogDescription className="text-xs text-slate-500">
-            Unggah dokumen proposal kegiatan, laporan pertanggungjawaban (LPJ), atau dokumen administrasi lainnya untuk ditinjau oleh DPM.
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Body Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-4 overflow-y-auto space-y-4 text-xs max-h-[calc(85vh-130px)]">
-          {/* 1. Pemilihan Ormawa Pengunggah */}
-          <div>
-            <label className="font-bold text-slate-700 block mb-2">
-              1. Ormawa Penyelenggara:
-            </label>
-            <div className="grid grid-cols-4 gap-2">
-              {ormawas.map((o) => {
-                const isSelected = ormawaId === o.id;
-                return (
-                  <button
-                    key={o.id}
-                    type="button"
-                    onClick={() => setOrmawaId(o.id)}
-                    className={`p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
-                      isSelected
-                        ? 'border-blue-600 bg-blue-50/80 text-blue-900 font-bold shadow-xs ring-2 ring-blue-200'
-                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <div className="w-6 h-6 rounded-lg bg-white p-0.5 border border-slate-100 flex items-center justify-center">
-                      <img src={o.logo} alt={o.name} className="w-full h-full object-contain" />
-                    </div>
-                    <span className="text-xs font-bold">{o.shortName}</span>
-                  </button>
-                );
-              })}
+      <DialogContent className="w-[95vw] sm:max-w-xl p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xl max-h-[92dvh] flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Header Sticky */}
+          <DialogHeader className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 bg-white shrink-0 space-y-1">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] font-bold">
+                DPM FASILKOM UMB
+              </Badge>
+              <span className="text-xs text-slate-500 font-medium">Transparansi Berkas</span>
             </div>
-          </div>
+            <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+              Form Upload Berkas Ormawa
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-600">
+              Unggah dokumen proposal kegiatan, laporan pertanggungjawaban (LPJ), atau dokumen administrasi lainnya untuk ditinjau oleh DPM.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Body Scrollable */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4 text-xs">
+          {/* 1. Pemilihan Ormawa Pengunggah */}
+          {currentUser?.ormawaId === 'dpm' ? (
+            <div>
+              <label className="font-bold text-slate-700 block mb-1.5">
+                Ormawa Penyelenggara:
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {ormawas.map((o) => {
+                  const isSelected = ormawaId === o.id;
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      onClick={() => setOrmawaId(o.id)}
+                      className={`p-2 sm:p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 transition cursor-pointer ${
+                        isSelected
+                          ? 'border-blue-600 bg-blue-50/80 text-blue-900 font-bold shadow-2xs ring-1 ring-blue-300'
+                          : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-white p-0.5 border border-slate-100 flex items-center justify-center">
+                        <img src={o.logo} alt={o.name} className="w-full h-full object-contain" />
+                      </div>
+                      <span className="text-[11px] font-bold">{o.shortName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="p-2.5 sm:p-3 rounded-xl border border-slate-200/90 bg-slate-50/70 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white border border-slate-200 p-0.5 shadow-2xs flex items-center justify-center">
+                  <img src={currentOrmawaObj?.logo} alt="" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Ormawa Pengunggah</span>
+                  <span className="text-xs font-bold text-slate-900">{currentOrmawaObj?.name}</span>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-[10px] font-bold bg-white text-blue-700 border-blue-200">
+                Resmi
+              </Badge>
+            </div>
+          )}
 
           {/* 2. Jenis Dokumen */}
           <div>
@@ -296,7 +317,7 @@ export default function UploadBerkasModal({ isOpen, onClose, defaultOrmawaId = '
                 onChange={(val) => setSelectedProkerId(val)}
                 options={availableProkers.map(p => ({
                   value: p.id,
-                  label: `${p.title} (Pelaksanaan: ${p.startDate})`
+                  label: `${p.title} (Pelaksanaan: ${formatDateIndo(p.startDate)})`
                 }))}
                 triggerClassName="py-2.5 px-3 font-semibold text-xs"
               />
@@ -448,24 +469,26 @@ export default function UploadBerkasModal({ isOpen, onClose, defaultOrmawaId = '
             />
           </div>
 
-          {/* Footer Action */}
-          <DialogFooter className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
+          </div>
+
+          {/* Sticky Modal Footer */}
+          <div className="p-3 sm:px-6 sm:py-3.5 border-t border-slate-100 bg-slate-50/80 sm:bg-white shrink-0 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-2.5">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="rounded-xl text-xs"
+              className="rounded-xl h-10 w-full sm:w-auto font-bold text-xs cursor-pointer"
             >
               Batal
             </Button>
             <Button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-10 w-full sm:w-auto text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
             >
               <UploadCloud className="w-4 h-4" />
               <span>Upload Berkas Sekarang</span>
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

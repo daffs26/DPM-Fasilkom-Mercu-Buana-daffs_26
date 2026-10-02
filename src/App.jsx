@@ -25,7 +25,7 @@ const AddProkerModal = lazy(() => import('./components/proker/TambahProkerModal'
 const ReviewProposalModal = lazy(() => import('./components/proker/ReviewProposalModal'));
 const DetailProkerModal = lazy(() => import('./components/proker/DetailProkerModal'));
 const AuditLPJModal = lazy(() => import('./components/audit/AuditLpjModal'));
-const IssueSPModal = lazy(() => import('./components/sp/TerbitkanSPModal'));
+const IssueSPModal = lazy(() => import('./components/sp/SuratPeringatanModals'));
 const PrintDocModal = lazy(() => import('./components/print/PrintDocModal'));
 const SetPaguModal = lazy(() => import('./components/anggaran/AturPaguModal'));
 const AddTransactionModal = lazy(() => import('./components/anggaran/TambahTransaksiModal'));
@@ -41,7 +41,7 @@ import {
   SuratPeringatanSkeleton,
   HistorySkeleton,
   GenericPageSkeleton
-} from './components/ui/view-skeletons';
+} from './components/ui/skeleton';
 
 function ViewLoadingFallback({ tab }) {
   switch (tab) {
@@ -71,13 +71,28 @@ function ViewLoadingFallback({ tab }) {
 class RouteErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
   componentDidCatch(error, errorInfo) {
     console.error('Route error caught:', error, errorInfo);
+    // Jika kegagalan disebabkan oleh versi build baru (chunk hash usang), otomatis refresh sekali
+    const isChunkError = 
+      error?.name === 'ChunkLoadError' ||
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.message?.includes('Importing a module script failed') ||
+      error?.message?.includes('Loading chunk');
+
+    if (isChunkError && typeof window !== 'undefined') {
+      const lastReload = window.sessionStorage.getItem('auditmawa_chunk_reload');
+      const now = Date.now();
+      if (!lastReload || now - parseInt(lastReload, 10) > 15000) {
+        window.sessionStorage.setItem('auditmawa_chunk_reload', String(now));
+        window.location.reload();
+      }
+    }
   }
   render() {
     if (this.state.hasError) {
@@ -87,19 +102,36 @@ class RouteErrorBoundary extends React.Component {
             <AlertCircle className="w-6 h-6" />
           </div>
           <h3 className="font-extrabold text-slate-900 text-base">Terjadi Kendala Memuat Halaman</h3>
-          <p className="text-xs text-slate-500 mt-1.5 mb-4">
-            Silakan coba muat ulang atau kembali ke Dashboard.
+          <p className="text-xs text-slate-500 mt-1.5 mb-5 leading-relaxed">
+            Halaman mungkin telah diperbarui ke versi terbaru atau terdapat kendala modul. Silakan muat ulang halaman untuk memperbarui aset aplikasi.
           </p>
-          <button
-            type="button"
-            onClick={() => {
-              this.setState({ hasError: false });
-              window.location.href = '/dashboard';
-            }}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
-          >
-            Kembali ke Dashboard
-          </button>
+          <div className="flex items-center justify-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.reload();
+              }}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
+            >
+              Muat Ulang Halaman
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.href = '/dashboard';
+              }}
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer"
+            >
+              Kembali ke Dashboard
+            </button>
+          </div>
+          {import.meta.env.DEV && this.state.error && (
+            <p className="mt-4 text-[10px] font-mono text-rose-500 bg-rose-50 p-2 rounded-lg text-left overflow-x-auto">
+              {this.state.error.toString()}
+            </p>
+          )}
         </div>
       );
     }

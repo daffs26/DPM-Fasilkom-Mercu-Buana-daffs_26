@@ -9,8 +9,7 @@ import {
   MessageSquare, 
   Send 
 } from 'lucide-react';
-import KlarifikasiSPModal from './KlarifikasiSPModal';
-import ReviewKlarifikasiModal from './ReviewKlarifikasiModal';
+import { KlarifikasiSPModal, ReviewKlarifikasiModal } from './SuratPeringatanModals';
 
 export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
   const { suratPeringatan, ormawas, resolveSP, currentUser } = useStore(useShallow(state => ({
@@ -72,9 +71,6 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                   </span>
                 )}
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed">
-                Pengawasan kedisiplinan administratif, tenggat proposal, dan pelaporan LPJ ormawa.
-              </p>
             </div>
           </div>
 
@@ -161,8 +157,8 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                 </h4>
 
                 <div className="mt-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
-                  <span className="font-bold text-slate-800 text-[11px] block">
-                    Dasar Pertimbangan Legislatif:
+                  <span className="font-bold text-slate-700 text-[11px] block">
+                    Pertimbangan:
                   </span>
                   <p className="text-slate-700 text-xs leading-relaxed">
                     {sp.reason}
@@ -264,17 +260,17 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
             {filterStatus === 'all'
               ? 'Tidak Ada Surat Peringatan'
               : filterStatus === 'active'
-              ? 'Tidak Ada Surat Peringatan yang Sedang Aktif'
+              ? 'Tidak Ada SP Aktif'
               : filterStatus === 'clarification'
-              ? 'Belum Ada Tanggapan atau Klarifikasi Baru'
-              : 'Belum Ada Surat Peringatan yang Ditandai Terselesaikan'}
+              ? 'Tidak Ada Tanggapan Menunggu'
+              : 'Belum Ada Riwayat Penyelesaian SP'}
           </h4>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
             {filterStatus === 'active'
-              ? 'Seluruh ormawa Fasilkom saat ini tertib administratif dan mematuhi tenggat proker.'
+              ? 'Seluruh ormawa tertib administratif.'
               : filterStatus === 'clarification'
-              ? 'Tidak ada klarifikasi atau tanggapan SP yang menunggu persetujuan komisi DPM.'
-              : 'Daftar riwayat SP akan tampil di sini setelah ada surat yang diselesaikan.'}
+              ? 'Tidak ada tanggapan yang menunggu review.'
+              : 'Daftar riwayat SP akan tampil di sini.'}
           </p>
           {filterStatus !== 'all' && (
             <button

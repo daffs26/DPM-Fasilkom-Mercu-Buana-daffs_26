@@ -204,7 +204,7 @@ export default function TemplateView() {
               type="text"
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              placeholder="Cari nama template, format (.docx/.pdf), atau kata kunci..."
+              placeholder="Cari template dokumen..."
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-9 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 transition font-medium"
             />
             {localSearch && (
@@ -369,16 +369,16 @@ export default function TemplateView() {
         <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-soft">
           <Files className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-sm font-extrabold text-slate-800">
-            Tidak Ditemukan Template Dokumen
+            Tidak Ditemukan Template
           </h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-            Tidak ada dokumen yang cocok dengan filter atau kata kunci pencarian Anda. Coba kata kunci lain atau unggah template baru.
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            Tidak ada dokumen yang sesuai filter.
           </p>
           <button
             onClick={() => { setSelectedCategory('all'); setSelectedPeriode('all'); setLocalSearch(''); setSearchQuery(''); }}
-            className="mt-4 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+            className="mt-3.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
           >
-            Reset Filter Pencarian
+            Reset Filter
           </button>
         </div>
       )}

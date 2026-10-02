@@ -4,10 +4,9 @@ import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { 
-  Clock, 
+  Clock,
   RotateCcw, 
   ShieldCheck, 
   FileText, 
@@ -16,8 +15,8 @@ import {
   Layers, 
   ArrowRight 
 } from 'lucide-react';
-import { formatRupiah } from '@/utils/formatters';
-import TamuGuideCard from '@/components/tamu/TamuGuideCard';
+import { formatRupiah, formatDateIndo } from '@/utils/formatters';
+import { TamuGuideCard } from '@/components/tamu/TamuComponents';
 
 function ProposalBadge({ proposal }) {
   if (proposal?.reviewStatus === 'approved') {
@@ -62,16 +61,13 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Indeks Kinerja Ormawa (Scorecard)</h3>
+            <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Indeks Kinerja Ormawa</h3>
             {isFiltered && activeOrmawa && (
               <span className="text-[10px] font-extrabold text-blue-700 bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-full">
                 Filter: {activeOrmawa.shortName}
               </span>
             )}
           </div>
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            Pilih ormawa untuk melihat rincian metrik kedisiplinan dan kepatuhan proker
-          </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
@@ -155,18 +151,6 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
             </div>
           );
         })}
-      </div>
-
-      <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-2 min-w-0">
-          <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-          <p className="text-[11px] text-slate-600 truncate">
-            <span className="font-bold text-slate-800">Ketentuan SLA:</span> Proposal <span className="font-bold text-slate-900">≥ H-14</span> • LPJ <span className="font-bold text-slate-900">≤ H+14</span>
-          </p>
-        </div>
-        <p className="text-[10.5px] text-slate-400 shrink-0 text-right">
-          Nilai akhir ditentukan melalui Sidang Pleno LPJ Komisi Audit
-        </p>
       </div>
     </Card>
   );
@@ -272,11 +256,10 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
   const isGuest = currentUser?.role === 'guest';
 
   return (
-    <Card className="lg:col-span-2 rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft">
+    <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft">
       <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
         <div>
           <h3 className="font-extrabold text-slate-900 text-sm">Status Pengawasan Program Kerja</h3>
-          <p className="text-[11px] text-slate-500 mt-0.5">Monitoring berkas proposal, inspeksi hari-H, dan audit LPJ</p>
         </div>
       </div>
 
@@ -300,9 +283,6 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                       <Layers className="w-6 h-6 stroke-[1.8]" />
                     </div>
                     <h4 className="text-sm font-extrabold text-slate-900">Belum Ada Program Kerja</h4>
-                    <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 font-normal">
-                      Daftarkan kegiatan baru atau ganti filter ormawa untuk melihat status monitoring berkas.
-                    </p>
                     {!isGuest && (
                       <Button onClick={onOpenAddProker} className="mt-3" size="sm">
                         + Tambah Proker Baru
@@ -327,7 +307,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 pr-3 text-slate-600 font-medium text-[11px]">{p.startDate}</TableCell>
+                    <TableCell className="py-3 pr-3 text-slate-600 font-medium text-[11px] whitespace-nowrap">{formatDateIndo(p.startDate)}</TableCell>
                     <TableCell className="py-3 pr-3"><ProposalBadge proposal={p.proposal} /></TableCell>
                     <TableCell className="py-3 pr-3"><LpjBadge status={p.status} lpj={p.lpj} /></TableCell>
                     <TableCell className="py-3 text-right">
@@ -418,48 +398,70 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
 
 function DashboardBudgetCard({ totalSerapan, totalPagu, serapanPercent, ormawas }) {
   return (
-    <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft flex flex-col justify-between">
-      <div>
-        <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-slate-100">
-          <div className="min-w-0 flex-1">
-            <h3 className="font-extrabold text-slate-900 text-[13px] sm:text-sm leading-tight">Serapan Dana Kemahasiswaan</h3>
-            <p className="text-[11px] text-slate-500 mt-0.5">Alokasi Anggaran Fakultas 2026</p>
+    <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 border-b border-slate-100 text-left">
+        <div>
+          <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight text-left">Serapan Dana Kemahasiswaan</h3>
+          <p className="text-[11px] text-slate-500 mt-0.5 text-left">Alokasi Anggaran Fakultas 2026</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/60 self-start sm:self-auto">
+          <span>Realisasi Total: <strong className="text-blue-600">{formatRupiah(totalSerapan)}</strong></span>
+          <span className="text-slate-300">•</span>
+          <span className="text-slate-500 font-bold">{serapanPercent}%</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 my-5 items-stretch">
+        <div className="lg:col-span-4 p-4 sm:p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex flex-col justify-between">
+          <div>
+            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">TOTAL REALISASI DANA</span>
+            <h4 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">{formatRupiah(totalSerapan)}</h4>
+            <p className="text-[11px] text-slate-500 mt-0.5">dari total alokasi anggaran {formatRupiah(totalPagu)}</p>
           </div>
-          <Badge variant="secondary" className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200/60 shrink-0 whitespace-nowrap">
-            {serapanPercent}% Terserap
-          </Badge>
+
+          <div className="mt-4">
+            <div className="w-full bg-slate-200/80 h-2.5 rounded-full overflow-hidden">
+              <div 
+                className="bg-blue-600 h-full rounded-full transition-all duration-500" 
+                style={{ width: `${Math.min(serapanPercent, 100)}%` }} 
+              />
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mt-1.5">
+              <span>0%</span>
+              <span className="text-blue-600 font-extrabold">{serapanPercent}% Terserap</span>
+              <span>100%</span>
+            </div>
+          </div>
         </div>
 
-        <div className="my-4">
-          <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">TOTAL REALISASI DANA</span>
-          <h4 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">{formatRupiah(totalSerapan)}</h4>
-          <p className="text-[11px] text-slate-500 mt-0.5">dari total anggaran {formatRupiah(totalPagu)}</p>
-
-          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-3">
-            <div className="bg-blue-600 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(serapanPercent, 100)}%` }} />
-          </div>
-        </div>
-
-        <div className="space-y-2.5 pt-1">
-          {ormawas.map(o => {
+        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {ormawas.map((o) => {
             const pct = o.paguAnggaran > 0 ? Math.round((o.serapanAnggaran / o.paguAnggaran) * 100) : 0;
             return (
-              <div key={o.id} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
+              <div 
+                key={o.id} 
+                className="p-3.5 rounded-2xl border border-slate-200/80 bg-white hover:border-slate-300 transition-all flex flex-col justify-between"
+              >
+                <div className="flex items-center justify-between text-xs mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: o.color?.primary || '#2563EB' }} />
-                    <span className="font-semibold text-slate-700 text-[11px]">{o.shortName}</span>
+                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: o.color?.primary || '#2563EB' }} />
+                    <span className="font-extrabold text-slate-800 text-xs">{o.name || o.shortName}</span>
                   </div>
-                  <div className="text-right font-medium text-slate-600 text-[11px]">
-                    <span>{formatRupiah(o.serapanAnggaran)}</span>
-                    <span className="text-[10px] text-slate-500 font-bold ml-1.5">({pct}%)</span>
-                  </div>
+                  <span className="text-[10px] font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                    {pct}%
+                  </span>
                 </div>
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2.5">
                   <div 
                     className="h-full rounded-full transition-all duration-500" 
                     style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: o.color?.primary || '#2563EB' }} 
                   />
+                </div>
+
+                <div className="flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Realisasi Dana</span>
+                  <strong className="text-slate-800 font-bold">{formatRupiah(o.serapanAnggaran)}</strong>
                 </div>
               </div>
             );
@@ -467,10 +469,8 @@ function DashboardBudgetCard({ totalSerapan, totalPagu, serapanPercent, ormawas 
         </div>
       </div>
 
-      <div className="pt-3 border-t border-slate-100 mt-4 text-center">
-        <span className="text-[10px] text-slate-500 font-medium">
-          Bukti nota &amp; kwitansi fisik diverifikasi pada saat audit LPJ.
-        </span>
+      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+        <span>Berdasarkan pencatatan kas riil ormawa</span>
       </div>
     </Card>
   );
@@ -523,9 +523,6 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
             <Clock className="w-5 h-5 stroke-[1.8]" />
           </div>
           <h4 className="text-xs font-extrabold text-slate-900">Belum Ada Catatan Log</h4>
-          <p className="text-[11px] text-slate-400 max-w-sm mt-0.5 font-normal">
-            Seluruh aktivitas verifikasi proker dan audit ormawa akan otomatis tersaji secara horizontal di sini.
-          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
@@ -658,26 +655,22 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2">
-          <DashboardProkerTable
-            filteredProkers={filteredProkers}
-            ormawas={ormawas}
-            onOpenAddProker={onOpenAddProker}
-            onReviewProposal={onReviewProposal}
-            onAuditLPJ={onAuditLPJ}
-          />
-        </div>
+      {/* 1. Card Serapan Dana Kemahasiswaan (Horizontal Full-Width) */}
+      <DashboardBudgetCard
+        totalSerapan={totalSerapan}
+        totalPagu={totalPagu}
+        serapanPercent={serapanPercent}
+        ormawas={ormawas}
+      />
 
-        <div>
-          <DashboardBudgetCard
-            totalSerapan={totalSerapan}
-            totalPagu={totalPagu}
-            serapanPercent={serapanPercent}
-            ormawas={ormawas}
-          />
-        </div>
-      </div>
+      {/* 2. Card Status Pengawasan Program Kerja (Horizontal Full-Width) */}
+      <DashboardProkerTable
+        filteredProkers={filteredProkers}
+        ormawas={ormawas}
+        onOpenAddProker={onOpenAddProker}
+        onReviewProposal={onReviewProposal}
+        onAuditLPJ={onAuditLPJ}
+      />
 
       <DashboardActivityFeed activityLogs={activityLogs} ormawas={ormawas} />
     </div>

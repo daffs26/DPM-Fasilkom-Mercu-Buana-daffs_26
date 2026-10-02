@@ -59,26 +59,26 @@ function FileInspectorBody({ file, isGuest, onDownload, onAction, isMobile = fal
       </div>
 
       <div>
-        <span className="font-bold text-slate-700 block mb-1">
-          {isOther ? 'Status Dokumen:' : 'Status Kepatuhan Waktu:'}
+        <span className="text-[11px] font-bold text-slate-500 block mb-1.5">
+          {isOther ? 'Status Dokumen:' : 'Status Kepatuhan:'}
         </span>
         {isOther ? (
-          <div className="p-2.5 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-800 text-[11px] leading-relaxed">
-            📁 <strong>Dokumen Pendukung / Arsip</strong>. Berkas administrasi ormawa telah tersimpan dalam arsip transparansi DPM Fasilkom.
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-700 text-xs font-semibold">
+            📁 Dokumen Pendukung
           </div>
         ) : file.isDadakan ? (
-          <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl text-red-800 text-[11px] leading-relaxed">
-            ⚠️ <strong>Pengajuan Terlambat (&lt; H-14)</strong>. Berkas diajukan melampaui batas waktu standar regulasi DPM.
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-semibold">
+            ⚠️ Terlambat (&lt; H-14)
           </div>
         ) : (
-          <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] leading-relaxed">
-            ✓ <strong>Diajukan Tepat Waktu (≥ H-14)</strong>. Memenuhi standar batas waktu pengajuan DPM Fasilkom.
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 text-xs font-semibold">
+            ✓ Tepat Waktu (≥ H-14)
           </div>
         )}
       </div>
 
       <div>
-        <span className="font-bold text-slate-700 block mb-1.5">
+        <span className="text-[11px] font-bold text-slate-500 block mb-1.5">
           Catatan Review DPM:
         </span>
         {file.notes && file.notes.length > 0 ? (
@@ -91,8 +91,8 @@ function FileInspectorBody({ file, isGuest, onDownload, onAction, isMobile = fal
             ))}
           </div>
         ) : (
-          <p className="text-slate-600 italic text-[11px] p-2.5 bg-white border border-slate-200 rounded-xl">
-            Belum ada catatan revisi pada berkas ini.
+          <p className="text-slate-400 italic text-[11px] p-2 bg-white border border-slate-200 rounded-xl">
+            Belum ada catatan revisi.
           </p>
         )}
       </div>
@@ -365,30 +365,23 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
               })}
             </div>
           </div>
-
-          <div className="hidden md:block p-3.5 bg-white border border-slate-200/80 rounded-2xl">
-            <span className="text-[11px] font-bold text-slate-700 block">Arsip Digital Terbuka</span>
-            <p className="text-[10px] text-slate-600 mt-1">
-              Transparansi arsip digital untuk memitigasi keterlambatan berkas proposal dan pelaporan LPJ.
-            </p>
-          </div>
         </div>
 
         {/* Center File Grid */}
         <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
           {!isGuest && (
             isTemplateBannerOpen ? (
-              <div className="mb-4 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 to-indigo-50/70 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs relative">
+              <div className="mb-4 p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/90 to-indigo-50/70 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs relative">
                 <div className="flex items-center gap-3 min-w-0 flex-1 pr-6 sm:pr-0">
-                  <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                     <ScrollText className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <h4 className="text-xs font-bold text-slate-900 truncate">
-                      Butuh Template Dokumen &amp; Format Baku Ormawa?
+                      Bank Template Dokumen
                     </h4>
-                    <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-1">
-                      Format surat izin dispensasi, sidang umum, proposal sponsor, dan peminjaman ruangan.
+                    <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
+                      Format baku proposal, LPJ, dan surat resmi ormawa.
                     </p>
                   </div>
                 </div>
@@ -400,7 +393,7 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
                     }}
                     className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 shadow-2xs transition shrink-0 cursor-pointer"
                   >
-                    <span>Buka Bank Template</span>
+                    <span>Buka Template</span>
                     <ScrollText className="w-3.5 h-3.5 text-blue-600" />
                   </button>
                   <button
@@ -416,14 +409,14 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
             ) : (
               <div className="mb-3 flex items-center justify-between px-3 py-1.5 rounded-xl bg-blue-50/50 border border-blue-100 text-xs">
                 <span className="text-[11px] text-blue-800 font-medium">
-                  💡 Bank Template Dokumen &amp; Surat Resmi tersedia di menu Template.
+                  💡 Bank Template Dokumen tersedia di menu Template.
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsTemplateBannerOpen(true)}
                   className="text-[11px] font-bold text-blue-600 hover:underline"
                 >
-                  Tampilkan Panduan
+                  Tampilkan
                 </button>
               </div>
             )
@@ -434,9 +427,6 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
               <h3 className="font-bold text-slate-900 text-sm">
                 Berkas Pengawasan ({filteredFiles.length} Dokumen)
               </h3>
-              <p className="text-xs text-slate-600 mt-0.5">
-                Klik pada file untuk melihat detail catatan review &amp; tanggal upload
-              </p>
             </div>
             {!isGuest && (
               <button
@@ -520,19 +510,17 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
               <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 ring-8 ring-blue-50/50 flex items-center justify-center mx-auto mb-3">
                 <FileText className="w-6 h-6 stroke-[1.8]" />
               </div>
-              <p className="font-extrabold text-slate-900 text-sm">Belum Ada Berkas yang Sesuai</p>
-              <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto font-normal">
-                {isGuest 
-                  ? 'Pilih folder ormawa lain untuk melihat arsip transparansi berkas.' 
-                  : 'Pilih folder ormawa lain atau unggah berkas pengawasan baru.'}
+              <p className="font-extrabold text-slate-900 text-sm">Belum Ada Berkas</p>
+              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto font-normal">
+                Tidak ada berkas yang sesuai filter.
               </p>
               {!isGuest && (
                 <button
                   onClick={() => setIsUploadModalOpen(true)}
-                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                  className="mt-3.5 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
                 >
                   <UploadCloud className="w-4 h-4" />
-                  <span>Upload Berkas Sekarang</span>
+                  <span>Unggah Berkas</span>
                 </button>
               )}
             </div>

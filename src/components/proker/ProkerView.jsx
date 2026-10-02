@@ -29,9 +29,9 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import DropdownSelect from '@/components/ui/dropdown-select';
-import AjukanHapusProkerModal from './AjukanHapusProkerModal';
+import { AjukanHapusProkerModal, KelolaHapusProkerModal } from './ProkerHapusModal';
 import UploadRevisiModal from './UploadRevisiModal';
-import KelolaHapusProkerModal from './KelolaHapusProkerModal';
+import { formatDateIndo, formatDateRange } from '@/utils/formatters';
 
 const ORMAWA_ORDER = ['dpm', 'bem', 'himti', 'himsisfo'];
 
@@ -370,7 +370,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-600">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                    <span className="tracking-tight">{p.startDate} s/d {p.endDate}</span>
+                    <span className="tracking-tight">{formatDateRange(p.startDate, p.endDate)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
@@ -389,29 +389,29 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
 
                 <div className="mt-3.5 p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 font-medium">1. Proposal:</span>
+                    <span className="text-slate-500 font-medium">Proposal</span>
                     {p.proposal?.fileName ? (
                       <span className={`font-bold tracking-tight ${p.proposal.isDadakan ? 'text-red-600' : 'text-slate-800'}`}>
-                        {p.proposal.isDadakan ? '⚠️ Terlambat (< H-14)' : '✓ Ada'} ({p.proposal.uploadDate})
+                        {p.proposal.isDadakan ? '⚠️ Terlambat' : '✓ Ada'} ({formatDateIndo(p.proposal.uploadDate)})
                       </span>
                     ) : (
-                      <span className="text-slate-500">Belum diunggah</span>
+                      <span className="text-slate-400">Belum diunggah</span>
                     )}
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 font-medium">2. Berkas LPJ:</span>
+                    <span className="text-slate-500 font-medium">LPJ</span>
                     {p.lpj?.fileName ? (
                       <span className="text-emerald-600 font-bold tracking-tight">
-                        ✓ Terlampir ({p.lpj.uploadDate})
+                        ✓ Terlampir ({formatDateIndo(p.lpj.uploadDate)})
                       </span>
                     ) : isOverdue ? (
                       <span className="text-red-600 font-bold tracking-tight">
-                        🔴 Terlambat (&gt; H+14)
+                        🔴 Terlambat
                       </span>
                     ) : (
-                      <span className="text-slate-500 tracking-tight">
-                        Batas: {p.lpj?.deadlineDate || 'H+14'}
+                      <span className="text-slate-400 tracking-tight">
+                        Deadline: {p.lpj?.deadlineDate ? formatDateIndo(p.lpj.deadlineDate) : 'H+14'}
                       </span>
                     )}
                   </div>
@@ -473,8 +473,8 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
             <Layers className="w-6 h-6 stroke-[1.8]" />
           </div>
           <h3 className="font-extrabold text-slate-900 text-sm">Tidak Ada Program Kerja</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto font-normal">
-            Coba sesuaikan filter ormawa atau kata kunci pencarian Anda di atas.
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto font-normal">
+            Tidak ada program kerja yang sesuai filter.
           </p>
         </div>
       )}
@@ -488,10 +488,10 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
             </div>
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-base font-extrabold text-slate-900">
-                Hapus Program Kerja Langsung?
+                Hapus Program Kerja?
               </DialogTitle>
               <DialogDescription className="text-slate-600 text-xs mt-1.5">
-                Sebagai DPM, Anda dapat menghapus proker <strong>{prokerToDelete?.title}</strong> secara langsung. Data yang dihapus tidak dapat dikembalikan.
+                Hapus <strong>{prokerToDelete?.title}</strong> secara permanen dari sistem? Tindakan ini tidak dapat dibatalkan.
               </DialogDescription>
             </div>
           </div>

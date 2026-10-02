@@ -61,92 +61,91 @@ export default function SetPaguModal({ isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[95vw] sm:max-w-lg p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xl max-h-[92vh] flex flex-col">
-        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-slate-100 bg-slate-50/70 space-y-1 shrink-0">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px] font-bold bg-white text-emerald-700 border-emerald-200">
-              Alokasi Anggaran
-            </Badge>
-            <span className="text-xs text-slate-500 font-medium">Regulasi Anggaran DPM FASILKOM</span>
-          </div>
-          <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-            Atur Alokasi Anggaran Ormawa
-          </DialogTitle>
-          <DialogDescription className="text-xs text-slate-600">
-            Tentukan batas alokasi anggaran dana kemahasiswaan per ormawa untuk periode kepengurusan berjalan.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="px-4 sm:px-6 pt-3 pb-6 space-y-4 text-xs max-h-[calc(92vh-120px)] overflow-y-auto">
-          <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-2xl flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
-                <Coins className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">
-                  Total Alokasi Anggaran Fasilkom
-                </span>
-                <span className="font-extrabold text-sm text-blue-950">
-                  Rp {calculateTotal().toLocaleString('id-ID')}
-                </span>
-              </div>
+      <DialogContent className="w-[95vw] sm:max-w-lg p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xl max-h-[92dvh] flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Header Sticky */}
+          <DialogHeader className="px-5 sm:px-6 py-4 border-b border-slate-100 bg-white shrink-0">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                Atur Alokasi Anggaran
+              </DialogTitle>
+              <Badge variant="outline" className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200">
+                Pagu Ormawa
+              </Badge>
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-              {ormawas.length} Ormawa
-            </span>
-          </div>
+            <DialogDescription className="sr-only">
+              Form pengaturan alokasi anggaran ormawa
+            </DialogDescription>
+          </DialogHeader>
 
-          <div className="space-y-3 pt-1">
-            {ormawas.map(o => (
-              <div key={o.id} className="p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 p-0.5 shrink-0 flex items-center justify-center">
-                      <img src={o.logo} alt={o.name} className="w-full h-full object-contain" />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-xs text-slate-900 truncate">{o.name}</h4>
-                      <p className="text-[10px] text-slate-500">{o.type}</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-md shrink-0">
-                    Serapan: Rp {(o.serapanAnggaran || 0).toLocaleString('id-ID')}
-                  </span>
+          {/* Body Scrollable */}
+          <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-3.5 text-xs">
+            <div className="p-3 bg-blue-50/60 border border-blue-100 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+                  <Coins className="w-3.5 h-3.5" />
                 </div>
-
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
-                    Rp
+                <div>
+                  <span className="text-[10px] text-slate-500 font-medium block">
+                    Total Anggaran Fasilkom
                   </span>
-                  <input
-                    type="text"
-                    value={paguValues[o.id] || ''}
-                    onChange={(e) => handleInputChange(o.id, e.target.value)}
-                    placeholder="0"
-                    className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3.5 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                  />
+                  <span className="font-bold text-sm text-blue-950">
+                    Rp {calculateTotal().toLocaleString('id-ID')}
+                  </span>
                 </div>
               </div>
-            ))}
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100/70 text-blue-800">
+                {ormawas.length} Ormawa
+              </span>
+            </div>
+
+            <div className="space-y-2.5">
+              {ormawas.map(o => (
+                <div key={o.id} className="p-2.5 rounded-xl border border-slate-200 bg-white space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <img src={o.logo} alt="" className="w-5 h-5 object-contain shrink-0" />
+                      <span className="font-semibold text-xs text-slate-900 truncate">{o.name}</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded shrink-0">
+                      Serapan: Rp {(o.serapanAnggaran || 0).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-xs">
+                      Rp
+                    </span>
+                    <input
+                      type="text"
+                      value={paguValues[o.id] || ''}
+                      onChange={(e) => handleInputChange(o.id, e.target.value)}
+                      placeholder="0"
+                      className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 h-9 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <DialogFooter className="pt-3 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-2.5">
+          {/* Sticky Modal Footer */}
+          <div className="px-5 sm:px-6 py-3 border-t border-slate-100 bg-white shrink-0 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition text-center cursor-pointer"
+              className="rounded-xl font-semibold h-9 px-4 bg-red-600 hover:bg-red-700 text-white shadow-none cursor-pointer active:scale-95 transition text-xs"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="w-full sm:w-auto justify-center px-5 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-xs transition flex items-center gap-1.5 text-center cursor-pointer"
+              className="rounded-xl font-semibold h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white shadow-none cursor-pointer active:scale-95 flex items-center gap-1.5 transition text-xs"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Simpan Alokasi Anggaran</span>
+              <span>Simpan Alokasi</span>
             </button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

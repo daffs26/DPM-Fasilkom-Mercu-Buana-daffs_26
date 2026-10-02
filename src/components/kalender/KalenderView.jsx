@@ -591,7 +591,7 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <h4 className="font-extrabold text-xs text-amber-800 truncate">
-                  Peringatan Sistem: {collisions.length} Jadwal Kegiatan Berdekatan / Bentrok!
+                  {collisions.length} Jadwal Bentrok / Berdekatan
                 </h4>
                 <span className="hidden sm:inline-flex text-[9px] font-mono font-bold bg-amber-200/70 text-amber-900 px-1.5 py-0.2 rounded-full">
                   Perlu Koordinasi
@@ -599,7 +599,7 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
               </div>
               {isCollisionExpanded && (
                 <p className="text-[11px] text-amber-700 mt-1 leading-relaxed animate-in fade-in-50 duration-150">
-                  DPM Fasilkom merekomendasikan koordinasi teknis antar-ormawa terkait agar penggunaan fasilitas aula, laboratorium, dan audiens mahasiswa tidak saling berebut.
+                  Koordinasikan penggunaan fasilitas ruangan dan audiens peserta kegiatan.
                 </p>
               )}
             </div>
@@ -619,11 +619,11 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
             <p className="text-xs font-bold text-emerald-800">
-              Jadwal Terpadu Aman: Tidak ada tabrakan proker aktif antar-ormawa.
+              Jadwal Terpadu: Tidak ada bentrok kegiatan ormawa.
             </p>
           </div>
           <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-            Kondisi Normal
+            Aman
           </span>
         </div>
       )}

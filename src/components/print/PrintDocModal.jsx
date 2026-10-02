@@ -1,9 +1,11 @@
 import React from 'react';
 import { X, Printer } from 'lucide-react';
-import PrintRekapAnggaran from './templates/CetakRekapAnggaran';
-import PrintSuratPeringatan from './templates/CetakSuratPeringatan';
-import PrintRundown from './templates/CetakRundown';
-import PrintBeritaAcaraAudit from './templates/CetakBeritaAcaraAudit';
+import { 
+  PrintRekapAnggaran, 
+  PrintSuratPeringatan, 
+  PrintRundown, 
+  PrintBeritaAcaraAudit 
+} from './PrintTemplates';
 
 export default function PrintDocModal({ isOpen, onClose, documentData }) {
   if (!isOpen || !documentData) return null;

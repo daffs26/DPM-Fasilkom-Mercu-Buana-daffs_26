@@ -215,6 +215,9 @@ export const useStore = create(
         const prokerItem = {
           id,
           ormawaId: newProker.ormawaId,
+          createdBy: get().currentUser?.username || get().currentUser?.name || newProker.ormawaId,
+          creatorRole: get().currentUser?.role || 'ketua',
+          creatorOrmawaId: newProker.ormawaId,
           title: newProker.title,
           divisi: newProker.divisi || 'Umum',
           pic: newProker.pic,

@@ -3,7 +3,7 @@ import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, User, AlertCircle, ArrowRight, Globe } from 'lucide-react';
+import { Lock, AlertCircle, Globe } from 'lucide-react';
 
 export default function LoginView({ onSwitchToRegister, notice, onClearNotice }) {
   const { login, loginAsGuest } = useStore(useShallow(state => ({ login: state.login, loginAsGuest: state.loginAsGuest })));

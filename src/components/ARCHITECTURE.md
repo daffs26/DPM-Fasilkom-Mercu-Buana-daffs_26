@@ -12,13 +12,12 @@ Setiap folder fitur mengonsolidasikan sub-komponen tampilan langsung ke dalam fi
 src/components/
 ├── proker/                          # [FITUR: PROGRAM KERJA]
 │   ├── ProkerView.jsx               # Halaman utama pemantauan proker & kartu statistik
-│   ├── DetailProkerModal.jsx        # Modal rincian proker & multi-tab
+│   ├── DetailProkerModal.jsx        # Modal rincian proker (termasuk preview kuitansi)
 │   ├── TambahProkerModal.jsx        # (Khusus Eksekutif) Form pengajuan proker baru
-│   ├── AjukanHapusProkerModal.jsx   # (Khusus Eksekutif) Pengajuan permohonan batal proker
 │   ├── UploadRevisiModal.jsx        # (Khusus Eksekutif) Unggah revisi berkas proposal
 │   ├── ReviewProposalModal.jsx      # (Khusus DPM) Review & persetujuan proposal
-│   ├── KelolaHapusProkerModal.jsx   # (Khusus DPM) ACC/Tolak permohonan hapus proker
-│   └── detail-tabs/                 # Tab Ringkasan, RAB, Rundown, Panitia, LPJ, PreviewKwitansi
+│   ├── ProkerHapusModal.jsx         # Konsolidasi: Pengajuan & Verifikasi DPM hapus proker
+│   └── detail-tabs/                 # Tab Ringkasan, RAB, Rundown, Panitia, LPJ, Dokumentasi
 │
 ├── anggaran/                        # [FITUR: ANGGARAN & KAS]
 │   ├── AnggaranView.jsx             # Halaman serapan, KPI, matriks belanja & tabel transaksi
@@ -35,9 +34,7 @@ src/components/
 │
 ├── sp/                              # [FITUR: SURAT PERINGATAN (Eksklusif Ormawa)]
 │   ├── SuratPeringatanView.jsx      # Halaman riwayat & penanganan SP
-│   ├── TerbitkanSPModal.jsx         # (Khusus DPM) Penerbitan SP resmi (SP 1, 2, 3)
-│   ├── ReviewKlarifikasiModal.jsx   # (Khusus DPM) Tinjau klarifikasi SP dari ormawa
-│   └── KlarifikasiSPModal.jsx       # (Khusus Eksekutif) Form tanggapan & klarifikasi SP
+│   └── SuratPeringatanModals.jsx    # Konsolidasi modal SP: Terbitkan, Review, Klarifikasi
 │
 ├── template/                        # [FITUR: TEMPLATE DOKUMEN (Eksklusif Ormawa)]
 │   ├── TemplateDokumenView.jsx      # Katalog master dokumen resmi fakultas
@@ -60,19 +57,17 @@ src/components/
 │
 ├── print/                           # [CETAK LAPORAN RESMI]
 │   ├── PrintDocModal.jsx            # Modal generator print preview
-│   └── templates/                   # CetakBeritaAcaraAudit, CetakRekapAnggaran, CetakRundown, CetakSuratPeringatan
+│   └── PrintTemplates.jsx           # Konsolidasi: CetakBeritaAcara, RekapAnggaran, Rundown, SP
 │
 ├── auth/                            # [AUTENTIKASI & AKSES MASUK]
 │   ├── LoginView.jsx                # Form login Ormawa & 1-klik Tamu Publik
 │   └── RegisterView.jsx             # Form pendaftaran akun pengurus baru
 │
 ├── tamu/                            # 🛡️ [KHUSUS TAMU PUBLIK & TRANSPARANSI]
-│   ├── TamuGuideCard.jsx            # Kartu panduan informasi transparansi publik
-│   ├── TamuGuard.jsx                # Utilitas guard pembatas aksi mutasi interaktif
-│   └── TamuPrivacyNotice.jsx        # Keterangan perlindungan sensor nomor WA & NIM
+│   └── TamuComponents.jsx           # Konsolidasi: TamuGuard, TamuGuideCard, TamuPrivacyNotice
 │
 └── ui/                              # [DESIGN SYSTEM PRIMITIVES]
-    └── button, dialog, card, badge, input, skeleton, table, dropdown-select, dll.
+    └── skeleton.jsx (dengan page skeletons), button, dialog, card, badge, input, table, dll.
 ```
 
 ---

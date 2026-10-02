@@ -30,6 +30,7 @@ scratch/
 
 # Gambar Screenshot Pengujian Lokal di Root (Aset gambar di public & src tetap aman)
 /*.png
+.docs/
 
 # Editor & OS
 .vscode/

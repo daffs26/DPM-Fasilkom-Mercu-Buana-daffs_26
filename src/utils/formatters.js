@@ -20,6 +20,11 @@ export function formatNumber(num) {
 
 export function formatDateIndo(dateStr, options = { day: 'numeric', month: 'long', year: 'numeric' }) {
   if (!dateStr) return '-';
+  if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    return date.toLocaleDateString('id-ID', options);
+  }
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('id-ID', options);
@@ -27,6 +32,13 @@ export function formatDateIndo(dateStr, options = { day: 'numeric', month: 'long
 
 export function formatShortDate(dateStr) {
   return formatDateIndo(dateStr, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+export function formatDateRange(startDate, endDate, options = { day: 'numeric', month: 'long', year: 'numeric' }) {
+  if (!startDate && !endDate) return '-';
+  if (!startDate) return formatDateIndo(endDate, options);
+  if (!endDate || startDate === endDate) return formatDateIndo(startDate, options);
+  return `${formatDateIndo(startDate, options)} s/d ${formatDateIndo(endDate, options)}`;
 }
 
 export function getOrmawaMetadata(ormawaId) {

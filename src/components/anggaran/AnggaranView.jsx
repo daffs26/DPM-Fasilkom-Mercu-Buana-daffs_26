@@ -7,6 +7,7 @@ import {
   FileSpreadsheet, 
   Printer, 
   Download,
+  Loader2,
   ArrowDownLeft,
   ArrowUpRight,
   Coins,
@@ -80,17 +81,17 @@ function AnggaranKpiCards({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 animate-in fade-in duration-200">
         <KpiCard
-          title={`Total Alokasi Anggaran (${activeOrmawaObj.shortName})`}
+          title={`Total Alokasi (${activeOrmawaObj.shortName})`}
           value={formatRupiah(paguOrmawa)}
-          subtitle="Dana total anggaran berdasarkan pembagian fakultas"
+          subtitle="Pagu anggaran ormawa"
           icon={Coins}
           iconBg="bg-emerald-50"
           iconColor="text-emerald-600"
         />
         <KpiCard
-          title={`Sisa Saldo Anggaran (${activeOrmawaObj.shortName})`}
+          title={`Sisa Saldo (${activeOrmawaObj.shortName})`}
           value={formatRupiah(sisaOrmawa)}
-          subtitle="Sisa saldo kas alokasi fakultas yang siap digunakan"
+          subtitle="Saldo kas siap digunakan"
           icon={Scale}
           iconBg="bg-indigo-50"
           iconColor="text-indigo-600"
@@ -106,7 +107,7 @@ function AnggaranKpiCards({
       <KpiCard
         title="Total Alokasi Anggaran"
         value={formatRupiah(totalPaguFakultas)}
-        subtitle="Batas alokasi dana 4 ormawa aktif"
+        subtitle="Total pagu 4 ormawa"
         icon={Coins}
         iconBg="bg-emerald-50"
         iconColor="text-emerald-600"
@@ -114,7 +115,7 @@ function AnggaranKpiCards({
       <KpiCard
         title="RAB Proker Diajukan"
         value={formatRupiah(totalRabTerencana)}
-        subtitle="Akumulasi RAB proposal proker"
+        subtitle="Akumulasi usulan proposal"
         icon={FileSpreadsheet}
         iconBg="bg-blue-50"
         iconColor="text-blue-600"
@@ -122,7 +123,7 @@ function AnggaranKpiCards({
       <KpiCard
         title="Realisasi Dana Cair"
         value={formatRupiah(totalRealisasiAktual)}
-        subtitle="Total dana kas yang telah terserap"
+        subtitle="Total dana terserap"
         icon={ArrowDownRight}
         iconBg="bg-amber-50"
         iconColor="text-amber-600"
@@ -132,7 +133,7 @@ function AnggaranKpiCards({
       <KpiCard
         title="Sisa Saldo Anggaran"
         value={formatRupiah(sisaSaldoFakultas)}
-        subtitle="Dana fakultas siap dialokasikan"
+        subtitle="Sisa alokasi fakultas"
         icon={Scale}
         iconBg="bg-indigo-50"
         iconColor="text-indigo-600"
@@ -455,9 +456,9 @@ function AnggaranTransactionTable({ filteredTransactions, ormawas, deleteBudgetT
     return (
       <div className="py-10 text-center bg-slate-50/50 rounded-2xl border border-slate-200/80 p-6">
         <Receipt className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-        <h4 className="text-xs font-bold text-slate-800">Belum Ada Riwayat Transaksi Anggaran</h4>
-        <p className="text-[11px] text-slate-500 mt-1 max-w-sm mx-auto">
-          Pilih salah satu Ormawa untuk mencatat <strong>"+ Pemasukan"</strong> atau <strong>"+ Pengeluaran"</strong> kas.
+        <h4 className="text-xs font-bold text-slate-800">Belum Ada Transaksi Kas</h4>
+        <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">
+          Riwayat kas masuk &amp; keluar akan tercatat di sini.
         </p>
       </div>
     );
@@ -721,6 +722,8 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
         type: 'rekap_anggaran',
         title: 'LAPORAN REKAPITULASI PENGAWASAN ANGGARAN & LPJ ORMAWA',
         date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        filter: selectedOrmawaFilter,
+        selectedFilter: selectedOrmawaFilter,
         ormawaName: selectedOrmawaFilter === 'all' ? 'Seluruh Ormawa FASILKOM' : activeOrmawaObj?.name,
         ormawaShort: selectedOrmawaFilter === 'all' ? 'FASILKOM' : activeOrmawaObj?.shortName,
         totalPagu: totalPaguFakultas,
@@ -728,6 +731,11 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
         totalRealisasi: totalRealisasiAktual,
         sisaSaldo: sisaSaldoFakultas,
         persenSerap: persentaseSerapanFakultas,
+        totalPaguFakultas,
+        totalRabTerencana,
+        totalRealisasiAktual,
+        sisaSaldoFakultas,
+        persentaseSerapanFakultas,
         ormawas: filteredOrmawas,
         prokers: filteredProkers,
         transactions: filteredTransactions
@@ -745,48 +753,60 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">Kelola Anggaran &amp; Realisasi Dana</h3>
+                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">Kelola Anggaran &amp; Realisasi</h3>
                 {selectedOrmawaFilter !== 'all' && (
                   <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
                     Filter: {activeOrmawaObj?.shortName}
                   </span>
                 )}
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-snug">
-                Pencatatan kas masuk &amp; keluar, batas alokasi pagu, serta serapan anggaran ormawa.
-              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:items-center gap-2 w-full lg:w-auto">
+          {/* Action Buttons: Layout & Desain Harmonis, Elegan, dan Fungsional */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
+            
+            {/* Tombol Ekspor Excel */}
             <button
               type="button"
               onClick={handleDownloadExcel}
               disabled={isExportingExcel}
-              className="min-h-[38px] flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold transition shadow-2xs active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="flex-1 sm:flex-initial h-9 px-3.5 bg-white hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-800 rounded-xl text-xs font-semibold shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed group"
               title="Unduh Rekapitulasi Excel (.xlsx) Resmi"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              {isExportingExcel ? (
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+              ) : (
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600 group-hover:scale-105 transition-transform" />
+              )}
               <span>{isExportingExcel ? 'Menyiapkan...' : 'Excel (.xlsx)'}</span>
             </button>
 
+            {/* Tombol Cetak PDF */}
             <button
               type="button"
               onClick={handlePrintRekap}
-              className="min-h-[38px] flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer"
+              className="flex-1 sm:flex-initial h-9 px-3.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 group"
               title="Cetak Dokumen PDF Resmi Rekapitulasi"
             >
-              <Printer className="w-4 h-4 text-amber-400" />
+              <Printer className="w-4 h-4 text-slate-600 group-hover:text-slate-900 group-hover:scale-105 transition-transform" />
               <span>Cetak PDF</span>
             </button>
 
+            {/* Pemisah Halus Desktop */}
+            {!isGuest && onOpenSetPagu && (
+              <div className="hidden sm:block w-px h-5 bg-slate-200" />
+            )}
+
+            {/* Tombol Primary: Atur Anggaran */}
             {!isGuest && onOpenSetPagu && (
               <button
                 type="button"
                 onClick={onOpenSetPagu}
-                className="col-span-2 sm:col-span-1 min-h-[38px] flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 group"
+                title="Atur Alokasi Pagu Anggaran Ormawa"
               >
-                <Settings2 className="w-4 h-4" />
+                <Settings2 className="w-4 h-4 text-blue-100 group-hover:rotate-45 transition-transform duration-300" />
                 <span>Atur Anggaran</span>
               </button>
             )}
@@ -822,7 +842,7 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
                 activeSubTab === 'proker' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Matriks Anggaran Proker ({filteredProkers.length})
+              Anggaran Proker ({filteredProkers.length})
             </button>
             <button
               type="button"
@@ -831,7 +851,7 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
                 activeSubTab === 'transaksi' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Buku Kas &amp; Transaksi ({filteredTransactions.length})
+              Riwayat Kas ({filteredTransactions.length})
             </button>
           </div>
 
@@ -840,16 +860,20 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
               type="button"
               onClick={handleDownloadExcel}
               disabled={isExportingExcel}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs shadow-2xs transition cursor-pointer active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-emerald-300 bg-white hover:bg-emerald-50/60 text-slate-700 hover:text-emerald-800 font-semibold text-xs shadow-2xs transition cursor-pointer active:scale-95 disabled:opacity-50"
               title="Unduh Rekapitulasi Excel (.xlsx) Resmi"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              {isExportingExcel ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+              ) : (
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              )}
               <span className="hidden sm:inline">{isExportingExcel ? 'Menyiapkan...' : 'Ekspor Excel'}</span>
             </button>
             <button
               type="button"
               onClick={handleDownloadCSV}
-              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition cursor-pointer"
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-2xs transition cursor-pointer active:scale-95"
               title="Unduh data dalam format CSV"
             >
               <Download className="w-3.5 h-3.5 text-slate-500" />
