@@ -96,20 +96,20 @@ export function ProkerHistoryBadge({ status, label }) {
   let badgeConfig = {
     bg: 'bg-[#FFF7ED] text-[#EA580C] border-[#FED7AA]',
     icon: <InProgressIcon />,
-    text: label || 'In-progress'
+    text: label || 'Sedang Berjalan'
   };
 
   if (status === 'in-review') {
     badgeConfig = {
       bg: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]',
       icon: <InReviewIcon />,
-      text: label || 'In-review'
+      text: label || 'Menunggu Review'
     };
   } else if (status === 'completed') {
     badgeConfig = {
       bg: 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0]',
       icon: <CompletedIcon />,
-      text: label || 'Completed'
+      text: label || 'Selesai'
     };
   } else if (status === 'cancelled' || status === 'deleted') {
     badgeConfig = {
@@ -120,7 +120,7 @@ export function ProkerHistoryBadge({ status, label }) {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border tracking-tight shadow-3xs transition-all ${badgeConfig.bg}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border tracking-tight shadow-3xs transition-all ${badgeConfig.bg}`}>
       {badgeConfig.icon}
       <span>{badgeConfig.text}</span>
     </span>
@@ -133,12 +133,12 @@ function getLogStatusCategory(log) {
     return { status: 'cancelled', label: 'Dihapus' };
   }
   if (type === 'proposal_approved' || type === 'lpj_reviewed' || type.includes('completed') || type.includes('resolved')) {
-    return { status: 'completed', label: 'Completed' };
+    return { status: 'completed', label: 'Selesai' };
   }
   if (type === 'proposal_uploaded' || type === 'proker_deletion_requested' || type === 'lpj_uploaded' || type.includes('review') || type.includes('pending')) {
-    return { status: 'in-review', label: 'In-review' };
+    return { status: 'in-review', label: 'Menunggu Review' };
   }
-  return { status: 'in-progress', label: 'In-progress' };
+  return { status: 'in-progress', label: 'Sedang Berjalan' };
 }
 
 function formatDisplayDate(timestamp, formattedDate) {
@@ -147,7 +147,7 @@ function formatDisplayDate(timestamp, formattedDate) {
   return timestamp;
 }
 
-export default function HistoryView({ onOpenAddProker, onOpenDetailProker }) {
+export default function HistoryView({ onOpenAddProker, onOpenDetailProker, hideHeader = false }) {
   const { 
     activityLogs = [], 
     ormawas = [], 
@@ -246,9 +246,9 @@ export default function HistoryView({ onOpenAddProker, onOpenDetailProker }) {
 
   const statusOptions = useMemo(() => [
     { value: 'all', label: 'Semua Status', badge: statusCounts.all },
-    { value: 'in-progress', label: 'In-progress', badge: statusCounts['in-progress'] },
-    { value: 'in-review', label: 'In-review', badge: statusCounts['in-review'] },
-    { value: 'completed', label: 'Completed', badge: statusCounts.completed },
+    { value: 'in-progress', label: 'Sedang Berjalan', badge: statusCounts['in-progress'] },
+    { value: 'in-review', label: 'Menunggu Review', badge: statusCounts['in-review'] },
+    { value: 'completed', label: 'Selesai', badge: statusCounts.completed },
     { value: 'cancelled', label: 'Dihapus', badge: statusCounts.cancelled }
   ], [statusCounts]);
 
@@ -280,13 +280,15 @@ export default function HistoryView({ onOpenAddProker, onOpenDetailProker }) {
   return (
     <div className="space-y-6 w-full max-w-4xl mx-auto pb-10">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            Histori Proker
-          </h1>
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Histori Proker
+            </h1>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Filter Toolbar: Ormawa & Status Dropdowns + Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-soft">
@@ -476,11 +478,11 @@ export default function HistoryView({ onOpenAddProker, onOpenDetailProker }) {
           <div className="mt-3 space-y-3.5 text-xs">
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
               <div className="flex items-center justify-between text-slate-600">
-                <span className="text-slate-400">Entitas Ormawa:</span>
+                <span className="text-slate-400">Ormawa:</span>
                 <span className="font-bold text-slate-800 uppercase">{selectedArchivedLog?.ormawaId}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600">
-                <span className="text-slate-400">Penanggung Jawab Aksi:</span>
+                <span className="text-slate-400">Pelaksana:</span>
                 <span className="font-bold text-slate-800">{selectedArchivedLog?.actor || 'Sistem'}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600">
@@ -491,7 +493,7 @@ export default function HistoryView({ onOpenAddProker, onOpenDetailProker }) {
 
             <div>
               <h4 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Keterangan Log Resmi
+                Catatan Aktivitas
               </h4>
               <p className="text-slate-600 leading-relaxed bg-white p-3 rounded-xl border border-slate-200/70">
                 {selectedArchivedLog?.description}
@@ -504,7 +506,7 @@ export default function HistoryView({ onOpenAddProker, onOpenDetailProker }) {
                 onClick={() => setSelectedArchivedLog(null)}
                 className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer"
               >
-                Tutup Rincian
+                Tutup
               </button>
             </div>
           </div>

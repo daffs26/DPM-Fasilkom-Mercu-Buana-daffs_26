@@ -85,7 +85,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md">
                 DPM FASILKOM
               </span>
-              <span className="text-xs text-slate-500 font-semibold">Review &amp; Validasi Proposal</span>
+              <span className="text-xs text-slate-500 font-semibold">Review &amp; Verifikasi Proposal</span>
             </div>
             <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight mt-1 leading-snug">
               {proker.title}
@@ -132,14 +132,14 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
 
           {/* SLA Indicator */}
           {proposal?.isDadakan ? (
-            <div className="p-3.5 bg-red-50/80 border border-red-200 rounded-2xl flex items-start gap-2.5 text-red-800">
-              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-2xl flex items-start gap-2.5 text-amber-900">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-black uppercase text-[10px] tracking-wider text-red-700 block">
-                  ⚠️ Status Pengajuan: Terlambat (&lt; H-14)
+                <span className="font-black uppercase text-[10px] tracking-wider text-amber-800 block">
+                  Pengajuan Mendekati Hari-H (&lt; 14 Hari)
                 </span>
-                <p className="text-[11px] text-red-700/90 mt-0.5 leading-relaxed">
-                  Proposal diajukan kurang dari batas waktu 14 hari sebelum hari-H. Catatan keterlambatan ini terarsip di evaluasi kepatuhan DPM.
+                <p className="text-[11px] text-amber-800/90 mt-0.5 leading-relaxed">
+                  Proposal diajukan kurang dari batas waktu H-14. Keterangan ini dicatat dalam evaluasi kepatuhan ormawa.
                 </p>
               </div>
             </div>
@@ -148,10 +148,10 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <div>
                 <span className="font-bold text-xs text-emerald-800">
-                  ✓ Pengajuan Tepat Waktu (≥ H-14)
+                  ✓ Pengajuan Tepat Waktu (≥ 14 Hari)
                 </span>
                 <p className="text-[11px] text-emerald-600">
-                  Proposal mematuhi standar tenggat regulasi DPM FASILKOM UMB.
+                  Proposal diajukan sesuai batas waktu yang ditetapkan (H-14).
                 </p>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
               <div className="flex items-center gap-2">
                 <ListTodo className="w-4 h-4 text-amber-600" />
                 <h4 className="font-black text-xs text-slate-900">
-                  Daftar Poin Revisi Interaktif DPM
+                  Daftar Catatan Revisi
                 </h4>
               </div>
               {totalItems > 0 && (
@@ -247,7 +247,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
               </div>
             ) : (
               <div className="p-3 text-center bg-white/70 rounded-xl border border-dashed border-amber-200 text-slate-500 text-xs">
-                Belum ada butir revisi spesifik. Tulis poin baru atau pilih dari rekomendasi cepat di bawah.
+                Belum ada catatan revisi. Tulis poin baru atau pilih rekomendasi di bawah.
               </div>
             )}
 
@@ -265,7 +265,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
                     type="text"
                     value={newRevisionInput}
                     onChange={(e) => setNewRevisionInput(e.target.value)}
-                    placeholder="Tulis butir revisi baru (mis: Perbaiki rincian konsumsi di RAB)..."
+                    placeholder="Tulis catatan revisi (contoh: Lampirkan rincian konsumsi di RAB)..."
                     className="flex-1 bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                   <button
@@ -282,7 +282,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
                 <div className="space-y-1.5 pt-1">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-800">
                     <ListTodo className="w-3.5 h-3.5 text-amber-600" />
-                    <span className="tracking-tight">Rekomendasi Poin Revisi Cepat:</span>
+                    <span className="tracking-tight">Saran Revisi Cepat:</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {COMMON_REVISION_PRESETS.map((preset, idx) => (
@@ -305,13 +305,13 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
           {!isGuest && (
             <div>
               <label className="font-bold text-slate-800 block mb-1.5">
-                Catatan &amp; Arahan Umum DPM (Opsional):
+                Catatan Tambahan (Opsional):
               </label>
               <textarea
                 rows={2}
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
-                placeholder="Tambahkan pesan pengantar atau batas waktu perbaikan untuk pengurus ormawa..."
+                placeholder="Tambahkan pesan pengantar atau batas waktu perbaikan untuk ormawa..."
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
               />
             </div>
@@ -321,7 +321,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
           {proposal?.notes && proposal.notes.length > 0 && (
             <div className="space-y-2">
               <label className="font-bold text-slate-700 block text-[11px]">
-                Riwayat Catatan Review Sebelumnya:
+                Riwayat Catatan Review:
               </label>
               <div className="space-y-1.5 max-h-36 overflow-y-auto">
                 {proposal.notes.map((n) => (
@@ -356,7 +356,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
                 className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
               >
                 <AlertCircle className="w-4 h-4" />
-                <span>Minta Revisi Proposal</span>
+                <span>Ajukan Revisi</span>
               </button>
 
               <button
@@ -365,7 +365,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
                 className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition cursor-pointer active:scale-95"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Setujui (ACC Ketua DPM)</span>
+                <span>Setujui Proposal</span>
               </button>
             </div>
           )}

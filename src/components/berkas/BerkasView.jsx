@@ -32,8 +32,8 @@ const DEFAULT_ORMAWA_STYLE = { selected: 'bg-slate-900 text-white font-bold shad
 function FileInspectorBody({ file, isGuest, onDownload, onAction, isMobile = false }) {
   const isOther = file.category === 'other';
   const actionLabel = isGuest
-    ? (file.category === 'proposal' ? 'Lihat Lembar Proposal' : file.category === 'lpj' ? 'Lihat Lembar Audit LPJ' : 'Lihat Detail Proker')
-    : (file.category === 'proposal' ? 'Buka Form Review DPM' : file.category === 'lpj' ? 'Buka Form Audit LPJ' : 'Lihat Detail Proker');
+    ? (file.category === 'proposal' ? 'Lihat Proposal' : file.category === 'lpj' ? 'Lihat LPJ' : 'Lihat Detail Proker')
+    : (file.category === 'proposal' ? 'Review Proposal' : file.category === 'lpj' ? 'Audit LPJ' : 'Lihat Detail Proker');
 
   return (
     <div className="space-y-4 text-xs">
@@ -67,19 +67,19 @@ function FileInspectorBody({ file, isGuest, onDownload, onAction, isMobile = fal
             📁 Dokumen Pendukung
           </div>
         ) : file.isDadakan ? (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-semibold">
-            ⚠️ Terlambat (&lt; H-14)
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs font-semibold">
+            ⚠️ Mendekati H-14
           </div>
         ) : (
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 text-xs font-semibold">
-            ✓ Tepat Waktu (≥ H-14)
+            ✓ Tepat Waktu (≥ 14 Hari)
           </div>
         )}
       </div>
 
       <div>
         <span className="text-[11px] font-bold text-slate-500 block mb-1.5">
-          Catatan Review DPM:
+          Catatan Review:
         </span>
         {file.notes && file.notes.length > 0 ? (
           <div className={`space-y-1.5 overflow-y-auto ${isMobile ? 'max-h-36' : 'max-h-40'}`}>
@@ -378,18 +378,18 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
                   </div>
                   <div className="min-w-0">
                     <h4 className="text-xs font-bold text-slate-900 truncate">
-                      Bank Template Dokumen
+                      Template Dokumen Standar
                     </h4>
                     <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
-                      Format baku proposal, LPJ, dan surat resmi ormawa.
+                      Format baku proposal, LPJ, dan administrasi ormawa.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => {
-                      setActiveTab('template');
-                      navigate('/template');
+                      setActiveTab('transparansi');
+                      navigate('/transparansi?tab=template');
                     }}
                     className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 shadow-2xs transition shrink-0 cursor-pointer"
                   >
@@ -409,7 +409,7 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
             ) : (
               <div className="mb-3 flex items-center justify-between px-3 py-1.5 rounded-xl bg-blue-50/50 border border-blue-100 text-xs">
                 <span className="text-[11px] text-blue-800 font-medium">
-                  💡 Bank Template Dokumen tersedia di menu Template.
+                  💡 Template dokumen standar tersedia pada tab Template Dokumen.
                 </span>
                 <button
                   type="button"
@@ -425,7 +425,7 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
               <h3 className="font-bold text-slate-900 text-sm">
-                Berkas Pengawasan ({filteredFiles.length} Dokumen)
+                Daftar Berkas ({filteredFiles.length} Dokumen)
               </h3>
             </div>
             {!isGuest && (
@@ -434,7 +434,7 @@ export default function BerkasView({ onReviewProposal, onAuditLPJ }) {
                 className="flex items-center justify-center gap-2 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-xs transition cursor-pointer shrink-0"
               >
                 <UploadCloud className="w-4 h-4" />
-                <span>Upload Berkas</span>
+                <span>Unggah Berkas</span>
               </button>
             )}
           </div>

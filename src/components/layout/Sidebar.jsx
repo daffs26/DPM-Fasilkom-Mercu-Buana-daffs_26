@@ -5,24 +5,26 @@ import { useShallow } from 'zustand/react/shallow';
 import { 
   LayoutDashboard, 
   Layers, 
-  History,
-  Wallet,
   FolderOpen, 
   Award, 
-  CalendarDays, 
-  AlertOctagon, 
-  ShieldAlert,
   RotateCcw,
-  ScrollText,
   X,
   LogOut
 } from 'lucide-react';
+
+function getActiveMenuId(path) {
+  const clean = path.replace(/^\//, '') || 'dashboard';
+  if (['proker', 'history', 'kalender'].includes(clean)) return 'proker';
+  if (['transparansi', 'berkas', 'anggaran', 'template'].includes(clean)) return 'transparansi';
+  if (['audit', 'sp'].includes(clean)) return 'audit';
+  return clean;
+}
 
 function SidebarNavList({ items, activeTab, currentPathTab, onSelectTab }) {
   return (
     <div className="p-3.5 space-y-1.5">
       <p className="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
-        Menu Legislatif &amp; Pengawasan
+        Menu Utama
       </p>
       {items.map((item) => {
         const Icon = item.icon;
@@ -43,7 +45,7 @@ function SidebarNavList({ items, activeTab, currentPathTab, onSelectTab }) {
               <span className="truncate tracking-tight">{item.label}</span>
             </div>
             {item.badge && (
-              <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0 ml-1.5 tabular-nums ${item.badge.color}`}>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tracking-tight shrink-0 ml-1.5 tabular-nums ${item.badge.color}`}>
                 {item.badge.text}
               </span>
             )}
@@ -55,28 +57,7 @@ function SidebarNavList({ items, activeTab, currentPathTab, onSelectTab }) {
 }
 
 function SidebarRegulatoryCard() {
-  return (
-    <div className="px-3.5 py-2">
-      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-50 via-blue-50/25 to-slate-50 border border-blue-100/80 shadow-2xs text-slate-800">
-        <div className="flex items-center gap-2.5 mb-2">
-          <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100/80 shadow-2xs">
-            <ShieldAlert className="w-4 h-4" />
-          </div>
-          <span className="text-xs font-bold text-slate-900 tracking-tight">Standar Pengawasan DPM</span>
-        </div>
-        <div className="space-y-1.5 text-[11px] text-slate-600 leading-snug font-normal">
-          <div className="flex items-start gap-1.5">
-            <span className="text-blue-500 font-bold shrink-0 mt-0.5">•</span>
-            <span>Proposal diajukan <strong className="text-slate-900 font-semibold">minimal 14 hari sebelum acara</strong> (H-14)</span>
-          </div>
-          <div className="flex items-start gap-1.5">
-            <span className="text-blue-500 font-bold shrink-0 mt-0.5">•</span>
-            <span>LPJ diserahkan <strong className="text-slate-900 font-semibold">maksimal 14 hari setelah acara</strong> (H+14)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 function SidebarFooter({ currentUser, onLogout, onReset }) {
@@ -123,7 +104,7 @@ function SidebarFooter({ currentUser, onLogout, onReset }) {
 export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const currentPathTab = location.pathname.replace(/^\//, '') || 'dashboard';
+  const currentPathTab = getActiveMenuId(location.pathname);
 
   const {
     activeTab, 
@@ -160,18 +141,18 @@ export default function Sidebar({ isOpen, onClose }) {
   const unreadProkerLogsCount = Math.max(0, totalProkerLogs - (lastReadHistoryCount || 0));
 
   useEffect(() => {
-    if ((activeTab === 'history' || currentPathTab === 'history') && unreadProkerLogsCount > 0) {
+    if ((activeTab === 'history' || currentPathTab === 'proker') && unreadProkerLogsCount > 0) {
       markHistoryAsRead?.();
     }
-    if ((activeTab === 'template' || currentPathTab === 'template') && !hasSeenTemplateTab) {
+    if ((activeTab === 'template' || currentPathTab === 'transparansi') && !hasSeenTemplateTab) {
       markTemplateTabAsSeen?.();
     }
   }, [activeTab, currentPathTab, unreadProkerLogsCount, markHistoryAsRead, hasSeenTemplateTab, markTemplateTabAsSeen]);
 
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
-    if (tabId === 'history') markHistoryAsRead?.();
-    if (tabId === 'template') markTemplateTabAsSeen?.();
+    if (tabId === 'proker' && unreadProkerLogsCount > 0) markHistoryAsRead?.();
+    if (tabId === 'transparansi' && !hasSeenTemplateTab) markTemplateTabAsSeen?.();
     navigate(`/${tabId}`);
     onClose?.();
   };
@@ -188,23 +169,47 @@ export default function Sidebar({ isOpen, onClose }) {
     }
   };
 
+  const isGuest = currentUser?.role === 'guest';
+
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
-    { id: 'proker', label: 'Proker', icon: Layers, badge: pendingProposalCount > 0 ? { text: `${pendingProposalCount} Pending`, color: 'bg-amber-100 text-amber-800' } : null },
-    { id: 'history', label: 'Histori Proker', icon: History, badge: unreadProkerLogsCount > 0 ? { text: `${unreadProkerLogsCount}`, color: 'bg-blue-100 text-blue-800' } : null },
-    { id: 'anggaran', label: 'Kelola Anggaran', icon: Wallet, badge: null },
-    { id: 'berkas', label: 'Transparansi Berkas', icon: FolderOpen, badge: null },
-    { id: 'template', label: 'Template Dokumen', icon: ScrollText, badge: !hasSeenTemplateTab ? { text: 'Baru', color: 'bg-blue-100 text-blue-800' } : null },
-    { id: 'audit', label: 'Audit & Skor Ormawa', icon: Award, badge: overdueLPJCount > 0 ? { text: `${overdueLPJCount} Terlambat`, color: 'bg-rose-100 text-rose-800' } : null },
-    { id: 'kalender', label: 'Kalender Kegiatan', icon: CalendarDays, badge: null },
-    { id: 'sp', label: 'Surat Peringatan', icon: AlertOctagon, badge: activeSPCount > 0 ? { text: `${activeSPCount} Aktif`, color: 'bg-red-600 text-white' } : null }
+    { 
+      id: 'dashboard', 
+      label: 'Dashboard', 
+      icon: LayoutDashboard, 
+      badge: null 
+    },
+    { 
+      id: 'proker', 
+      label: 'Program Kerja', 
+      icon: Layers, 
+      badge: pendingProposalCount > 0 
+        ? { text: `${pendingProposalCount} Menunggu`, color: 'bg-amber-100 text-amber-800' } 
+        : unreadProkerLogsCount > 0 
+          ? { text: `${unreadProkerLogsCount} Baru`, color: 'bg-blue-100 text-blue-800' } 
+          : null 
+    },
+    { 
+      id: 'transparansi', 
+      label: 'Transparansi & Kas', 
+      icon: FolderOpen, 
+      badge: (!hasSeenTemplateTab && !isGuest)
+        ? { text: 'Baru', color: 'bg-blue-100 text-blue-800' }
+        : null 
+    },
+    { 
+      id: 'audit', 
+      label: 'Pengawasan & Audit', 
+      icon: Award, 
+      badge: activeSPCount > 0 
+        ? { text: `${activeSPCount} SP Aktif`, color: 'bg-red-600 text-white' } 
+        : overdueLPJCount > 0 
+          ? { text: `${overdueLPJCount} Terlambat`, color: 'bg-rose-100 text-rose-800' } 
+          : null 
+    }
   ];
 
   const filteredMenuItems = menuItems.filter(item => {
     if (!currentUser) return false;
-    if (currentUser.role === 'guest') {
-      return ['dashboard', 'proker', 'history', 'anggaran', 'berkas', 'audit', 'kalender'].includes(item.id);
-    }
     return true;
   });
 

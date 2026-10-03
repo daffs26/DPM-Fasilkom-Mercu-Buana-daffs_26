@@ -20,13 +20,13 @@ import { TamuGuideCard } from '@/components/tamu/TamuComponents';
 
 function ProposalBadge({ proposal }) {
   if (proposal?.reviewStatus === 'approved') {
-    return <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200/60">✓ ACC DPM</span>;
+    return <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200/60">✓ Disetujui</span>;
   }
   if (proposal?.reviewStatus === 'revisi') {
     return <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200/60">Perlu Revisi</span>;
   }
   if (proposal?.isDadakan) {
-    return <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-200/60">⚠️ Terlambat (&lt; H-14)</span>;
+    return <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-200/60">⚠️ Mendekati H-14</span>;
   }
   if (proposal?.fileName) {
     return <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200/60">Menunggu Review</span>;
@@ -39,10 +39,17 @@ function LpjBadge({ status, lpj }) {
     return <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200/60">✓ Selesai ({lpj?.auditScore})</span>;
   }
   if (status === 'lpj_overdue') {
-    return <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-red-300 animate-pulse">🔴 Keterlambatan LPJ</span>;
+    return <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-red-300 animate-pulse">🔴 LPJ Terlambat</span>;
   }
-  return <span className="text-slate-500 text-[10px]">Deadline: {lpj?.deadlineDate || '-'}</span>;
+  return <span className="text-slate-500 text-[10px]">Batas: {lpj?.deadlineDate || '-'}</span>;
 }
+
+const ORMAWA_DISPLAY_NAMES = {
+  dpm: 'DPM Fasilkom',
+  bem: 'BEM Fasilkom',
+  himti: 'HIMTI',
+  himsisfo: 'HIMSISFO'
+};
 
 const DashboardScorecard = React.memo(function DashboardScorecard({
   isDpm = true,
@@ -60,14 +67,9 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
     <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft flex flex-col justify-start gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Indeks Kinerja Ormawa</h3>
-            {isFiltered && activeOrmawa && (
-              <span className="text-[10px] font-extrabold text-blue-700 bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-full">
-                Filter: {activeOrmawa.shortName}
-              </span>
-            )}
-          </div>
+          <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">
+            Indeks Kinerja Ormawa{isFiltered && activeOrmawa ? `: ${ORMAWA_DISPLAY_NAMES[activeOrmawa.id] || activeOrmawa.shortName}` : ''}
+          </h3>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
@@ -124,6 +126,7 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
                 <h4 className={`font-extrabold text-xs transition ${isSelected ? 'text-blue-700' : 'text-slate-900 group-hover:text-blue-600'}`}>
                   {o.shortName}
                 </h4>
+                <p className="text-[10px] text-slate-500 mt-0.5 truncate max-w-[120px]">{o.type}</p>
               </div>
 
               <div className="my-1">
@@ -138,15 +141,13 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
                   ? 'bg-rose-100 text-rose-700' 
                   : oScore !== null 
                   ? (oScore >= 85 ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800')
-                  : isSelected
-                  ? 'bg-blue-100 text-blue-700 font-extrabold'
                   : 'bg-slate-100 text-slate-500'
               }`}>
                 {hasOverdue 
-                  ? 'Terlambat LPJ' 
+                  ? 'LPJ Terlambat' 
                   : oScore !== null 
                   ? (oScore >= 85 ? 'Predikat A' : oScore >= 70 ? 'Predikat B' : 'Predikat C')
-                  : isSelected ? 'Aktif' : 'Belum Dievaluasi'}
+                  : 'Belum Dinilai'}
               </span>
             </div>
           );
@@ -172,7 +173,7 @@ function DashboardKpiSummary({
       mobileTitle: 'Skor Audit',
       mobileSubtitle: ormawaName ? `Kepatuhan ${ormawaName}` : 'Kepatuhan Ormawa',
       value: avgScore !== null ? avgScore : '-',
-      unit: avgScore !== null ? '/ 100 Poin' : 'Belum Dievaluasi',
+      unit: avgScore !== null ? '/ 100 poin' : 'Belum dinilai',
       icon: ShieldCheck,
       iconBox: 'bg-blue-50 text-blue-600 border-blue-100/80',
       borderBg: 'border-slate-200/90 bg-white',
@@ -181,11 +182,11 @@ function DashboardKpiSummary({
     },
     {
       id: 'review-proposal',
-      title: 'Review Proposal DPM',
+      title: 'Proposal Butuh Review',
       mobileTitle: 'Review Proposal',
-      mobileSubtitle: 'Batas Waktu H-14',
+      mobileSubtitle: 'Perlu dicek',
       value: pendingProposal,
-      unit: 'butuh review DPM',
+      unit: 'menunggu review',
       icon: FileText,
       iconBox: 'bg-amber-50 text-amber-600 border-amber-100/80',
       borderBg: 'border-slate-200/90 bg-white',
@@ -194,9 +195,9 @@ function DashboardKpiSummary({
     },
     {
       id: 'lpj-verified',
-      title: 'LPJ Terverifikasi Sah',
-      mobileTitle: 'LPJ Terverifikasi',
-      mobileSubtitle: 'Capaian Proker',
+      title: 'LPJ Disetujui',
+      mobileTitle: 'LPJ Disetujui',
+      mobileSubtitle: 'Kegiatan selesai',
       value: completedProkers,
       unit: `dari ${totalProkers} proker`,
       icon: CheckCircle2,
@@ -209,9 +210,9 @@ function DashboardKpiSummary({
       id: 'lpj-overdue',
       title: 'Keterlambatan LPJ',
       mobileTitle: 'Keterlambatan LPJ',
-      mobileSubtitle: 'Batas Waktu H+14',
+      mobileSubtitle: 'Batas H+14',
       value: overdueLPJ,
-      unit: overdueLPJ > 0 ? 'Melampaui Batas H+14' : 'Nihil Keterlambatan',
+      unit: overdueLPJ > 0 ? 'Melewati batas H+14' : 'Semua tepat waktu',
       icon: AlertTriangle,
       iconBox: overdueLPJ > 0 ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-rose-50 text-rose-600 border-rose-100/80',
       borderBg: overdueLPJ > 0 ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200/90 bg-white',
@@ -259,7 +260,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
     <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft">
       <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
         <div>
-          <h3 className="font-extrabold text-slate-900 text-sm">Status Pengawasan Program Kerja</h3>
+          <h3 className="font-extrabold text-slate-900 text-sm">Status Program Kerja Terbaru</h3>
         </div>
       </div>
 
@@ -270,8 +271,8 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
               <TableHead className="pb-3 whitespace-nowrap">Ormawa &amp; Kegiatan</TableHead>
               <TableHead className="pb-3 whitespace-nowrap">Jadwal Acara</TableHead>
               <TableHead className="pb-3 whitespace-nowrap">Status Proposal</TableHead>
-              <TableHead className="pb-3 whitespace-nowrap">Status LPJ (H+14)</TableHead>
-              <TableHead className="pb-3 text-right whitespace-nowrap">{isGuest ? 'Dokumen' : 'Aksi DPM'}</TableHead>
+              <TableHead className="pb-3 whitespace-nowrap">Status LPJ</TableHead>
+              <TableHead className="pb-3 text-right whitespace-nowrap">{isGuest ? 'Dokumen' : 'Aksi'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -283,6 +284,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                       <Layers className="w-6 h-6 stroke-[1.8]" />
                     </div>
                     <h4 className="text-sm font-extrabold text-slate-900">Belum Ada Program Kerja</h4>
+                    <p className="text-xs text-slate-400 mt-1 max-w-sm">Daftarkan kegiatan baru atau pilih ormawa lain untuk melihat data.</p>
                     {!isGuest && (
                       <Button onClick={onOpenAddProker} className="mt-3" size="sm">
                         + Tambah Proker Baru
@@ -314,7 +316,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                       <div className="flex items-center justify-end gap-1.5">
                         {p.proposal?.fileName && (
                           <Button variant="outline" size="sm" onClick={() => onReviewProposal(p)} className="h-7 px-2.5 text-[11px]">
-                            {isGuest ? 'Proposal' : 'Review'}
+                            {isGuest ? 'Lihat Proposal' : 'Review'}
                           </Button>
                         )}
                         {p.lpj?.fileName && (
@@ -362,7 +364,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                     <ProposalBadge proposal={p.proposal} />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block mb-0.5">LPJ (H+14):</span>
+                    <span className="text-[10px] text-slate-400 block mb-0.5">LPJ:</span>
                     <LpjBadge status={p.status} lpj={p.lpj} />
                   </div>
                 </div>
@@ -374,7 +376,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                       onClick={() => onReviewProposal(p)}
                       className="flex-1 h-9 min-h-[38px] px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs"
                     >
-                      {isGuest ? 'Lihat Proposal' : 'Review Proposal'}
+                      {isGuest ? 'Lihat Proposal' : 'Review'}
                     </button>
                   )}
                   {p.lpj?.fileName && (
@@ -383,7 +385,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                       onClick={() => onAuditLPJ(p)}
                       className="flex-1 h-9 min-h-[38px] px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs"
                     >
-                      {isGuest ? 'Lihat Lembar LPJ' : 'Audit LPJ'}
+                      {isGuest ? 'Lihat LPJ' : 'Audit'}
                     </button>
                   )}
                 </div>
@@ -402,7 +404,7 @@ function DashboardBudgetCard({ totalSerapan, totalPagu, serapanPercent, ormawas 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 border-b border-slate-100 text-left">
         <div>
           <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight text-left">Serapan Dana Kemahasiswaan</h3>
-          <p className="text-[11px] text-slate-500 mt-0.5 text-left">Alokasi Anggaran Fakultas 2026</p>
+          <p className="text-[11px] text-slate-500 mt-0.5 text-left">Ringkasan alokasi &amp; realisasi anggaran periode 2026/2027</p>
         </div>
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/60 self-start sm:self-auto">
           <span>Realisasi Total: <strong className="text-blue-600">{formatRupiah(totalSerapan)}</strong></span>
@@ -414,7 +416,7 @@ function DashboardBudgetCard({ totalSerapan, totalPagu, serapanPercent, ormawas 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 my-5 items-stretch">
         <div className="lg:col-span-4 p-4 sm:p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex flex-col justify-between">
           <div>
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">TOTAL REALISASI DANA</span>
+            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">TOTAL REALISASI ANGGARAN</span>
             <h4 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">{formatRupiah(totalSerapan)}</h4>
             <p className="text-[11px] text-slate-500 mt-0.5">dari total alokasi anggaran {formatRupiah(totalPagu)}</p>
           </div>
@@ -470,7 +472,7 @@ function DashboardBudgetCard({ totalSerapan, totalPagu, serapanPercent, ormawas 
       </div>
 
       <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-        <span>Berdasarkan pencatatan kas riil ormawa</span>
+        <span>Data diperbarui otomatis dari pencatatan buku kas ormawa</span>
       </div>
     </Card>
   );
@@ -481,8 +483,8 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
   const setActiveTab = useStore((state) => state.setActiveTab);
 
   const handleOpenHistory = () => {
-    setActiveTab('history');
-    navigate('/history');
+    setActiveTab('proker');
+    navigate('/proker?tab=histori');
   };
 
   const getLogMeta = (log) => {
@@ -490,7 +492,7 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
     if (log.type === 'proker_added') return { badgeText: 'Dibuat', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
     if (log.title?.toLowerCase().includes('audit')) return { badgeText: 'Audit Selesai', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' };
     if (log.title?.toLowerCase().includes('revisi') || log.type?.includes('revisi')) return { badgeText: 'Revisi', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' };
-    return { badgeText: 'Log Audit', badgeClass: 'bg-slate-100 text-slate-700 border-slate-200' };
+    return { badgeText: 'Log Aktivitas', badgeClass: 'bg-slate-100 text-slate-700 border-slate-200' };
   };
 
   const recentLogs = activityLogs.slice(0, 3);
@@ -499,7 +501,7 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
     <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft flex flex-col justify-start gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
         <div className="flex items-center gap-2">
-          <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Aktivitas &amp; Log Audit Terkini</h3>
+          <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Aktivitas &amp; Pembaruan Terkini</h3>
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[10px] font-bold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>Live Feed</span>
@@ -510,9 +512,9 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
           type="button"
           onClick={handleOpenHistory}
           className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50/70 hover:bg-blue-100/70 border border-blue-200/60 px-3 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shrink-0 shadow-2xs min-h-[38px]"
-          title="Buka halaman Histori Proker lengkap"
+          title="Buka halaman Riwayat Proker lengkap"
         >
-          <span>Histori Lengkap</span>
+          <span>Lihat Semua Riwayat</span>
           <ArrowRight className="w-3.5 h-3.5 text-blue-600" />
         </button>
       </div>
@@ -522,7 +524,8 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
           <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
             <Clock className="w-5 h-5 stroke-[1.8]" />
           </div>
-          <h4 className="text-xs font-extrabold text-slate-900">Belum Ada Catatan Log</h4>
+          <h4 className="text-xs font-extrabold text-slate-900">Belum Ada Aktivitas Terkini</h4>
+          <p className="text-[11px] text-slate-400 mt-0.5">Semua pembaruan status dan pengawasan proker akan tercatat di sini.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">

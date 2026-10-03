@@ -73,7 +73,7 @@ export function TerbitkanSPModal({ isOpen, onClose }) {
             </div>
             <div>
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded">
-                Wewenang Eksekutif DPM
+                Komisi Pengawasan DPM
               </span>
               <h3 className="text-base font-bold text-slate-900 tracking-tight mt-0.5">
                 Terbitkan Surat Peringatan (SP)
@@ -90,7 +90,7 @@ export function TerbitkanSPModal({ isOpen, onClose }) {
 
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 text-xs">
           <div>
-            <label className="font-bold text-slate-700 block mb-1.5">Ormawa yang Diberi Peringatan:</label>
+            <label className="font-bold text-slate-700 block mb-1.5">Ormawa Penerima SP:</label>
             <DropdownSelect
               value={ormawaId}
               onChange={(val) => {
@@ -106,16 +106,16 @@ export function TerbitkanSPModal({ isOpen, onClose }) {
           </div>
 
           <div>
-            <label className="font-bold text-slate-700 block mb-1.5">Program Kerja Terkait:</label>
+            <label className="font-bold text-slate-700 block mb-1.5">Kegiatan Terkait:</label>
             <DropdownSelect
               value={prokerId || (availableProkers[0]?.id || 'umum')}
               onChange={(val) => setProkerId(val)}
               options={[
                 ...availableProkers.map(p => ({
                   value: p.id,
-                  label: `${p.title} (${p.status === 'lpj_overdue' ? '🔴 KETERLAMBATAN LPJ' : formatDateIndo(p.startDate)})`
+                  label: `${p.title} (${p.status === 'lpj_overdue' ? 'LPJ Terlambat' : formatDateIndo(p.startDate)})`
                 })),
-                { value: 'umum', label: 'Pelanggaran Tupoksi Umum Organisasi' }
+                { value: 'umum', label: 'Evaluasi Kedisiplinan Umum Organisasi' }
               ]}
               triggerClassName="py-2.5 px-3.5 text-xs font-medium"
             />
@@ -147,7 +147,7 @@ export function TerbitkanSPModal({ isOpen, onClose }) {
           </div>
 
           <div>
-            <label className="font-bold text-slate-700 block mb-1.5">Alasan &amp; Dasar Pertimbangan Hukum DPM:</label>
+            <label className="font-bold text-slate-700 block mb-1.5">Alasan Penerbitan &amp; Pertimbangan DPM:</label>
             <textarea
               rows={3}
               value={reason}
@@ -159,7 +159,7 @@ export function TerbitkanSPModal({ isOpen, onClose }) {
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2 text-amber-800">
             <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-[11px] leading-relaxed">
-              Surat Peringatan resmi ini akan tercatat dalam Rapor Kinerja Ormawa dan ditembuskan kepada <strong>Wakil Dekan Bidang Kemahasiswaan Fasilkom UMB</strong>.
+              Surat Peringatan resmi ini akan tercatat dalam Rapor Kinerja Ormawa dan diteruskan ke pihak kemahasiswaan fakultas.
             </p>
           </div>
 
@@ -175,7 +175,7 @@ export function TerbitkanSPModal({ isOpen, onClose }) {
               type="submit"
               className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-700/20 transition active:scale-95"
             >
-              Terbitkan Surat Resmi
+              Terbitkan Surat Peringatan
             </button>
           </div>
         </form>
@@ -213,7 +213,7 @@ export function ReviewKlarifikasiModal({ isOpen, onClose, sp }) {
         <DialogHeader className="px-5 sm:px-6 pt-5 pb-4 border-b border-slate-100 bg-slate-50/70 space-y-1.5 shrink-0">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200 text-[10px] font-bold uppercase tracking-wider">
-              EVALUASI TANGGAPAN SP
+              Tinjauan Klarifikasi SP
             </Badge>
             <span className="text-xs font-semibold text-slate-500">{sp.ormawaName}</span>
           </div>

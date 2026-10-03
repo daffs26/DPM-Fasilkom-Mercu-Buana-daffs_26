@@ -50,8 +50,8 @@ const PILLAR_CONFIGS = {
   },
   sla: {
     icon: FileCheck,
-    title: 'Kepatuhan SLA Berkas',
-    subtitle: 'Kedisiplinan pengajuan Proposal (H-14) & LPJ (H+14)',
+    title: 'Ketepatan Waktu Berkas',
+    subtitle: 'Ketepatan waktu pengajuan Proposal (H-14) & LPJ (H+14)',
     badgeCls: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     iconCls: 'bg-indigo-50 text-indigo-600 border-indigo-200',
     accentCls: 'accent-indigo-500',
@@ -218,26 +218,26 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
   let predikat = 'A';
   let predikatBadge = 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-2 ring-emerald-500/10';
   let predikatBar = 'bg-emerald-500';
-  let predikatText = 'Sangat Berhasil';
+  let predikatText = 'Sangat Baik';
   let heroScoreBg = 'bg-gradient-to-br from-slate-900 to-slate-800 border-emerald-500/30';
 
   if (totalScore < 55) {
     predikat = 'D';
     predikatBadge = 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10';
     predikatBar = 'bg-rose-500';
-    predikatText = 'Kurang Memuaskan';
+    predikatText = 'Perlu Perbaikan';
     heroScoreBg = 'bg-gradient-to-br from-slate-900 to-slate-800 border-rose-500/30';
   } else if (totalScore < 70) {
     predikat = 'C';
     predikatBadge = 'bg-amber-50 text-amber-700 border-amber-300 ring-2 ring-amber-500/10';
     predikatBar = 'bg-amber-500';
-    predikatText = 'Evaluasi Khusus';
+    predikatText = 'Cukup (Perlu Evaluasi)';
     heroScoreBg = 'bg-gradient-to-br from-slate-900 to-slate-800 border-amber-500/30';
   } else if (totalScore < 85) {
     predikat = 'B';
     predikatBadge = 'bg-blue-50 text-blue-700 border-blue-300 ring-2 ring-blue-500/10';
     predikatBar = 'bg-blue-500';
-    predikatText = 'Berhasil';
+    predikatText = 'Baik';
     heroScoreBg = 'bg-gradient-to-br from-slate-900 to-slate-800 border-blue-500/30';
   }
 
@@ -558,9 +558,9 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
               <div className="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-soft space-y-2.5">
                 <div className="flex items-center justify-between">
                   <label className="font-extrabold text-slate-900 text-xs block">
-                    Rekomendasi Resmi DPM
+                    Catatan &amp; Arahan Evaluasi
                   </label>
-                  <span className="text-[10px] text-slate-400 font-medium">BAP Audit</span>
+                  <span className="text-[10px] text-slate-400 font-medium">Catatan DPM</span>
                 </div>
 
                 {!isGuest && (
@@ -686,7 +686,7 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
                 className="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs hover:shadow transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <CheckCircle2 className="w-4 h-4 text-white" />
-                <span>Sahkan Hasil Audit</span>
+                <span>Simpan &amp; Sahkan Audit</span>
               </button>
             )}
           </div>

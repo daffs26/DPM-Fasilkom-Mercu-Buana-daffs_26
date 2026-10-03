@@ -26,18 +26,18 @@ const AUDIT_PARAMETERS = [
   { no: '01', title: 'Kedisiplinan Rundown', bobot: '20 Poin', pct: '20%', desc: 'Ketepatan waktu dan alur rundown sesi di lapangan.', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
   { no: '02', title: 'Capaian Peserta', bobot: '20 Poin', pct: '20%', desc: 'Tingkat kehadiran peserta sesuai target proposal.', icon: Users, color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200' },
   { no: '03', title: 'Efisiensi Anggaran', bobot: '20 Poin', pct: '20%', desc: 'Realisasi sesuai RAB dan kelengkapan bukti nota sah.', icon: Coins, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
-  { no: '04', title: 'Kepatuhan SLA Berkas', bobot: '20 Poin', pct: '20%', desc: 'Ketepatan waktu Proposal (H-14) & LPJ (H+14).', icon: FileCheck, color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200' },
+  { no: '04', title: 'Ketepatan Waktu Berkas', bobot: '20 Poin', pct: '20%', desc: 'Ketepatan waktu pengumpulan Proposal (H-14) & LPJ (H+14).', icon: FileCheck, color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200' },
   { no: '05', title: 'Mutu Output Acara', bobot: '20 Poin', pct: '20%', desc: 'Ketercapaian output nyata dan manfaat kegiatan ormawa.', icon: Target, color: 'text-rose-600', bg: 'bg-rose-50 border-rose-200' }
 ];
 
 function AuditSlaStatus({ p }) {
   if (p.status === 'lpj_overdue') {
-    return <span className="text-rose-600 font-extrabold text-[11px] inline-flex items-center gap-1">🔴 Melampaui Batas (&gt; H+14)</span>;
+    return <span className="text-rose-600 font-bold text-xs inline-flex items-center gap-1">Terlambat (&gt; H+14)</span>;
   }
   if (p.lpj?.fileName) {
-    return <span className="text-emerald-600 font-bold text-[11px] inline-flex items-center gap-1">✓ Tepat Waktu</span>;
+    return <span className="text-emerald-600 font-medium text-xs inline-flex items-center gap-1">Tepat Waktu</span>;
   }
-  return <span className="text-slate-500 text-[11px]">Tenggat: {p.lpj?.deadlineDate || 'H+14'}</span>;
+  return <span className="text-slate-500 text-xs">Batas LPJ: {p.lpj?.deadlineDate || 'H+14'}</span>;
 }
 
 function AuditScoreBadge({ audit }) {
@@ -45,7 +45,7 @@ function AuditScoreBadge({ audit }) {
     return (
       <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-        <span>Menunggu Audit</span>
+        <span>Menunggu Evaluasi</span>
       </span>
     );
   }
@@ -65,36 +65,55 @@ function AuditScoreBadge({ audit }) {
   );
 }
 
-const AuditParameterStandards = React.memo(function AuditParameterStandards() {
+const AuditEvaluasiDanPilarCard = React.memo(function AuditEvaluasiDanPilarCard({
+  auditedCount = 0,
+  totalCount = 0,
+  passedCount = 0,
+  avgScore = 0
+}) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-soft w-full max-w-full overflow-hidden transition-all duration-300">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-3.5 border-b border-slate-100 gap-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs border border-blue-200/60">
             <Award className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                5 Pilar Penilaian Mutu Kegiatan
-              </h3>
-              <span className="hidden sm:inline-flex text-[10px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
-                Skor 0 - 100
-              </span>
-            </div>
+            <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
+              Kriteria Penilaian Performa Ormawa
+            </h3>
             <p className="text-[11px] text-slate-500 mt-0.5">
-              Standar baku evaluasi akuntabilitas &amp; mutu LPJ regulasi DPM Fasilkom
+              Standar baku evaluasi akuntabilitas kegiatan (bobot total 100 poin).
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+        <div className="flex items-center gap-2 self-start lg:self-auto flex-wrap">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+            <span className="text-slate-500 font-medium text-[11px]">Diaudit:</span>
+            <span className="font-bold text-slate-900 tabular-nums text-xs">
+              {auditedCount}<span className="text-slate-400 font-normal">/{totalCount}</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-xs">
+            <span className="text-emerald-700 font-medium text-[11px]">Lulus:</span>
+            <span className="font-bold text-emerald-800 tabular-nums text-xs">
+              {passedCount}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 border border-blue-200 text-xs">
+            <span className="text-blue-700 font-medium text-[11px]">Rata-rata:</span>
+            <span className="font-bold text-blue-800 tabular-nums text-xs">
+              {avgScore > 0 ? `${avgScore}/100` : '-'}
+            </span>
+          </div>
+
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200/80 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer min-h-[36px]"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200/80 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer min-h-[32px]"
             title={isExpanded ? 'Ringkas Tampilan Parameter' : 'Tampilkan Detail 5 Parameter'}
           >
             {isExpanded ? (
@@ -105,7 +124,7 @@ const AuditParameterStandards = React.memo(function AuditParameterStandards() {
             ) : (
               <>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-                <span>Detail Parameter</span>
+                <span>Detail</span>
               </>
             )}
           </button>
@@ -113,27 +132,24 @@ const AuditParameterStandards = React.memo(function AuditParameterStandards() {
       </div>
 
       {!isExpanded ? (
-        <div className="pt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {AUDIT_PARAMETERS.map((param) => {
-              const Icon = param.icon;
-              return (
-                <div 
-                  key={param.no} 
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-700 text-[11px] font-semibold"
-                >
-                  <Icon className={`w-3.5 h-3.5 ${param.color}`} />
-                  <span>{param.title}</span>
-                  <span className="text-[9px] px-1 py-0.2 bg-white border border-slate-200 rounded font-mono text-slate-500">
-                    {param.pct}
-                  </span>
+        <div className="pt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
+          {AUDIT_PARAMETERS.map((param) => {
+            const Icon = param.icon;
+            return (
+              <div 
+                key={param.no} 
+                className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/80 border border-slate-200/70 text-slate-700 text-xs"
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${param.color}`} />
+                  <span className="truncate font-semibold text-[11px]">{param.title}</span>
                 </div>
-              );
-            })}
-          </div>
-          <div className="text-[11px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-xl flex items-center gap-1">
-            <span>Total: 100 Poin</span>
-          </div>
+                <span className="text-[10px] font-bold text-slate-500 shrink-0 ml-1.5 font-mono">
+                  {param.pct}
+                </span>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-3.5">
@@ -184,10 +200,10 @@ const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, proke
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div>
           <h3 className="font-bold text-slate-900 text-sm">
-            {canViewAll ? 'Rapor Kinerja & Akreditasi Ormawa' : `Rapor Kinerja: ${displayedOrmawas[0]?.shortName || 'Ormawa'}`}
+            {canViewAll ? 'Rapor Kinerja Ormawa' : `Rapor Kinerja: ${displayedOrmawas[0]?.shortName || 'Ormawa'}`}
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Akumulasi skor mutu kegiatan dan ketertiban pelaporan periode aktif
+            Rata-rata skor evaluasi LPJ dan ketepatan waktu pelaporan periode aktif.
           </p>
         </div>
       </div>
@@ -623,47 +639,12 @@ export default function AuditView({ onAuditLPJ, onPrintDoc }) {
 
   return (
     <div className="space-y-5">
-      {/* Top Banner & Quick Metric Strip */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/80 shadow-soft flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/70">
-              AUDIT MUTU &amp; AKUNTABILITAS
-            </span>
-            <span className="text-xs text-slate-400 font-medium">Periode 2026/2027</span>
-          </div>
-          <h2 className="text-base sm:text-lg font-black text-slate-900 mt-1">
-            Evaluasi LPJ &amp; Akreditasi Ormawa Fasilkom
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Instrumen audit pengawasan legislatif berbasis 5 pilar mutu kegiatan dan transparansi anggaran.
-          </p>
-        </div>
-
-        {/* 3 Quick Metric Pills */}
-        <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
-          <div className="p-2.5 sm:px-3.5 sm:py-2 rounded-2xl bg-slate-50 border border-slate-200/80">
-            <span className="text-[10px] text-slate-400 font-medium block">Kegiatan Diaudit</span>
-            <span className="text-xs sm:text-sm font-black text-slate-900 tabular-nums">
-              {auditedList.length} <span className="text-[10px] text-slate-400 font-normal">/ {displayedProkers.length}</span>
-            </span>
-          </div>
-          <div className="p-2.5 sm:px-3.5 sm:py-2 rounded-2xl bg-emerald-50/70 border border-emerald-200/70">
-            <span className="text-[10px] text-emerald-600 font-medium block">Lulus Audit</span>
-            <span className="text-xs sm:text-sm font-black text-emerald-700 tabular-nums">
-              {passedCount} <span className="text-[10px] text-emerald-600/70 font-normal">proker</span>
-            </span>
-          </div>
-          <div className="p-2.5 sm:px-3.5 sm:py-2 rounded-2xl bg-blue-50/70 border border-blue-200/70">
-            <span className="text-[10px] text-blue-600 font-medium block">Rata-rata Skor</span>
-            <span className="text-xs sm:text-sm font-black text-blue-700 tabular-nums">
-              {avgScore > 0 ? `${avgScore} / 100` : '-'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <AuditParameterStandards />
+      <AuditEvaluasiDanPilarCard 
+        auditedCount={auditedList.length}
+        totalCount={displayedProkers.length}
+        passedCount={passedCount}
+        avgScore={avgScore}
+      />
       <AuditOrmawaReport ormawas={displayedOrmawas} prokers={displayedProkers} currentUser={currentUser} />
       <AuditProkerTable 
         prokers={displayedProkers} 

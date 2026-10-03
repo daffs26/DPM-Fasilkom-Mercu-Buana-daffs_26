@@ -360,7 +360,7 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
                         setTitle(e.target.value);
                         if (errorMessage) setErrorMessage('');
                       }}
-                      placeholder="Nama kegiatan / acara"
+                      placeholder="Misal: Seminar Nasional AI 2026"
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 h-9 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
                     />
                   </div>
@@ -521,15 +521,15 @@ export default function AddProkerModal({ isOpen, onClose, initialDate = '' }) {
                     ) : (
                       <div className="flex items-center justify-center gap-2 text-slate-500">
                         <UploadCloud className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="text-xs">Klik atau seret file proposal (PDF/DOCX, maks 25MB)</span>
+                        <span className="text-xs">Unggah proposal kegiatan (PDF atau DOCX, maks. 25MB)</span>
                       </div>
                     )}
                   </div>
 
                   {isDadakanWarning && (
-                    <div className="mt-2 p-2 bg-rose-50/70 border border-rose-200/70 rounded-xl flex items-center gap-2 text-rose-700 text-xs">
-                      <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                      <span>Pelaksanaan &lt; H-14 ({daysDiff} hari lagi), berstatus pengajuan terlambat.</span>
+                    <div className="mt-2 p-2 bg-amber-50/70 border border-amber-200/70 rounded-xl flex items-center gap-2 text-amber-800 text-xs">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>Pengajuan kurang dari 14 hari sebelum acara ({daysDiff} hari lagi). Berkas akan ditandai sebagai pengajuan mendesak.</span>
                     </div>
                   )}
                 </div>

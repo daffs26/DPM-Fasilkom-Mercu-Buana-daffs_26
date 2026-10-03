@@ -94,20 +94,20 @@ export function getOrmawaMetadata(ormawaId) {
 export function getStatusBadge(status) {
   switch (status) {
     case 'completed':
-      return { label: 'Selesai & LPJ Disetujui', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      return { label: 'Kegiatan Selesai', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
     case 'lpj_pending':
-      return { label: 'LPJ Sedang Direview', color: 'bg-blue-50 text-blue-700 border-blue-200' };
+      return { label: 'LPJ Menunggu Review', color: 'bg-blue-50 text-blue-700 border-blue-200' };
     case 'lpj_overdue':
-      return { label: 'LPJ Terlambat / Overdue', color: 'bg-red-50 text-red-700 border-red-200' };
+      return { label: 'LPJ Terlambat', color: 'bg-rose-50 text-rose-700 border-rose-200' };
     case 'proposal_pending':
-      return { label: 'Proposal Menunggu Review', color: 'bg-amber-50 text-amber-700 border-amber-200' };
+      return { label: 'Menunggu Review', color: 'bg-amber-50 text-amber-700 border-amber-200' };
     case 'proposal_approved':
-      return { label: 'Proposal Disetujui', color: 'bg-teal-50 text-teal-700 border-teal-200' };
+      return { label: 'Proposal Disetujui', color: 'bg-blue-50 text-blue-700 border-blue-200' };
     case 'in_progress':
       return { label: 'Sedang Berlangsung', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
     case 'draft':
     default:
-      return { label: 'Draf Proker', color: 'bg-slate-100 text-slate-700 border-slate-200' };
+      return { label: 'Draf Kegiatan', color: 'bg-slate-100 text-slate-700 border-slate-200' };
   }
 }
 

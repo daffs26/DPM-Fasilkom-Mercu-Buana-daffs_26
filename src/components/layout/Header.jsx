@@ -278,8 +278,25 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
   const handleNotificationClick = (notif) => {
     markNotificationAsRead(notif.id);
     if (notif.linkTab) {
-      setActiveTab(notif.linkTab);
-      navigate(`/${notif.linkTab}`);
+      if (['proker', 'history', 'kalender'].includes(notif.linkTab)) {
+        setActiveTab('proker');
+        navigate(notif.linkTab === 'history' ? '/proker?tab=histori' : notif.linkTab === 'kalender' ? '/proker?tab=kalender' : '/proker');
+      } else if (['transparansi', 'berkas', 'anggaran', 'template'].includes(notif.linkTab)) {
+        setActiveTab('transparansi');
+        navigate(
+          notif.linkTab === 'anggaran' 
+            ? '/transparansi?tab=anggaran' 
+            : notif.linkTab === 'template' 
+              ? '/transparansi?tab=template' 
+              : '/transparansi?tab=berkas'
+        );
+      } else if (['audit', 'sp'].includes(notif.linkTab)) {
+        setActiveTab('audit');
+        navigate(notif.linkTab === 'sp' ? '/audit?tab=sp' : '/audit');
+      } else {
+        setActiveTab(notif.linkTab);
+        navigate(`/${notif.linkTab}`);
+      }
     }
     setIsNotificationsOpen(false);
   };

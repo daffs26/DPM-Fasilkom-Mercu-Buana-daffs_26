@@ -33,6 +33,13 @@ import {
 import { exportFinancialWorkbook, exportFormattedCSV } from '@/utils/exportExcel';
 import { formatRupiah, getTransactionTypeBadge } from '@/utils/formatters';
 
+const ORMAWA_DISPLAY_NAMES = {
+  dpm: 'DPM Fasilkom',
+  bem: 'BEM Fasilkom',
+  himti: 'HIMTI',
+  himsisfo: 'HIMSISFO'
+};
+
 function KpiCard({ title, value, subtitle, icon: Icon, iconBg, iconColor, percent, progressColor }) {
   return (
     <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-soft flex flex-col justify-between">
@@ -192,19 +199,6 @@ function AnggaranOrmawaGrid({
           const sisa = Math.max(0, pagu - serapan);
           const percent = pagu > 0 ? Math.round((serapan / pagu) * 100) : 0;
 
-          let badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-          let badgeLabel = 'Aman';
-          if (percent > 100) {
-            badgeColor = 'bg-red-50 text-red-700 border-red-300';
-            badgeLabel = 'Over-Budget';
-          } else if (percent >= 85) {
-            badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
-            badgeLabel = 'Kritis';
-          } else if (percent >= 50) {
-            badgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
-            badgeLabel = 'Optimal';
-          }
-
           return (
             <div 
               key={`pagu-card-${o.id}`}
@@ -229,9 +223,6 @@ function AnggaranOrmawaGrid({
                     <p className="text-[10px] text-slate-500 truncate">{o.type}</p>
                   </div>
                 </div>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${badgeColor}`}>
-                  {badgeLabel}
-                </span>
               </div>
 
               <div className="space-y-1.5 pt-1">
@@ -754,12 +745,21 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">Kelola Anggaran &amp; Realisasi</h3>
-                {selectedOrmawaFilter !== 'all' && (
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
-                    Filter: {activeOrmawaObj?.shortName}
+                {selectedOrmawaFilter !== 'all' && activeOrmawaObj && (
+                  <span className="text-xs font-semibold text-slate-500">
+                    — {ORMAWA_DISPLAY_NAMES[activeOrmawaObj.id] || activeOrmawaObj.shortName}
                   </span>
                 )}
               </div>
+              <p className="text-xs text-slate-500 mt-0.5 font-normal">
+                {selectedOrmawaFilter !== 'all' && activeOrmawaObj ? (
+                  <span>
+                    Menampilkan data kas &amp; anggaran <strong className="font-semibold text-slate-800">{ORMAWA_DISPLAY_NAMES[activeOrmawaObj.id] || activeOrmawaObj.shortName}</strong>
+                  </span>
+                ) : (
+                  'Monitoring alokasi dan realisasi pencatatan kas ormawa'
+                )}
+              </p>
             </div>
           </div>
 

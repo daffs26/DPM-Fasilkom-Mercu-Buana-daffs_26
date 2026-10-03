@@ -11,14 +11,10 @@ import LoginView from './components/auth/LoginView';
 import RegisterView from './components/auth/RegisterView';
 import { Analytics } from '@vercel/analytics/react';
 
-// Secondary views loaded on-demand
-const HistoryView = lazy(() => import('./components/history/HistoryView'));
-const BerkasView = lazy(() => import('./components/berkas/BerkasView'));
-const AuditView = lazy(() => import('./components/audit/AuditView'));
-const KalenderView = lazy(() => import('./components/kalender/KalenderView'));
-const SuratPeringatanView = lazy(() => import('./components/sp/SuratPeringatanView'));
-const TemplateView = lazy(() => import('./components/template/TemplateDokumenView'));
-const AnggaranView = lazy(() => import('./components/anggaran/AnggaranView'));
+// Consolidated primary domain containers loaded on-demand
+const ProkerContainerView = lazy(() => import('./components/proker/ProkerContainerView'));
+const TransparansiContainerView = lazy(() => import('./components/berkas/TransparansiContainerView'));
+const PengawasanContainerView = lazy(() => import('./components/audit/PengawasanContainerView'));
 
 // Modals loaded on-demand (Disederhanakan & Lokasi Per Fitur)
 const AddProkerModal = lazy(() => import('./components/proker/TambahProkerModal'));
@@ -49,6 +45,8 @@ function ViewLoadingFallback({ tab }) {
       return <DashboardSkeleton />;
     case 'proker':
       return <ProkerSkeleton />;
+    case 'transparansi':
+      return <BerkasSkeleton />;
     case 'anggaran':
       return <AnggaranSkeleton />;
     case 'audit':
@@ -153,9 +151,17 @@ export default function App() {
   const lastActivityRef = useRef(Date.now());
 
   // Sinkronkan URL path saat ini ke activeTab di Zustand store agar backward-compatible
-  const currentPathTab = location.pathname.replace(/^\//, '') || 'dashboard';
+  const rawPathTab = location.pathname.replace(/^\//, '') || 'dashboard';
+  const getActiveTabFromPath = (path) => {
+    if (['proker', 'history', 'kalender'].includes(path)) return 'proker';
+    if (['transparansi', 'berkas', 'anggaran', 'template'].includes(path)) return 'transparansi';
+    if (['audit', 'sp'].includes(path)) return 'audit';
+    return path || 'dashboard';
+  };
+  const currentPathTab = getActiveTabFromPath(rawPathTab);
+
   useEffect(() => {
-    const validTabs = ['dashboard', 'proker', 'history', 'anggaran', 'berkas', 'template', 'audit', 'kalender', 'sp'];
+    const validTabs = ['dashboard', 'proker', 'transparansi', 'audit'];
     if (validTabs.includes(currentPathTab) && currentPathTab !== activeTab) {
       useStore.getState().setActiveTab(currentPathTab);
     }
@@ -292,70 +298,46 @@ export default function App() {
                   } />
 
                   <Route path="/proker" element={
-                    <ProkerView 
-                      onOpenAddProker={() => handleOpenAddProker('')}
+                    <ProkerContainerView 
+                      onOpenAddProker={handleOpenAddProker}
                       onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
                       onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
                       onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
                       onPrintDoc={(docData) => setPrintDocData(docData)}
+                      calendarSelectedDate={calendarSelectedDate}
+                      onDateChange={setCalendarSelectedDate}
                     />
                   } />
 
-                  <Route path="/history" element={
-                    <HistoryView 
-                      onOpenAddProker={() => handleOpenAddProker('')}
-                      onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
-                    />
-                  } />
+                  {/* Backward compatibility redirects for Proker */}
+                  <Route path="/history" element={<Navigate to="/proker?tab=histori" replace />} />
+                  <Route path="/kalender" element={<Navigate to="/proker?tab=kalender" replace />} />
 
-                  <Route path="/anggaran" element={
-                    <AnggaranView 
+                  <Route path="/transparansi" element={
+                    <TransparansiContainerView 
+                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
                       onOpenSetPagu={() => setIsSetPaguOpen(true)}
                       onOpenAddTransaction={handleOpenAddTransaction}
                       onPrintDoc={(docData) => setPrintDocData(docData)}
                     />
                   } />
 
-                  <Route path="/berkas" element={
-                    <BerkasView 
-                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                    />
-                  } />
-
-                  <Route path="/template" element={
-                    isGuest ? (
-                      <Navigate to="/dashboard" replace />
-                    ) : (
-                      <TemplateView />
-                    )
-                  } />
+                  {/* Backward compatibility redirects for Transparansi */}
+                  <Route path="/berkas" element={<Navigate to="/transparansi?tab=berkas" replace />} />
+                  <Route path="/anggaran" element={<Navigate to="/transparansi?tab=anggaran" replace />} />
+                  <Route path="/template" element={<Navigate to="/transparansi?tab=template" replace />} />
 
                   <Route path="/audit" element={
-                    <AuditView 
+                    <PengawasanContainerView 
                       onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                      onOpenIssueSP={() => setIsIssueSPOpen(true)}
                       onPrintDoc={(docData) => setPrintDocData(docData)}
                     />
                   } />
 
-                  <Route path="/kalender" element={
-                    <KalenderView 
-                      onOpenAddProker={(date) => handleOpenAddProker(date || calendarSelectedDate)}
-                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                      onDateChange={setCalendarSelectedDate}
-                    />
-                  } />
-
-                  <Route path="/sp" element={
-                    isGuest ? (
-                      <Navigate to="/dashboard" replace />
-                    ) : (
-                      <SuratPeringatanView 
-                        onOpenIssueSP={() => setIsIssueSPOpen(true)}
-                        onPrintDoc={(docData) => setPrintDocData(docData)}
-                      />
-                    )
-                  } />
+                  {/* Backward compatibility redirects for Pengawasan */}
+                  <Route path="/sp" element={<Navigate to="/audit?tab=sp" replace />} />
 
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>

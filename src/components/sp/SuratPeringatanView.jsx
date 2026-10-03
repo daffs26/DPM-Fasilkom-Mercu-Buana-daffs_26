@@ -145,7 +145,7 @@ export default function SuratPeringatanView({ onOpenIssueSP, onPrintDoc }) {
                       ? 'bg-amber-50 text-amber-800 border-amber-200'
                       : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   }`}>
-                    {isActive ? `🔴 SP ${sp.level} AKTIF` : isClarification ? '💬 Tanggapan Masuk' : '✓ Terselesaikan'}
+                    {isActive ? `🔴 SP ${sp.level} Aktif` : isClarification ? '💬 Tanggapan Masuk' : '✓ Terselesaikan'}
                   </span>
                 </div>
 

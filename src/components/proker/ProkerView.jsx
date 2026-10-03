@@ -39,7 +39,7 @@ function ProkerStatusBadge({ p, isCompleted, isOverdue, isRevisi, pendingRevisio
   if (p.status === 'deletion_pending' || p.deletionPending) {
     return (
       <span className="bg-rose-50 text-rose-700 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-rose-200 flex items-center gap-1 shrink-0">
-        <AlertTriangle className="w-3 h-3 text-rose-600" /> Hapus (Menunggu DPM)
+        <AlertTriangle className="w-3 h-3 text-rose-600" /> Pengajuan Hapus
       </span>
     );
   }
@@ -65,12 +65,12 @@ function ProkerStatusBadge({ p, isCompleted, isOverdue, isRevisi, pendingRevisio
     );
   }
   if (p.proposal?.reviewStatus === 'approved') {
-    return <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">Proposal ACC</span>;
+    return <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">Proposal Disetujui</span>;
   }
   if (p.proposal?.isDadakan) {
-    return <span className="bg-red-50 text-red-700 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-red-200 shrink-0">⚠️ Terlambat (&lt; H-14)</span>;
+    return <span className="bg-amber-50 text-amber-800 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-amber-200 shrink-0">⚠️ Mendekati H-14</span>;
   }
-  return <span className="bg-amber-50 text-amber-700 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-amber-200 shrink-0">Menunggu Review</span>;
+  return <span className="bg-slate-100 text-slate-700 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-slate-200 shrink-0">Menunggu Review</span>;
 }
 
 export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDetailProker, onAuditLPJ, onPrintDoc }) {
@@ -180,14 +180,14 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     { value: 'all', label: 'Semua Status', badge: statusCounts.all },
     { value: 'pending', label: 'Menunggu Review', badge: statusCounts.pending },
     { value: 'revisi', label: 'Perlu Revisi', badge: statusCounts.revisi },
-    { value: 'approved', label: 'Proposal ACC', badge: statusCounts.approved },
+    { value: 'approved', label: 'Proposal Disetujui', badge: statusCounts.approved },
     { value: 'overdue', label: 'LPJ Terlambat', badge: statusCounts.overdue },
     { value: 'completed', label: 'Proker Selesai', badge: statusCounts.completed }
   ], [statusCounts]);
 
   const kpiItems = [
     { label: 'Total Proker', count: statusCounts.all, bg: 'bg-slate-50 border-slate-200/80', text: 'text-slate-500', val: 'text-slate-900' },
-    { label: 'Proposal ACC', count: statusCounts.approved, bg: 'bg-blue-50/60 border-blue-200', text: 'text-blue-700', val: 'text-blue-900' },
+    { label: 'Proposal Disetujui', count: statusCounts.approved, bg: 'bg-blue-50/60 border-blue-200', text: 'text-blue-700', val: 'text-blue-900' },
     { label: 'Perlu Revisi', count: statusCounts.revisi, bg: 'bg-amber-50/60 border-amber-200', text: 'text-amber-800', val: 'text-amber-900' },
     { label: 'LPJ Terlambat', count: statusCounts.overdue, bg: 'bg-rose-50/60 border-rose-200', text: 'text-rose-700', val: 'text-rose-900' },
     { label: 'Selesai Diaudit', count: statusCounts.completed, bg: 'bg-emerald-50/60 border-emerald-200 col-span-2 sm:col-span-1', text: 'text-emerald-700', val: 'text-emerald-900' }
@@ -203,7 +203,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
               <Layers className="w-4 h-4" />
             </div>
             <h3 className="font-black text-slate-900 text-xs sm:text-sm tracking-tight truncate">
-              Manajemen &amp; Pengawasan Proker
+              Daftar Program Kerja
             </h3>
           </div>
 
