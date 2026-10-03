@@ -6,7 +6,6 @@ import { AlertCircle } from 'lucide-react';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import DashboardView from './components/dashboard/DashboardView';
-import ProkerView from './components/proker/ProkerView';
 import LoginView from './components/auth/LoginView';
 import RegisterView from './components/auth/RegisterView';
 import { Analytics } from '@vercel/analytics/react';
@@ -15,6 +14,7 @@ import { Analytics } from '@vercel/analytics/react';
 const ProkerContainerView = lazy(() => import('./components/proker/ProkerContainerView'));
 const TransparansiContainerView = lazy(() => import('./components/berkas/TransparansiContainerView'));
 const PengawasanContainerView = lazy(() => import('./components/audit/PengawasanContainerView'));
+const StrukturView = lazy(() => import('./components/struktur/StrukturView'));
 
 // Modals loaded on-demand (Disederhanakan & Lokasi Per Fitur)
 const AddProkerModal = lazy(() => import('./components/proker/TambahProkerModal'));
@@ -61,6 +61,8 @@ function ViewLoadingFallback({ tab }) {
       return <SuratPeringatanSkeleton />;
     case 'history':
       return <HistorySkeleton />;
+    case 'struktur':
+      return <GenericPageSkeleton />;
     default:
       return <GenericPageSkeleton />;
   }
@@ -147,6 +149,7 @@ export default function App() {
     logout: state.logout 
   })));
   const isGuest = currentUser?.role === 'guest';
+  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
   const [idleNotice, setIdleNotice] = useState('');
   const lastActivityRef = useRef(Date.now());
 
@@ -161,7 +164,7 @@ export default function App() {
   const currentPathTab = getActiveTabFromPath(rawPathTab);
 
   useEffect(() => {
-    const validTabs = ['dashboard', 'proker', 'transparansi', 'audit'];
+    const validTabs = ['dashboard', 'proker', 'transparansi', 'audit', 'struktur'];
     if (validTabs.includes(currentPathTab) && currentPathTab !== activeTab) {
       useStore.getState().setActiveTab(currentPathTab);
     }
@@ -338,6 +341,9 @@ export default function App() {
 
                   {/* Backward compatibility redirects for Pengawasan */}
                   <Route path="/sp" element={<Navigate to="/audit?tab=sp" replace />} />
+
+                  {/* Struktur Organisasi DPM (Khusus Role DPM) */}
+                  <Route path="/struktur" element={isDpm ? <StrukturView /> : <Navigate to="/dashboard" replace />} />
 
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>

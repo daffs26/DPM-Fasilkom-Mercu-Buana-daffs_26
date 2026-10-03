@@ -7,6 +7,7 @@ import {
   Layers, 
   FolderOpen, 
   Award, 
+  Network,
   RotateCcw,
   X,
   LogOut
@@ -66,11 +67,11 @@ function SidebarFooter({ currentUser, onLogout, onReset }) {
 
   return (
     <div className="p-3.5 border-t border-slate-100 bg-slate-50/60 space-y-2.5 shrink-0">
-      <div className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-        <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+      <div className="flex items-center gap-3 p-2.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+        <div className="w-8.5 h-8.5 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
           {currentUser.name.substring(0, 2).toUpperCase()}
         </div>
-        <div className="overflow-hidden flex-1">
+        <div className="overflow-hidden flex-1 space-y-0.5">
           <p className="text-xs font-bold text-slate-900 truncate">
             {currentUser.name}
           </p>
@@ -205,11 +206,22 @@ export default function Sidebar({ isOpen, onClose }) {
         : overdueLPJCount > 0 
           ? { text: `${overdueLPJCount} Terlambat`, color: 'bg-rose-100 text-rose-800' } 
           : null 
+    },
+    { 
+      id: 'struktur', 
+      label: 'Struktur DPM', 
+      icon: Network, 
+      badge: null 
     }
   ];
 
+  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
+
   const filteredMenuItems = menuItems.filter(item => {
     if (!currentUser) return false;
+    if (item.id === 'struktur') {
+      return isDpm;
+    }
     return true;
   });
 
