@@ -9,6 +9,7 @@ import DashboardView from './components/dashboard/DashboardView';
 import LoginView from './components/auth/LoginView';
 import RegisterView from './components/auth/RegisterView';
 import { Analytics } from '@vercel/analytics/react';
+import { notificationService } from './services/notificationService';
 
 // Consolidated primary domain containers loaded on-demand
 const ProkerContainerView = lazy(() => import('./components/proker/ProkerContainerView'));
@@ -197,6 +198,32 @@ export default function App() {
     };
   }, [currentUser, logout, navigate]);
 
+  // Realtime Supabase Notification Subscription (Hybrid Realtime Sesuai PRD)
+  useEffect(() => {
+    if (!currentUser || isGuest) return;
+
+    const unsubscribe = notificationService.subscribeNotifications(
+      currentUser.ormawaId,
+      currentUser.id,
+      (newNotif) => {
+        useStore.getState().addNotification({
+          id: newNotif.id,
+          title: newNotif.title,
+          message: newNotif.message,
+          time: 'Baru saja',
+          type: newNotif.type || 'system',
+          targetOrmawaId: newNotif.recipient_ormawa_id,
+          isRead: false,
+          linkTab: newNotif.link_tab || 'dashboard'
+        });
+      }
+    );
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [currentUser, isGuest]);
+
   // Modal States
   const [isAddProkerOpen, setIsAddProkerOpen] = useState(false);
   const [initialProkerDate, setInitialProkerDate] = useState('');
@@ -213,8 +240,6 @@ export default function App() {
   // Mobile sidebar state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Dev & Preview Skeleton Toggle (allows instant live inspection of skeletons on local)
-  const [isPreviewSkeleton, setIsPreviewSkeleton] = useState(false);
 
   const handleOpenAddTransaction = (mode = 'pengeluaran', ormawaId = '') => {
     if (isGuest) return;
@@ -282,74 +307,70 @@ export default function App() {
         />
 
         <main className="flex-1 p-3.5 sm:p-5 lg:p-7 xl:p-8 max-w-[1440px] w-full mx-auto overflow-x-hidden">
-          {isPreviewSkeleton ? (
-            <ViewLoadingFallback tab={currentPathTab} />
-          ) : (
-            <Suspense fallback={<ViewLoadingFallback tab={currentPathTab} />}>
-              <RouteErrorBoundary>
-                <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/register" element={<Navigate to="/dashboard" replace />} />
-                  
-                  <Route path="/dashboard" element={
-                    <DashboardView 
-                      onOpenAddProker={() => handleOpenAddProker('')}
-                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                    />
-                  } />
+          <Suspense fallback={<ViewLoadingFallback tab={currentPathTab} />}>
+            <RouteErrorBoundary>
+              <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/register" element={<Navigate to="/dashboard" replace />} />
+                
+                <Route path="/dashboard" element={
+                  <DashboardView 
+                    onOpenAddProker={() => handleOpenAddProker('')}
+                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                  />
+                } />
 
-                  <Route path="/proker" element={
-                    <ProkerContainerView 
-                      onOpenAddProker={handleOpenAddProker}
-                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                      onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
-                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                      onPrintDoc={(docData) => setPrintDocData(docData)}
-                      calendarSelectedDate={calendarSelectedDate}
-                      onDateChange={setCalendarSelectedDate}
-                    />
-                  } />
+                <Route path="/proker" element={
+                  <ProkerContainerView 
+                    onOpenAddProker={handleOpenAddProker}
+                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                    onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
+                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                    onPrintDoc={(docData) => setPrintDocData(docData)}
+                    calendarSelectedDate={calendarSelectedDate}
+                    onDateChange={setCalendarSelectedDate}
+                  />
+                } />
 
-                  {/* Backward compatibility redirects for Proker */}
-                  <Route path="/history" element={<Navigate to="/proker?tab=histori" replace />} />
-                  <Route path="/kalender" element={<Navigate to="/proker?tab=kalender" replace />} />
+                {/* Backward compatibility redirects for Proker */}
+                <Route path="/history" element={<Navigate to="/proker?tab=histori" replace />} />
+                <Route path="/kalender" element={<Navigate to="/proker?tab=kalender" replace />} />
 
-                  <Route path="/transparansi" element={
-                    <TransparansiContainerView 
-                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                      onOpenSetPagu={() => setIsSetPaguOpen(true)}
-                      onOpenAddTransaction={handleOpenAddTransaction}
-                      onPrintDoc={(docData) => setPrintDocData(docData)}
-                    />
-                  } />
+                <Route path="/transparansi" element={
+                  <TransparansiContainerView 
+                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                    onOpenSetPagu={() => setIsSetPaguOpen(true)}
+                    onOpenAddTransaction={handleOpenAddTransaction}
+                    onPrintDoc={(docData) => setPrintDocData(docData)}
+                  />
+                } />
 
-                  {/* Backward compatibility redirects for Transparansi */}
-                  <Route path="/berkas" element={<Navigate to="/transparansi?tab=berkas" replace />} />
-                  <Route path="/anggaran" element={<Navigate to="/transparansi?tab=anggaran" replace />} />
-                  <Route path="/template" element={<Navigate to="/transparansi?tab=template" replace />} />
+                {/* Backward compatibility redirects for Transparansi */}
+                <Route path="/berkas" element={<Navigate to="/transparansi?tab=berkas" replace />} />
+                <Route path="/anggaran" element={<Navigate to="/transparansi?tab=anggaran" replace />} />
+                <Route path="/template" element={<Navigate to="/transparansi?tab=template" replace />} />
 
-                  <Route path="/audit" element={
-                    <PengawasanContainerView 
-                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                      onOpenIssueSP={() => setIsIssueSPOpen(true)}
-                      onPrintDoc={(docData) => setPrintDocData(docData)}
-                    />
-                  } />
+                <Route path="/audit" element={
+                  <PengawasanContainerView 
+                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                    onOpenIssueSP={() => setIsIssueSPOpen(true)}
+                    onPrintDoc={(docData) => setPrintDocData(docData)}
+                  />
+                } />
 
-                  {/* Backward compatibility redirects for Pengawasan */}
-                  <Route path="/sp" element={<Navigate to="/audit?tab=sp" replace />} />
+                {/* Backward compatibility redirects for Pengawasan */}
+                <Route path="/sp" element={<Navigate to="/audit?tab=sp" replace />} />
 
-                  {/* Struktur Organisasi DPM (Khusus Role DPM) */}
-                  <Route path="/struktur" element={isDpm ? <StrukturView /> : <Navigate to="/dashboard" replace />} />
+                {/* Struktur Organisasi DPM (Khusus Role DPM) */}
+                <Route path="/struktur" element={isDpm ? <StrukturView /> : <Navigate to="/dashboard" replace />} />
 
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                </Routes>
-              </RouteErrorBoundary>
-            </Suspense>
-          )}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </RouteErrorBoundary>
+          </Suspense>
         </main>
       </div>
 
@@ -432,29 +453,6 @@ export default function App() {
         )}
       </Suspense>
 
-      {/* Floating Interactive Dev Controller: Skeleton Preview Mode (Hanya aktif di lokal/dev, otomatis hilang saat deploy produksi) */}
-      {import.meta.env.DEV && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2.5 bg-slate-900/90 backdrop-blur-md text-white pl-3.5 pr-2 py-1.5 rounded-2xl shadow-2xl border border-slate-700/80 text-xs font-semibold select-none transition-all hover:border-slate-500">
-          <span className="flex h-2.5 w-2.5 relative">
-            {isPreviewSkeleton && (
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-            )}
-            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isPreviewSkeleton ? 'bg-amber-400' : 'bg-slate-400'}`} />
-          </span>
-          <span className="text-slate-300">Mode Skeleton:</span>
-          <button
-            type="button"
-            onClick={() => setIsPreviewSkeleton(prev => !prev)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs ${
-              isPreviewSkeleton 
-                ? 'bg-amber-400 text-slate-950 hover:bg-amber-300 ring-2 ring-amber-400/40' 
-                : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
-            }`}
-          >
-            {isPreviewSkeleton ? 'AKTIF (Tampil)' : 'NONAKTIF'}
-          </button>
-        </div>
-      )}
     </div>
     <Analytics />
     </>

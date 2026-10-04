@@ -16,6 +16,7 @@ dist-ssr
 .env.*
 *.env
 *.local
+KREDENSIAL_KEAMANAN.md
 
 # File & Direktori AI / Agen / Scratch
 .agents/

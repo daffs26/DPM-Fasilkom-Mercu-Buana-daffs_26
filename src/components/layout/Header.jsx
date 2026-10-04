@@ -207,6 +207,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
     currentUser,
     logout,
     pendingAccounts,
+    fetchPendingAccounts,
     approveAccount,
     rejectAccount,
     notifications,
@@ -223,6 +224,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
     currentUser: state.currentUser, 
     logout: state.logout, 
     pendingAccounts: state.pendingAccounts, 
+    fetchPendingAccounts: state.fetchPendingAccounts,
     approveAccount: state.approveAccount, 
     rejectAccount: state.rejectAccount, 
     notifications: state.notifications, 
@@ -238,6 +240,13 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isManageDeletionOpen, setIsManageDeletionOpen] = useState(false);
+
+  // Sync antrean pendaftaran akun pending dari Supabase secara berkala saat modal dibuka
+  useEffect(() => {
+    if (currentUser?.ormawaId === 'dpm') {
+      fetchPendingAccounts?.();
+    }
+  }, [currentUser, isApprovalModalOpen, fetchPendingAccounts]);
 
   const dropdownRef = useRef(null);
   const desktopDropdownRef = useRef(null);
@@ -334,7 +343,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
     }
   };
 
-  const isDPMAdmin = currentUser?.ormawaId === 'dpm' && currentUser?.role !== 'guest' && (currentUser?.role === 'ketua' || currentUser?.role === 'wakil');
+  const isDPMAdmin = currentUser?.ormawaId === 'dpm' && currentUser?.role !== 'guest' && ['ketua', 'wakil', 'sekretaris', 'sekre'].includes(currentUser?.role);
 
   return (
     <header className="bg-white border-b border-slate-200/80 sticky top-0 z-20 px-3 sm:px-6 lg:px-8 py-3 sm:py-3.5">
@@ -691,22 +700,60 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
             {pendingAccounts.length === 0 ? (
               <div className="text-center py-8"><Users className="w-12 h-12 text-slate-200 mx-auto mb-3" /><p className="text-sm font-bold text-slate-500">Tidak ada antrean validasi akun</p></div>
             ) : (
-              pendingAccounts.map(account => (
-                <div key={account.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border border-slate-200 rounded-2xl bg-white shadow-2xs">
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900">{account.name}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5 font-medium">{account.nim} • Username: <span className="font-semibold text-slate-700">{account.username}</span></p>
-                    <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-50 border border-blue-100">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                      <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">{account.role} {account.ormawaId}</span>
+              pendingAccounts.map(account => {
+                const targetOrmawa = account.ormawa_id || account.ormawaId || 'ormawa';
+                return (
+                  <div key={account.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border border-slate-200 rounded-2xl bg-white shadow-2xs">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-slate-900">{account.name}</h4>
+                        {account.ticket_number && (
+                          <span className="text-[10px] font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                            {account.ticket_number}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                        {account.nim} • Username: <span className="font-semibold text-slate-700">@{account.username}</span>
+                      </p>
+                      <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-100">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">
+                          {account.role} {targetOrmawa.toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 sm:shrink-0 mt-1 sm:mt-0">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={async () => {
+                          const reason = window.prompt(`Alasan penolakan akun ${account.name} (opsional):`, 'Data kepengurusan tidak sesuai SK resmi.');
+                          if (reason !== null) {
+                            await rejectAccount(account.id, reason);
+                            fetchPendingAccounts?.();
+                          }
+                        }} 
+                        className="border-red-200 text-red-600 hover:bg-red-50 h-9 px-3 rounded-xl cursor-pointer"
+                      >
+                        <XCircle className="w-4 h-4 mr-1.5" />
+                        <span className="text-xs font-bold">Tolak</span>
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        onClick={async () => {
+                          await approveAccount(account.id);
+                          fetchPendingAccounts?.();
+                        }} 
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white h-9 px-3 rounded-xl cursor-pointer shadow-sm"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1.5" />
+                        <span className="text-xs font-bold">Setujui (ACC)</span>
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 sm:shrink-0 mt-1 sm:mt-0">
-                    <Button variant="outline" size="sm" onClick={() => rejectAccount(account.id)} className="border-red-200 text-red-600 hover:bg-red-50 h-9 px-3 rounded-xl"><XCircle className="w-4 h-4 mr-1.5" /><span className="text-xs font-bold">Tolak</span></Button>
-                    <Button size="sm" onClick={() => approveAccount(account.id)} className="bg-emerald-600 hover:bg-emerald-700 text-white h-9 px-3 rounded-xl"><CheckCircle className="w-4 h-4 mr-1.5" /><span className="text-xs font-bold">Setujui</span></Button>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </DialogContent>

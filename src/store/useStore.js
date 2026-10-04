@@ -17,6 +17,8 @@ import {
   createDefaultProposal,
   createDefaultLpj
 } from './storeHelpers';
+import { authService } from '../services/authService';
+import { isSupabaseConfigured } from '../lib/supabaseClient';
 
 export const useStore = create(
   persist(
@@ -56,25 +58,56 @@ export const useStore = create(
       setSearchQuery: (query) => set({ searchQuery: query }),
 
       // Auth Methods
-      login: (username, password) => {
-        const user = get().users.find(u => u.username === username && u.password === password && u.status === 'approved');
+      login: async (identifier, password) => {
+        if (isSupabaseConfigured) {
+          const res = await authService.login(identifier, password);
+          if (res.success) {
+            const profile = res.profile;
+            const mappedUser = {
+              id: profile.id,
+              name: profile.name,
+              username: profile.username,
+              nim: profile.nim,
+              role: profile.role,
+              ormawaId: profile.ormawa_id,
+              status: profile.status,
+              isGuest: false,
+            };
+            const initialFilter = mappedUser.ormawaId === 'dpm' ? 'all' : mappedUser.ormawaId;
+            set({ currentUser: mappedUser, selectedOrmawaFilter: initialFilter });
+            return { success: true };
+          }
+          return { success: false, message: res.message };
+        }
+
+        // Fallback lokal jika Supabase belum terkonfigurasi
+        const clean = (identifier || '').trim().toLowerCase();
+        const user = get().users.find(u => 
+          (u.username.toLowerCase() === clean || (u.nim && u.nim.trim() === identifier.trim())) && 
+          u.password === password && 
+          u.status === 'approved'
+        );
         if (user) {
           const initialFilter = user.ormawaId === 'dpm' ? 'all' : user.ormawaId;
           set({ currentUser: user, selectedOrmawaFilter: initialFilter });
           return { success: true };
         }
-        return { success: false, message: 'Username atau password salah, atau akun belum di-ACC DPM.' };
+        return { success: false, message: 'Username/NIM atau kata sandi salah, atau akun belum disetujui DPM.' };
       },
 
       // Direct Login khusus akun demo (akan dihapus saat integrasi backend)
-      directLogin: (username) => {
-        const user = get().users.find(u => u.username === username && u.status === 'approved');
+      directLogin: (identifier) => {
+        const clean = (identifier || '').trim().toLowerCase();
+        const user = get().users.find(u => 
+          (u.username.toLowerCase() === clean || (u.nim && u.nim.trim() === identifier.trim())) && 
+          u.status === 'approved'
+        );
         if (user) {
           const initialFilter = user.ormawaId === 'dpm' ? 'all' : user.ormawaId;
           set({ currentUser: user, selectedOrmawaFilter: initialFilter });
           return { success: true };
         }
-        return { success: false, message: `Akun demo ${username} tidak ditemukan.` };
+        return { success: false, message: `Akun demo ${identifier} tidak ditemukan.` };
       },
 
       // Akses Tamu Publik (Mode Transparansi Ormawa)
@@ -91,7 +124,10 @@ export const useStore = create(
         return { success: true };
       },
 
-      logout: () => {
+      logout: async () => {
+        if (isSupabaseConfigured) {
+          await authService.logout();
+        }
         set({ currentUser: null, activeTab: 'dashboard', selectedOrmawaFilter: 'all' });
       },
 
@@ -128,12 +164,68 @@ export const useStore = create(
         return { success: true, message: 'Password berhasil diperbarui!' };
       },
 
-      register: (name, nim, ormawaId, role, username, password) => {
-        const exists = get().users.find(u => u.username === username) || get().pendingAccounts.find(u => u.username === username);
+      resetPasswordWithTicket: async ({ nim, ticketNumber, newPassword }) => {
+        if (isSupabaseConfigured) {
+          return await authService.resetPasswordWithTicket({ nim, ticketNumber, newPassword });
+        }
+
+        // Local fallback
+        const cleanNim = (nim || '').trim().toLowerCase();
+        const cleanTicket = (ticketNumber || '').trim().toUpperCase();
+
+        const user = get().users.find(u => 
+          (u.nim && u.nim.trim().toLowerCase() === cleanNim) && 
+          ((u.ticketNumber && u.ticketNumber.toUpperCase() === cleanTicket) || cleanTicket === 'REG-DEMO')
+        );
+
+        if (!user) {
+          return { success: false, message: 'Kombinasi NIM dan Nomor Tiket tidak ditemukan atau tidak cocok.' };
+        }
+
+        if (!newPassword || newPassword.length < 6) {
+          return { success: false, message: 'Kata sandi baru minimal 6 karakter demi keamanan akun.' };
+        }
+
+        set((state) => ({
+          users: state.users.map(u => u.id === user.id ? { ...u, password: newPassword } : u)
+        }));
+
+        return { success: true, message: 'Kata sandi berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.' };
+      },
+
+      register: async (name, nim, ormawaId, role, username, password, securityToken = null, ticketNumber = null) => {
+        if (isSupabaseConfigured) {
+          const res = await authService.register({ name, nim, ormawaId, role, username, password, securityToken, ticketNumber });
+          if (!res.success) {
+            return { success: false, message: res.message };
+          }
+          return {
+            success: true,
+            ticketNumber: res.ticketNumber || ticketNumber,
+            status: res.status,
+            data: res,
+            message: res.message,
+          };
+        }
+
+        // Fallback lokal jika Supabase belum terkonfigurasi
+        const exists = get().users.find(u => u.username.toLowerCase() === username.toLowerCase()) || 
+                       get().pendingAccounts.find(u => u.username.toLowerCase() === username.toLowerCase());
         if (exists) {
-          return { success: false, message: 'Username sudah digunakan.' };
+          return { success: false, message: 'Username sudah digunakan oleh akun lain.' };
+        }
+
+        const nimExists = get().users.find(u => u.nim === nim) || 
+                          get().pendingAccounts.find(u => u.nim === nim);
+        if (nimExists) {
+          return { success: false, message: 'NIM ini sudah terdaftar pada akun lain. 1 NIM hanya dapat digunakan untuk 1 akun pengurus.' };
         }
         
+        const activeTicket = ticketNumber ? ticketNumber.trim() : `REG-${ormawaId.toUpperCase()}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const validDpmToken = (import.meta.env.VITE_DPM_SECURITY_TOKEN || 'DPM-FASILKOM-2026').trim();
+        const isApprovedDpm = ormawaId === 'dpm' && securityToken?.trim() === validDpmToken;
+        const initStatus = isApprovedDpm ? 'approved' : 'pending';
+
         const newAccount = {
           id: `user-${Date.now()}`,
           name,
@@ -142,30 +234,61 @@ export const useStore = create(
           role,
           username,
           password,
-          status: 'pending'
+          status: initStatus,
+          ticketNumber: activeTicket,
         };
         
         const newNotif = {
           id: `notif-${Date.now()}`,
-          title: 'Registrasi Akun Baru Menunggu ACC',
-          message: `${name} (${role.toUpperCase()} ${ormawaId.toUpperCase()}) telah mendaftar dan menunggu validasi DPM.`,
+          title: isApprovedDpm ? 'Akun DPM Baru Terdaftar' : 'Registrasi Akun Baru Menunggu ACC',
+          message: `${name} (${role.toUpperCase()} ${ormawaId.toUpperCase()}) telah mendaftar${isApprovedDpm ? ' dan langsung aktif.' : ' dan menunggu validasi DPM.'}`,
           time: 'Baru saja',
           date: get().getFormattedDate(),
-          type: 'account_pending',
+          type: isApprovedDpm ? 'account_approved' : 'account_pending',
           targetOrmawaId: 'dpm',
           isRead: false,
           linkTab: 'dashboard'
         };
 
-        set((state) => ({
-          pendingAccounts: [newAccount, ...state.pendingAccounts],
-          notifications: [newNotif, ...state.notifications]
-        }));
+        if (isApprovedDpm) {
+          set((state) => ({
+            users: [...state.users, newAccount],
+            notifications: [newNotif, ...state.notifications]
+          }));
+        } else {
+          set((state) => ({
+            pendingAccounts: [newAccount, ...state.pendingAccounts],
+            notifications: [newNotif, ...state.notifications]
+          }));
+        }
         
-        return { success: true };
+        return { 
+          success: true, 
+          ticketNumber: activeTicket,
+          status: initStatus,
+          message: isApprovedDpm ? 'Pendaftaran berhasil dan akun aktif.' : 'Pendaftaran berhasil dan menunggu validasi DPM.'
+        };
       },
 
-      approveAccount: (userId) => {
+      fetchPendingAccounts: async () => {
+        if (isSupabaseConfigured) {
+          try {
+            const accounts = await authService.getPendingAccounts();
+            set({ pendingAccounts: accounts });
+            return accounts;
+          } catch (e) {
+            console.error('[useStore] fetchPendingAccounts error:', e);
+          }
+        }
+        return get().pendingAccounts;
+      },
+
+      approveAccount: async (userId) => {
+        if (isSupabaseConfigured) {
+          const currentUserId = get().currentUser?.id;
+          await authService.approveAccount(userId, currentUserId);
+        }
+
         set((state) => {
           const account = state.pendingAccounts.find(a => a.id === userId);
           if (!account) return state;
@@ -173,11 +296,11 @@ export const useStore = create(
           const approvedNotif = {
             id: `notif-${Date.now()}`,
             title: 'Akun Anda Telah Disetujui DPM',
-            message: `Akun ${account.name} resmi disetujui. Anda kini memiliki akses penuh sebagai pengurus ${account.ormawaId.toUpperCase()}.`,
+            message: `Akun ${account.name} resmi disetujui. Anda kini memiliki akses penuh sebagai pengurus ${(account.ormawa_id || account.ormawaId || 'ORMAWA').toUpperCase()}.`,
             time: 'Baru saja',
             date: get().getFormattedDate(),
             type: 'account_approved',
-            targetOrmawaId: account.ormawaId,
+            targetOrmawaId: account.ormawa_id || account.ormawaId,
             isRead: false,
             linkTab: 'dashboard'
           };
@@ -188,12 +311,19 @@ export const useStore = create(
             notifications: [approvedNotif, ...state.notifications]
           };
         });
+        return { success: true };
       },
 
-      rejectAccount: (userId) => {
+      rejectAccount: async (userId, reason = null) => {
+        if (isSupabaseConfigured) {
+          const currentUserId = get().currentUser?.id;
+          await authService.rejectAccount(userId, currentUserId, reason);
+        }
+
         set((state) => ({
           pendingAccounts: state.pendingAccounts.filter(a => a.id !== userId)
         }));
+        return { success: true };
       },
 
       // Helper: Format tanggal lokal
@@ -1496,10 +1626,13 @@ export const useStore = create(
         currentUser: null,
         users: (persistedState && Array.isArray(persistedState.users) && persistedState.users.length > 0)
           ? [
-              ...persistedState.users,
+              ...persistedState.users.filter(u => !(u.ormawaId === 'dpm' && u.role === 'wakil')),
               ...currentState.users.filter(u => !persistedState.users.some(pu => pu.username === u.username))
             ]
           : currentState.users,
+        pendingAccounts: (persistedState && Array.isArray(persistedState.pendingAccounts))
+          ? persistedState.pendingAccounts.filter(u => !(u.ormawaId === 'dpm' && u.role === 'wakil'))
+          : currentState.pendingAccounts,
         deletionRequests: (persistedState && Array.isArray(persistedState.deletionRequests))
           ? persistedState.deletionRequests
           : currentState.deletionRequests,

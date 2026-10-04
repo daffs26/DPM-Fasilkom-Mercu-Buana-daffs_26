@@ -327,7 +327,7 @@ export default function StrukturView() {
                   </h3>
                 </div>
                 <p className="text-xs font-medium text-slate-500">
-                  Dewan Perwakilan Mahasiswa FASILKOM UMB • Periode 2025/2026
+                  Dewan Perwakilan Mahasiswa FASILKOM UMB • Periode 2026/2027
                 </p>
                 <div className="w-16 h-0.5 bg-blue-600 rounded-full mt-1.5" />
               </div>
@@ -655,41 +655,61 @@ export default function StrukturView() {
                 <div
                   key={member.id}
                   onClick={() => setSelectedMember(member)}
-                  className="group bg-white rounded-3xl p-4.5 border border-slate-200/80 shadow-soft hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-4"
+                  className="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between text-center"
                 >
-                  {/* Photo Border Placement Box */}
-                  <div className="relative w-full aspect-[4/5] rounded-2xl border-2 border-dashed border-slate-300 group-hover:border-blue-400 bg-slate-50/70 group-hover:bg-blue-50/30 flex flex-col items-center justify-center gap-2 text-slate-400 group-hover:text-blue-600 transition-all overflow-hidden">
-                    <div className="w-14 h-14 rounded-full border border-dashed border-slate-300 group-hover:border-blue-400 flex items-center justify-center bg-white shadow-2xs group-hover:scale-105 transition-all">
-                      <User className="w-7 h-7 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                  <div>
+                    {/* Centered Circular Border Placement Avatar */}
+                    <div className="flex justify-center mb-4">
+                      <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-slate-300 group-hover:border-blue-500 bg-slate-50/80 group-hover:bg-blue-50/40 flex items-center justify-center text-slate-400 group-hover:text-blue-600 transition-all shadow-xs shrink-0">
+                        <User className="w-8 h-8" />
+                      </div>
                     </div>
-                    <span className="text-[11px] font-semibold text-slate-400 group-hover:text-blue-600 tracking-wide transition-colors">
-                      Foto Personil
-                    </span>
 
-                    {/* Quick View Floating Hint */}
-                    <div className="absolute top-3 right-3 w-7 h-7 rounded-xl bg-white/90 border border-slate-200/60 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:border-blue-200 shadow-2xs transition-colors">
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-
-                  {/* Profile Card Info */}
-                  <div className="px-1 pb-1 space-y-1">
-                    <h3 
-                      className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors leading-snug truncate"
-                      title={member.name}
-                    >
-                      {member.name}
-                    </h3>
-                    <div className="space-y-0.5">
-                      <p 
-                        className="text-xs text-blue-600 font-semibold truncate leading-tight"
-                        title={member.role}
+                    {/* Identity: Name, Handle & Subtitle */}
+                    <div className="space-y-1">
+                      <h4 
+                        className="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors leading-snug truncate"
+                        title={member.name}
                       >
-                        {member.role}
+                        {member.name}
+                      </h4>
+                      <p className="text-xs text-slate-400 font-medium">
+                        @{member.id}
                       </p>
-                      <p className="text-[11px] text-slate-400 font-normal truncate">
-                        {member.prodi}
+                      <p 
+                        className="text-xs text-slate-500 font-normal leading-relaxed mt-2 max-w-[220px] mx-auto line-clamp-2"
+                        title={`${member.role} • ${member.prodi}`}
+                      >
+                        {member.role} • {member.prodi}
                       </p>
+                    </div>
+
+                    {/* 3-Kolom Statistik Ringkas (Bahasa Indonesia) */}
+                    <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 text-center">
+                      <div>
+                        <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                          {member.tupoksi?.length || 4}
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                          Tupoksi
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                          {member.category === 'exec' ? '12' : '8'}
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                          Agenda
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                          100%
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                          Kinerja
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

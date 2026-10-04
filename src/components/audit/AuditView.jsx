@@ -193,10 +193,10 @@ const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, proke
   const displayedOrmawas = canViewAll ? ormawas : ormawas.filter(o => o.id === currentUser?.ormawaId);
 
   return (
-    <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-soft w-full max-w-full overflow-hidden">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-soft w-full max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
         <div>
-          <h3 className="font-bold text-slate-900 text-sm">
+          <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">
             {canViewAll ? 'Rapor Kinerja Ormawa' : `Rapor Kinerja: ${displayedOrmawas[0]?.shortName || 'Ormawa'}`}
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -205,81 +205,102 @@ const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, proke
         </div>
       </div>
 
-      <div className={`grid gap-3.5 sm:gap-4 mt-4 ${canViewAll ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 max-w-xl'}`}>
+      <div className={`grid gap-4 mt-5 ${canViewAll ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 max-w-xl'}`}>
         {displayedOrmawas.map((o) => {
           const oProkers = prokers.filter(p => p.ormawaId === o.id);
           const auditedProkers = oProkers.filter(p => p.lpj?.auditScore);
-          const avgScore = auditedProkers.length > 0
-            ? Math.round(auditedProkers.reduce((acc, p) => acc + p.lpj.auditScore, 0) / auditedProkers.length)
-            : null;
-          const predikat = avgScore !== null
-            ? (avgScore >= 85 ? 'Predikat A' : avgScore >= 70 ? 'Predikat B' : 'Predikat C')
-            : 'Belum Dievaluasi';
-
-          const dadakanProposals = oProkers.filter(p => p.proposal?.isDadakan).length;
           const hasOverdue = oProkers.some(p => p.status === 'lpj_overdue');
+
+          // Mapping sesuai instruksi user: nama UMB, nickname instagram, dan lingkup ormawa
+          const ormawaConfig = {
+            dpm: { name: 'DPM UMB', ig: 'dpmfasilkom.umb', type: 'Lembaga Legislatif Fasilkom' },
+            bem: { name: 'BEM FASILKOM UMB', ig: 'bemfasilkom.umb', type: 'Lembaga Eksekutif Fasilkom' },
+            himti: { name: 'HIMTI UMB', ig: 'himti.umb', type: 'Lembaga Eksekutif Teknik Informatika' },
+            himsisfo: { name: 'HIMSISFO UMB', ig: 'himsisfo_umb', type: 'Lembaga Eksekutif Sistem Informasi' }
+          }[o.id] || {
+            name: o.name,
+            ig: o.instagram || o.shortName.toLowerCase(),
+            type: (o.type || '').replace('Eksekutif Program Studi ', 'Prodi ').replace('Eksekutif Tingkat ', '')
+          };
+
+          const ormawaName = ormawaConfig.name;
+          const ormawaIg = ormawaConfig.ig;
+          const cleanType = ormawaConfig.type;
+
+          const complianceRate = oProkers.length > 0 
+            ? Math.round(((oProkers.length - oProkers.filter(p => p.status === 'lpj_overdue').length) / oProkers.length) * 100) 
+            : 100;
 
           return (
             <div 
               key={o.id}
-              className={`p-4 rounded-2xl border flex flex-col justify-between h-full transition-all duration-200 hover:shadow-soft ${
-                hasOverdue ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200/90 bg-white hover:border-blue-200 shadow-2xs'
+              className={`p-6 rounded-3xl border flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                hasOverdue 
+                  ? 'border-rose-200/90 bg-white hover:border-rose-300' 
+                  : 'border-slate-200/80 bg-white hover:border-slate-300 shadow-2xs'
               }`}
             >
               <div>
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="w-9 h-9 p-1 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0">
-                    <img src={o.logo} alt={o.name} className="w-full h-full object-contain" />
+                {/* Centered Circular Logo Avatar (Fitur Mail & Star dihapus) */}
+                <div className="flex justify-center mb-4">
+                  <div className="w-18 h-18 sm:w-20 sm:h-20 p-3 rounded-full bg-slate-50 border border-slate-200/80 shadow-xs flex items-center justify-center shrink-0">
+                    <img src={o.logo} alt={ormawaName} className="w-full h-full object-contain" />
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
-                    hasOverdue 
-                      ? 'bg-rose-50 text-rose-700 border-rose-200' 
-                      : auditedProkers.length > 0 
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                      : 'bg-slate-50 text-slate-600 border-slate-200'
-                  }`}>
-                    {hasOverdue ? 'Evaluasi Khusus' : predikat}
-                  </span>
                 </div>
 
-                <div className="min-h-[42px] flex flex-col justify-start">
-                  <h4 className="font-extrabold text-slate-900 text-xs sm:text-[13px] leading-snug truncate" title={o.name}>
-                    {o.name}
+                {/* Identity: Centered Name, Instagram Handle, Lingkup & Nama Ketua */}
+                <div className="text-center space-y-1">
+                  <h4 className="font-bold text-slate-900 text-base tracking-tight truncate leading-snug" title={ormawaName}>
+                    {ormawaName}
                   </h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug line-clamp-1" title={o.type}>
-                    {o.type}
-                  </p>
+                  <a 
+                    href={`https://instagram.com/${ormawaIg}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Instagram @${ormawaIg}`}
+                    className="text-xs text-slate-400 hover:text-blue-600 font-medium inline-block transition-colors"
+                  >
+                    @{ormawaIg}
+                  </a>
+
+                  {/* Lingkup & Letak Nama Ketua dibawah Legislatif / Fakultas / Prodi TI & SI */}
+                  <div className="pt-2 space-y-0.5">
+                    <p className="text-xs text-slate-600 font-medium" title={cleanType}>
+                      {cleanType}
+                    </p>
+                    <p className="text-xs text-slate-400 font-normal">
+                      Ketua: Nama Ketua
+                    </p>
+                  </div>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-slate-100 space-y-2 text-xs">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-medium text-slate-500">Skor Rata-rata</span>
-                    <span className="font-black text-slate-900 text-xs sm:text-[13px]">
-                      {avgScore !== null ? `${avgScore} / 100` : '-'}
+                {/* 3-Kolom Statistik Ringkas (Bahasa Indonesia) */}
+                <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 text-center">
+                  <div>
+                    <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                      {oProkers.length}
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                      Total Proker
                     </span>
                   </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-medium text-slate-500">Total Proker</span>
-                    <span className="font-bold text-slate-800 text-[11px]">
-                      {oProkers.length} kegiatan
+                  <div>
+                    <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                      {auditedProkers.length}
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                      Diaudit
                     </span>
                   </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-medium text-slate-500">Status LPJ</span>
-                    <span className={`text-[11px] font-bold ${
-                      hasOverdue ? 'text-rose-600' : oProkers.length > 0 ? 'text-emerald-600' : 'text-slate-500'
-                    }`}>
-                      {hasOverdue ? 'Ada Terlambat' : oProkers.length > 0 ? 'Tertib' : 'Belum Ada Kegiatan'}
+                  <div>
+                    <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                      {complianceRate}%
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                      Kepatuhan
                     </span>
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-center gap-1.5 text-center px-1">
-                <span className="text-[10px] text-slate-400 font-medium shrink-0">Ketua:</span>
-                <span className="text-[10.5px] font-semibold text-slate-700 leading-snug truncate" title={o.ketua}>
-                  {o.ketua}
-                </span>
               </div>
             </div>
           );

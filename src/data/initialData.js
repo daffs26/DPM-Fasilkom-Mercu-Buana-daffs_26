@@ -5,15 +5,16 @@
 export const INITIAL_ORMAWA = [
   {
     id: 'dpm',
-    name: 'DPM FASILKOM UMB',
+    name: 'DPM UMB',
     fullName: 'Dewan Perwakilan Mahasiswa Fakultas Ilmu Komputer',
     shortName: 'DPM',
-    type: 'Legislatif & Pengawas',
+    type: 'Lembaga Legislatif Fasilkom',
     logo: '/logos/logo-dpm.png',
     pdhColorName: 'Hitam (DPM)',
     paguAnggaran: 0,
     serapanAnggaran: 0,
-    ketua: 'Muhammad Daffa Aulia Syahrul',
+    ketua: 'Nama Ketua',
+    instagram: 'dpmfasilkom.umb',
     color: {
       primary: '#090D16', // Hitam Resmi DPM
       accent: '#D97706',
@@ -30,12 +31,13 @@ export const INITIAL_ORMAWA = [
     name: 'BEM FASILKOM UMB',
     fullName: 'Badan Eksekutif Mahasiswa Fakultas Ilmu Komputer',
     shortName: 'BEM',
-    type: 'Eksekutif Tingkat Fakultas',
+    type: 'Lembaga Eksekutif Fasilkom',
     logo: '/logos/logo-bem.png',
     pdhColorName: 'Biru Muda (BEM)',
     paguAnggaran: 0,
     serapanAnggaran: 0,
-    ketua: 'Rafi Pratama (Ketua BEM)',
+    ketua: 'Nama Ketua',
+    instagram: 'bemfasilkom.umb',
     color: {
       primary: '#0284C7', // Biru Muda Resmi BEM
       accent: '#38BDF8',
@@ -49,15 +51,16 @@ export const INITIAL_ORMAWA = [
   },
   {
     id: 'himti',
-    name: 'HiMTI - UMB',
+    name: 'HIMTI UMB',
     fullName: 'Himpunan Mahasiswa Teknik Informatika',
-    shortName: 'HiMTI',
-    type: 'Eksekutif Program Studi Teknik Informatika',
+    shortName: 'HIMTI',
+    type: 'Lembaga Eksekutif Teknik Informatika',
     logo: '/logos/logo-himti.png',
     pdhColorName: 'Biru Dongker (HiMTI)',
     paguAnggaran: 0,
     serapanAnggaran: 0,
-    ketua: 'Aldi Renaldi (Ketua HiMTI)',
+    ketua: 'Nama Ketua',
+    instagram: 'himti.umb',
     color: {
       primary: '#172554', // Biru Dongker Resmi HiMTI
       accent: '#1E3A8A',
@@ -71,15 +74,16 @@ export const INITIAL_ORMAWA = [
   },
   {
     id: 'himsisfo',
-    name: 'HIMSISFO',
+    name: 'HIMSISFO UMB',
     fullName: 'Himpunan Mahasiswa Sistem Informasi',
     shortName: 'HIMSISFO',
-    type: 'Eksekutif Program Studi Sistem Informasi',
+    type: 'Lembaga Eksekutif Sistem Informasi',
     logo: '/logos/logo-himsisfo.png',
     pdhColorName: 'Krem (HIMSISFO)',
     paguAnggaran: 0,
     serapanAnggaran: 0,
-    ketua: 'Fadlan Maulana (Ketua HIMSISFO)',
+    ketua: 'Nama Ketua',
+    instagram: 'himsisfo_umb',
     color: {
       primary: '#9A7B56', // Krem PDH Himsisfo
       accent: '#C7B198',
