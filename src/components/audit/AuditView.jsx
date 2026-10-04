@@ -84,9 +84,6 @@ const AuditEvaluasiDanPilarCard = React.memo(function AuditEvaluasiDanPilarCard(
             <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
               Kriteria Penilaian Performa Ormawa
             </h3>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              Standar baku evaluasi akuntabilitas kegiatan (bobot total 100 poin).
-            </p>
           </div>
         </div>
 

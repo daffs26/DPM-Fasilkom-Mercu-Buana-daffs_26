@@ -62,21 +62,40 @@ function SidebarRegulatoryCard() {
 }
 
 function SidebarFooter({ currentUser, onLogout, onReset }) {
+  const ormawas = useStore(state => state.ormawas);
   if (!currentUser) return null;
   const isGuest = currentUser.role === 'guest';
+  const userOrmawa = ormawas?.find(o => o.id === currentUser?.ormawaId) || ormawas?.find(o => o.id === 'dpm');
+  const userLogo = userOrmawa?.logo || '/logos/logo-dpm.png';
 
   return (
     <div className="p-3.5 border-t border-slate-100 bg-slate-50/60 space-y-2.5 shrink-0">
       <div className="flex items-center gap-3 p-2.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
-        <div className="w-8.5 h-8.5 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
-          {currentUser.name.substring(0, 2).toUpperCase()}
+        <div 
+          className="w-9 h-9 min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-full bg-white border border-slate-200/90 p-1 flex items-center justify-center shadow-2xs shrink-0 overflow-hidden"
+          style={{ width: '36px', height: '36px' }}
+        >
+          <img 
+            src={userLogo} 
+            alt={userOrmawa?.shortName || 'Logo Ormawa'} 
+            className="w-full h-full max-w-full max-h-full object-contain block" 
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              if (e.currentTarget.nextElementSibling) {
+                e.currentTarget.nextElementSibling.style.display = 'flex';
+              }
+            }}
+          />
+          <span className="hidden w-full h-full bg-blue-600 text-white font-bold text-xs items-center justify-center rounded-full">
+            {currentUser.name.substring(0, 2).toUpperCase()}
+          </span>
         </div>
         <div className="overflow-hidden flex-1 space-y-0.5">
           <p className="text-xs font-bold text-slate-900 truncate">
             {currentUser.name}
           </p>
           <p className="text-[10px] text-blue-700 font-semibold truncate capitalize">
-            {isGuest ? 'Akses Transparansi Publik' : `${currentUser.role} ${currentUser.ormawaId.toUpperCase()}`}
+            {isGuest ? 'Akses Transparansi Publik' : `${currentUser.role} • ${userOrmawa?.shortName || currentUser.ormawaId.toUpperCase()}`}
           </p>
         </div>
       </div>
@@ -231,8 +250,8 @@ export default function Sidebar({ isOpen, onClose }) {
       <aside className="hidden lg:flex w-[280px] h-screen sticky top-0 bg-white border-r border-slate-200/80 flex-col justify-between shrink-0 select-none z-30 overflow-hidden">
         <div className="flex-1 overflow-y-auto flex flex-col">
           <div className="p-5 border-b border-slate-100 flex items-center gap-3 shrink-0">
-            <div className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-xs">
-              <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full object-contain" />
+            <div className="w-11 h-11 min-w-[44px] min-h-[44px] max-w-[44px] max-h-[44px] rounded-2xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-xs" style={{ width: '44px', height: '44px' }}>
+              <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full max-w-full max-h-full object-contain block" />
             </div>
             <div className="overflow-hidden">
               <h1 className="text-sm font-extrabold text-slate-900 tracking-normal mt-0.5 truncate">
@@ -265,8 +284,8 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="flex-1 overflow-y-auto flex flex-col min-h-0 pb-4">
           <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-xs">
-                <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full object-contain" />
+              <div className="w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] rounded-2xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-xs" style={{ width: '40px', height: '40px' }}>
+                <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full max-w-full max-h-full object-contain block" />
               </div>
               <div className="overflow-hidden">
                 <h1 className="text-sm font-black text-slate-900 tracking-tight mt-0.5 truncate">

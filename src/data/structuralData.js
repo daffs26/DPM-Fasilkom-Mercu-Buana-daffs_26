@@ -486,113 +486,87 @@ export const structuralMembers = [
 // ── MATRIKS WEWENANG & TUPOKSI RESMI KOMISI DPM ───────────────────────
 export const structuralRoleMatrix = [
   {
-    role: 'Ketua Umum & Wakil Ketua Umum',
-    unit: 'Pimpinan Utama Parlemen',
-    category: 'exec',
-    accentColor: 'border-blue-500 text-blue-700 bg-blue-50/60',
-    badgeColor: 'bg-blue-100 text-blue-800',
-    deskripsi: 'Memegang kepemimpinan tertinggi dewan perwakilan, mengarahkan perumusan kebijakan legislasi, pengawasan, penganggaran, dan advokasi mahasiswa.',
+    id: 'pimpinan',
+    role: 'Ketua & Wakil Ketua Umum',
+    group: 'bph',
+    tag: 'Pimpinan Utama',
+    deskripsi: 'Memegang mandat kepemimpinan tertinggi dan menetapkan arah kebijakan strategis dewan.',
     responsibilities: [
-      'Penetapan garis besar haluan kebijakan parlemen DPM FASILKOM UMB.',
-      'Pengesahan SK Audit LPJ, Pagu Anggaran, dan SK Sanksi Administratif.',
-      'Representasi kelembagaan di hadapan Dekanat, Rektorat, dan Kongres Mahasiswa UMB.',
-      'Mengkoordinasikan 6 organ pelaksana setara agar berjalan sinergis.'
-    ],
-    fokusInti: 'Pucuk pimpinan pengambil keputusan strategis demi keberlanjutan dan integritas organisasi mahasiswa Fasilkom.'
+      'Menetapkan garis besar haluan kebijakan parlemen DPM FASILKOM UMB.',
+      'Mengesahkan SK hasil audit LPJ, alokasi pagu anggaran, dan produk regulasi.',
+      'Memimpin koordinasi kelembagaan dengan Dekanat, Rektorat, dan Ormawa.'
+    ]
   },
   {
+    id: 'sekretaris',
     role: 'Sekretaris DPM',
-    unit: 'Kesekretariatan & Arsip (Setara)',
-    category: 'admin',
-    accentColor: 'border-blue-500 text-blue-700 bg-blue-50/60',
-    badgeColor: 'bg-blue-100 text-blue-800',
-    deskripsi: 'Sekretaris bertanggung jawab terhadap administrasi, dokumentasi, dan pengelolaan surat-menyurat organisasi.',
+    group: 'bph',
+    tag: 'Kesekretariatan',
+    deskripsi: 'Mengelola tata administrasi umum, legalitas korespondensi, dan kearsipan kelembagaan.',
     responsibilities: [
-      'Membuat surat resmi dan undangan kelembagaan.',
-      'Menyusun notulen rapat sidang pleno dan koordinasi.',
-      'Mengelola arsip dan dokumen organisasi secara tertib.',
-      'Menyusun jadwal rapat dan agenda kegiatan rutin DPM.',
-      'Membantu menyusun laporan administrasi kelembagaan.'
-    ],
-    fokusInti: 'Menjamin ketertiban arsip, legalitas korespondensi, dan kelancaran sirkulasi administrasi organisasi DPM.'
+      'Mengelola persuratan resmi, undangan kelembagaan, dan berkas legalitas.',
+      'Menyusun notulen resmi sidang pleno, rapat koordinasi, dan agenda dewan.',
+      'Mengarsipkan seluruh dokumen organisasi dan laporan pertanggungjawaban.'
+    ]
   },
   {
+    id: 'bendahara',
     role: 'Bendahara DPM',
-    unit: 'Kebendaharaan & Kas (Setara)',
-    category: 'admin',
-    accentColor: 'border-blue-500 text-blue-700 bg-blue-50/60',
-    badgeColor: 'bg-blue-100 text-blue-800',
-    deskripsi: 'Bendahara bertanggung jawab mengelola keuangan organisasi secara tertib, transparan, dan dapat dipertanggungjawabkan.',
+    group: 'bph',
+    tag: 'Kebendaharaan',
+    deskripsi: 'Mengelola arus kas operasional, rencana anggaran, dan akuntabilitas belanja internal.',
     responsibilities: [
-      'Mengelola pemasukan dan pengeluaran kas operasional organisasi.',
-      'Menyusun dan mengamati rencana anggaran keuangan.',
-      'Membuat laporan keuangan berkala secara transparan.',
-      'Mengawasi penggunaan dana program kerja internal dewan.',
-      'Menyimpan bukti transaksi, faktur, dan dokumen keuangan.'
-    ],
-    fokusInti: 'Memastikan pengelolaan kas dan aset finansial internal DPM berjalan secara transparan, akurat, dan tertib audit.'
+      'Mengelola pencatatan arus kas operasional dan pembukuan internal dewan.',
+      'Menyusun rencana anggaran belanja dan laporan keuangan berkala.',
+      'Mengarsipkan bukti transaksi, faktur belanja, dan dokumentasi audit kas.'
+    ]
   },
   {
+    id: 'pengawasan',
     role: 'Komisi Pengawasan',
-    unit: 'Komisi Monitoring & Mutu Kinerja (Setara)',
-    category: 'pengawasan',
-    accentColor: 'border-blue-500 text-blue-700 bg-blue-50/60',
-    badgeColor: 'bg-blue-100 text-blue-800',
-    deskripsi: 'Komisi Pengawasan bertugas melakukan pemantauan dan evaluasi terhadap pelaksanaan program kerja serta kebijakan organisasi kemahasiswaan yang berada dalam cakupan kewenangan DPM.',
+    group: 'komisi',
+    tag: 'Monitoring Proker',
+    deskripsi: 'Memantau dan mengevaluasi kepatuhan pelaksanaan program kerja ormawa Fasilkom.',
     responsibilities: [
-      'Memantau pelaksanaan program kerja organisasi mahasiswa (BEM, HIMTI, HIMSISFO).',
-      'Melakukan evaluasi terhadap kegiatan dan kepatuhan kebijakan ormawa.',
-      'Meminta laporan pertanggungjawaban (LPJ) sesuai mekanisme yang berlaku.',
-      'Memberikan masukan, catatan kritis, dan rekomendasi perbaikan mutu kegiatan.'
-    ],
-    fokusInti: 'Komisi Pengawasan memastikan seluruh program kerja ormawa terlaksana sesuai rencana, tepat waktu, dan berkualitas unggul.'
+      'Memantau pelaksanaan program kerja seluruh ormawa (BEM, HIMTI, HIMSISFO).',
+      'Mengevaluasi kepatuhan kegiatan ormawa terhadap standar dan linimasa.',
+      'Memeriksa laporan pertanggungjawaban (LPJ) dan menerbitkan rekomendasi perbaikan.'
+    ]
   },
   {
+    id: 'keuangan',
     role: 'Komisi Keuangan',
-    unit: 'Komisi Penganggaran & Audit RAB (Setara)',
-    category: 'keuangan',
-    accentColor: 'border-blue-500 text-blue-700 bg-blue-50/60',
-    badgeColor: 'bg-blue-100 text-blue-800',
-    deskripsi: 'Komisi Keuangan fokus pada pengkajian dan pengawasan aspek keuangan organisasi kemahasiswaan sesuai dengan kewenangan yang diberikan kepada DPM.',
+    group: 'komisi',
+    tag: 'Penganggaran & Audit',
+    deskripsi: 'Mengkaji kelayakan anggaran kegiatan dan mengaudit akuntabilitas finansial ormawa.',
     responsibilities: [
-      'Mengkaji rencana anggaran kegiatan (RAB) ormawa.',
-      'Memantau penggunaan anggaran organisasi mahasiswa.',
-      'Menelaah laporan pertanggungjawaban keuangan (LPJ) dan bukti kwitansi.',
-      'Mengarahkan penggunaan dana ormawa agar sesuai dengan peraturan.',
-      'Memberikan rekomendasi terkait transparansi dan akuntabilitas keuangan.'
-    ],
-    fokusInti: 'Komisi Keuangan membantu memastikan pengelolaan anggaran organisasi mahasiswa dilakukan secara tertib dan dapat dipertanggungjawabkan.'
+      'Menelaah dan mengkaji Rencana Anggaran Biaya (RAB) kegiatan ormawa.',
+      'Mengawasi realisasi penyerapan dana kampus dan kesesuaian kwitansi belanja.',
+      'Memverifikasi bukti transaksi pada laporan pertanggungjawaban keuangan.'
+    ]
   },
   {
+    id: 'advokasi',
     role: 'Komisi Advokasi',
-    unit: 'Komisi Penjaringan & Pengawalan Aspirasi (Setara)',
-    category: 'advokasi',
-    accentColor: 'border-blue-500 text-blue-700 bg-blue-50/60',
-    badgeColor: 'bg-blue-100 text-blue-800',
-    deskripsi: 'Komisi Advokasi fokus pada penerimaan, penyaluran, dan pengawalan aspirasi mahasiswa.',
+    group: 'komisi',
+    tag: 'Aspirasi Mahasiswa',
+    deskripsi: 'Menjaring keluhan, mengkaji isu kampus, dan mengawal aspirasi mahasiswa ke pihak dekanat.',
     responsibilities: [
-      'Menampung keluhan, kritik, dan saran dari mahasiswa FASILKOM.',
-      'Mengidentifikasi permasalahan yang dihadapi mahasiswa.',
-      'Menyalurkan aspirasi kepada pihak yang berwenang (Dekanat / Kampus).',
-      'Mengawal tindak lanjut penyelesaian aspirasi mahasiswa hingga tuntas.',
-      'Memberikan informasi mengenai proses penanganan aspirasi.'
-    ],
-    fokusInti: 'Komisi Advokasi menjadi penghubung antara mahasiswa dan pihak terkait dalam memperjuangkan aspirasi serta kepentingan mahasiswa.'
+      'Menampung kritik, saran, dan keluhan mahasiswa FASILKOM UMB.',
+      'Mengkaji isu strategis fasilitas, akademik, dan pelayanan perkuliahan.',
+      'Mengawal audiensi bersama pihak Dekanat hingga tercapai solusi nyata.'
+    ]
   },
   {
-    role: 'Komisi Komunikasi dan Informasi (Kominfo)',
-    unit: 'Komisi Publikasi & Hubungan Mahasiswa (Setara)',
-    category: 'kominfo',
-    accentColor: 'border-blue-500 text-blue-700 bg-blue-50/60',
-    badgeColor: 'bg-blue-100 text-blue-800',
-    deskripsi: 'Komisi Kominfo bertanggung jawab terhadap penyebaran informasi, komunikasi organisasi, dan publikasi kegiatan DPM.',
+    id: 'kominfo',
+    role: 'Komisi Kominfo',
+    group: 'komisi',
+    tag: 'Komunikasi & Publikasi',
+    deskripsi: 'Mengelola publikasi kebijakan, media komunikasi, dan penyebaran informasi parlemen.',
     responsibilities: [
-      'Menyampaikan informasi kegiatan DPM kepada mahasiswa.',
-      'Mengelola media komunikasi dan publikasi organisasi (Web & Medsos).',
-      'Mendokumentasikan kegiatan DPM secara menyeluruh.',
-      'Membantu menyebarkan hasil rapat atau informasi yang dapat dipublikasikan.',
-      'Menjaga komunikasi yang harmonis antara DPM dan mahasiswa.'
-    ],
-    fokusInti: 'Komisi Kominfo memastikan informasi mengenai DPM dapat tersampaikan dengan jelas, tepat, dan mudah diakses mahasiswa.'
+      'Mempublikasikan informasi kegiatan, hasil rapat, dan kebijakan DPM.',
+      'Mengelola media sosial, portal resmi, dan kanal komunikasi mahasiswa.',
+      'Mendokumentasikan arsip media dan dokumentasi kegiatan secara sistematis.'
+    ]
   }
 ];

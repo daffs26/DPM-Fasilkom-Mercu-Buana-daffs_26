@@ -138,12 +138,27 @@ export default function ProfileModal({ isOpen, onClose }) {
 
               {/* Avatar & Role Header Card */}
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
-                <div className="w-12 h-12 rounded-xl bg-blue-600 text-white font-extrabold text-sm sm:text-base flex items-center justify-center shadow-xs shrink-0">
-                  {currentUser.name?.substring(0, 2).toUpperCase() || 'US'}
+                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200/90 p-1.5 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+                  <img 
+                    src={ormawa?.logo || '/logos/logo-dpm.png'} 
+                    alt={ormawa?.shortName || 'Logo Ormawa'} 
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      if (e.currentTarget.nextElementSibling) {
+                        e.currentTarget.nextElementSibling.style.display = 'flex';
+                      }
+                    }}
+                  />
+                  <span className="hidden w-full h-full bg-blue-600 text-white font-extrabold text-sm items-center justify-center rounded-xl">
+                    {currentUser.name?.substring(0, 2).toUpperCase() || 'US'}
+                  </span>
                 </div>
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <h4 className="text-sm font-bold text-slate-900 truncate leading-snug">{currentUser.name}</h4>
-                  <p className="text-xs text-slate-500 font-medium truncate">Username: <span className="font-semibold text-slate-800">{currentUser.username}</span></p>
+                  <p className="text-xs text-slate-500 font-medium truncate">
+                    Username: <span className="font-semibold text-slate-800">{currentUser.username}</span> • <span className="font-semibold text-blue-700 uppercase">{ormawa?.shortName || currentUser.ormawaId}</span>
+                  </p>
                   <div className="flex items-center gap-2 pt-0.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">

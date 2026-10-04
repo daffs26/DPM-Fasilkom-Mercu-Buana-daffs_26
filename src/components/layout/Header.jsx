@@ -39,6 +39,7 @@ const ORMAWA_ORDER = ['dpm', 'bem', 'himti', 'himsisfo'];
 
 function ProfileMenuDropdown({ 
   currentUser, 
+  userOrmawa,
   isDPMAdmin, 
   pendingAccountsCount, 
   pendingDeletionCount, 
@@ -47,13 +48,33 @@ function ProfileMenuDropdown({
   onOpenDeletion, 
   onLogout 
 }) {
+  const userLogo = userOrmawa?.logo || '/logos/logo-dpm.png';
+
   return (
-    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 space-y-1">
-      <div className="px-3 py-2 border-b border-slate-100 mb-1">
-        <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.name}</p>
-        <p className="text-[10px] text-slate-500 capitalize">
-          {currentUser?.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser?.role} ${currentUser?.ormawaId}`}
-        </p>
+    <div className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+      <div className="flex items-center gap-3 px-3 py-2.5 border-b border-slate-100 mb-1">
+        <div className="w-9 h-9 rounded-full bg-white border border-slate-200/90 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+          <img 
+            src={userLogo} 
+            alt={userOrmawa?.shortName || 'Logo'} 
+            className="w-full h-full object-contain" 
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              if (e.currentTarget.nextElementSibling) {
+                e.currentTarget.nextElementSibling.style.display = 'flex';
+              }
+            }}
+          />
+          <span className="hidden w-full h-full bg-blue-600 text-white font-bold text-xs items-center justify-center rounded-full">
+            {currentUser?.name?.substring(0, 2).toUpperCase() || 'US'}
+          </span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold text-slate-900 truncate">{currentUser?.name}</p>
+          <p className="text-[10px] text-slate-500 capitalize truncate font-medium">
+            {currentUser?.role === 'guest' ? 'Akses Transparansi Publik' : `${currentUser?.role} • ${userOrmawa?.shortName || currentUser?.ormawaId.toUpperCase()}`}
+          </p>
+        </div>
       </div>
 
       {currentUser?.role !== 'guest' && (
@@ -225,6 +246,12 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
   const mobileInputRef = useRef(null);
 
   const activeOrmawa = ormawas.find(o => o.id === selectedOrmawaFilter);
+
+  const currentUserOrmawa = useMemo(() => {
+    if (!currentUser?.ormawaId) return ormawas.find(o => o.id === 'dpm');
+    return ormawas.find(o => o.id === currentUser.ormawaId) || ormawas.find(o => o.id === 'dpm');
+  }, [currentUser, ormawas]);
+  const userLogo = currentUserOrmawa?.logo || '/logos/logo-dpm.png';
 
   const userNotifications = useMemo(() => {
     if (!currentUser) return [];
@@ -414,13 +441,28 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
             <div className="relative" ref={profileRef}>
               <button 
                 onClick={() => setIsProfileOpen(prev => !prev)} 
-                className="w-10 h-10 min-h-[40px] min-w-[40px] rounded-full bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center shadow-xs cursor-pointer active:scale-95"
+                title={`${currentUser?.name || 'User'} (${currentUserOrmawa?.shortName || 'DPM'})`}
+                className="w-10 h-10 min-h-[40px] min-w-[40px] rounded-full bg-white border border-slate-200/90 shadow-2xs hover:border-blue-400 hover:shadow-xs p-1 flex items-center justify-center cursor-pointer active:scale-95 transition overflow-hidden group"
               >
-                {currentUser?.name?.substring(0, 2).toUpperCase() || 'US'}
+                <img 
+                  src={userLogo} 
+                  alt={currentUserOrmawa?.shortName || 'Logo Ormawa'} 
+                  className="w-full h-full object-contain transition-transform group-hover:scale-105" 
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    if (e.currentTarget.nextElementSibling) {
+                      e.currentTarget.nextElementSibling.style.display = 'flex';
+                    }
+                  }}
+                />
+                <span className="hidden w-full h-full bg-blue-600 text-white font-extrabold text-xs items-center justify-center rounded-full">
+                  {currentUser?.name?.substring(0, 2).toUpperCase() || 'US'}
+                </span>
               </button>
               {isProfileOpen && (
                 <ProfileMenuDropdown
                   currentUser={currentUser}
+                  userOrmawa={currentUserOrmawa}
                   isDPMAdmin={isDPMAdmin}
                   pendingAccountsCount={pendingAccounts.length}
                   pendingDeletionCount={pendingDeletionCount}
@@ -597,12 +639,30 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
             )}
             
             <div className="relative ml-1" ref={profileRef}>
-              <button onClick={() => setIsProfileOpen(prev => !prev)} className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center shadow-xs cursor-pointer">
-                {currentUser?.name?.substring(0, 2).toUpperCase() || 'US'}
+              <button 
+                onClick={() => setIsProfileOpen(prev => !prev)} 
+                title={`${currentUser?.name || 'User'} (${currentUserOrmawa?.shortName || 'DPM'})`}
+                className="w-10 h-10 rounded-full bg-white border border-slate-200/90 shadow-2xs hover:border-blue-400 hover:shadow-xs p-1 flex items-center justify-center cursor-pointer active:scale-95 transition overflow-hidden group"
+              >
+                <img 
+                  src={userLogo} 
+                  alt={currentUserOrmawa?.shortName || 'Logo Ormawa'} 
+                  className="w-full h-full object-contain transition-transform group-hover:scale-105" 
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    if (e.currentTarget.nextElementSibling) {
+                      e.currentTarget.nextElementSibling.style.display = 'flex';
+                    }
+                  }}
+                />
+                <span className="hidden w-full h-full bg-blue-600 text-white font-bold text-xs items-center justify-center rounded-full">
+                  {currentUser?.name?.substring(0, 2).toUpperCase() || 'US'}
+                </span>
               </button>
               {isProfileOpen && (
                 <ProfileMenuDropdown
                   currentUser={currentUser}
+                  userOrmawa={currentUserOrmawa}
                   isDPMAdmin={isDPMAdmin}
                   pendingAccountsCount={pendingAccounts.length}
                   pendingDeletionCount={pendingDeletionCount}

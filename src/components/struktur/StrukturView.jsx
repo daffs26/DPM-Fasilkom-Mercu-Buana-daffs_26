@@ -2,19 +2,20 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { 
   Network, 
   Users, 
-  Search, 
   ArrowUpRight, 
   ShieldCheck, 
   CheckCircle2, 
   User,
   Scale,
-  Award,
   ZoomIn,
   ZoomOut,
   RotateCcw,
-  Maximize2
+  Maximize2,
+  FileText,
+  Wallet,
+  Coins,
+  Megaphone
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import DetailAnggotaModal from './DetailAnggotaModal';
 import { 
   structuralMembers, 
@@ -43,22 +44,22 @@ function InfographicNode({
 
   const colorStyles = {
     primary: {
-      circle: 'bg-blue-600 ring-4 ring-white shadow-md',
+      circle: 'bg-blue-50 border-2 border-dashed border-blue-500 text-blue-600 ring-4 ring-white shadow-xs',
       bottomBorder: 'border-b-4 border-b-blue-600',
       hoverText: 'group-hover:text-blue-600',
       hoverBorder: 'hover:border-blue-400',
       roleText: 'text-blue-600 font-bold'
     },
     lead: {
-      circle: 'bg-blue-600 ring-4 ring-white shadow-md',
+      circle: 'bg-blue-50 border-2 border-dashed border-blue-500 text-blue-600 ring-4 ring-white shadow-xs',
       bottomBorder: 'border-b-4 border-b-blue-600',
       hoverText: 'group-hover:text-blue-600',
       hoverBorder: 'hover:border-blue-400',
       roleText: 'text-blue-600 font-semibold'
     },
     member: {
-      circle: 'bg-sky-500 ring-4 ring-white shadow-md',
-      bottomBorder: 'border-b-4 border-b-sky-400',
+      circle: 'bg-slate-50 border-2 border-dashed border-slate-300 text-slate-500 ring-4 ring-white shadow-xs',
+      bottomBorder: 'border-b-4 border-b-slate-400',
       hoverText: 'group-hover:text-blue-600',
       hoverBorder: 'hover:border-blue-300',
       roleText: 'text-slate-500 font-medium'
@@ -80,20 +81,12 @@ function InfographicNode({
       onClick={() => onClick(member)}
       className={`group relative ${effectiveWidth} bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer ${cardPadding} text-center ${style.bottomBorder} ${style.hoverBorder} ${className}`}
     >
-      {/* Floating Circle Icon/Photo on Top Edge */}
+      {/* Floating Circle Border Placement Placeholder on Top Edge */}
       <div 
         style={{ top: `${circleTop}px` }}
-        className={`absolute left-1/2 -translate-x-1/2 ${circleSizeClass} rounded-full ${style.circle} text-white flex items-center justify-center overflow-hidden z-10`}
+        className={`absolute left-1/2 -translate-x-1/2 ${circleSizeClass} rounded-full ${style.circle} flex items-center justify-center overflow-hidden z-10`}
       >
-        {member.image ? (
-          <img 
-            src={member.image} 
-            alt={member.name} 
-            className="w-full h-full object-cover object-top" 
-          />
-        ) : (
-          <User className={isPrimary ? "w-5 h-5 text-white" : "w-4 h-4 text-white"} />
-        )}
+        <User className={isPrimary ? "w-5 h-5" : "w-4 h-4"} />
       </div>
 
       {/* Profile Card Info with Generous Breathing Space */}
@@ -118,10 +111,65 @@ function InfographicNode({
   );
 }
 
+/**
+ * RoleCard - Kartu Tupoksi Ringkas, Proporsional & Bebas Slop
+ */
+function RoleCard({ item }) {
+  const getIcon = (id) => {
+    switch (id) {
+      case 'pimpinan': return ShieldCheck;
+      case 'sekretaris': return FileText;
+      case 'bendahara': return Wallet;
+      case 'pengawasan': return CheckCircle2;
+      case 'keuangan': return Coins;
+      case 'advokasi': return Scale;
+      case 'kominfo': return Megaphone;
+      default: return ShieldCheck;
+    }
+  };
+
+  const Icon = getIcon(item.id);
+
+  return (
+    <div className="bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-blue-300 p-5 transition-all duration-200 hover:shadow-xs flex flex-col justify-between space-y-3.5">
+      <div className="space-y-2.5">
+        {/* Header: Icon + Title & Clean Tag */}
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+            <Icon className="w-4 h-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h4 className="text-sm font-bold text-slate-900 leading-snug">
+              {item.role}
+            </h4>
+            <span className="text-[11px] font-medium text-blue-600 block mt-0.5">
+              {item.tag}
+            </span>
+          </div>
+        </div>
+
+        {/* Short Scope Summary */}
+        <p className="text-xs text-slate-500 leading-relaxed min-h-[36px]">
+          {item.deskripsi}
+        </p>
+
+        {/* 3 Actionable Bullet Points */}
+        <ul className="space-y-1.5 pt-2 border-t border-slate-200/60">
+          {item.responsibilities.map((resp, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-xs text-slate-600 leading-relaxed">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
+              <span>{resp}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export default function StrukturView() {
   const [viewMode, setViewMode] = useState('chart'); // 'chart' | 'grid'
   const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedMember, setSelectedMember] = useState(null);
 
   // Auto-fit responsive state & canvas refs
@@ -159,15 +207,9 @@ export default function StrukturView() {
   // Filtered members for Grid view
   const filteredGridMembers = useMemo(() => {
     return structuralMembers.filter(member => {
-      const matchCategory = activeCategory === 'all' || member.category === activeCategory;
-      const matchSearch = searchQuery.trim() === '' || 
-        member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.nim.includes(searchQuery.trim()) ||
-        member.unit.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchCategory && matchSearch;
+      return activeCategory === 'all' || member.category === activeCategory;
     });
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory]);
 
   // Fit scale calculation for 0 scrollbar viewing (fits 1080px chart into viewport width)
   const calculateFitScale = useCallback(() => {
@@ -228,15 +270,12 @@ export default function StrukturView() {
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-blue-700 text-xs font-bold tracking-tight">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>DPM FASILKOM UNIVERSITAS MERCU BUANA</span>
-            </div>
+            
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
               Struktur Organisasi & Tata Kelola
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
-              Bagan alur hierarki komando dan tata kerja Dewan Perwakilan Mahasiswa FASILKOM UMB Periode 2025/2026.
+            Tim Struktural Organisasi Mahasiswa DPM FASILKOM UMB Periode 2026/2027.
             </p>
           </div>
 
@@ -286,11 +325,6 @@ export default function StrukturView() {
                   <h3 className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">
                     Bagan Struktur Organisasi
                   </h3>
-                  {isFitToScreen && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200/60">
-                      Penuh Layar
-                    </span>
-                  )}
                 </div>
                 <p className="text-xs font-medium text-slate-500">
                   Dewan Perwakilan Mahasiswa FASILKOM UMB • Periode 2025/2026
@@ -570,8 +604,8 @@ export default function StrukturView() {
             {/* Infographic Canvas Footer (Branding Bar sesuai template) */}
             <div className="p-6 border-t border-slate-200/60 bg-white flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-                  DPM
+                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200/90 p-1 flex items-center justify-center shadow-2xs shrink-0">
+                  <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h5 className="font-extrabold text-slate-900 uppercase tracking-tight text-xs">
@@ -583,10 +617,7 @@ export default function StrukturView() {
                 </div>
               </div>
 
-              <div className="text-[11px] text-slate-400 flex items-center gap-4">
-                <span>🌐 dpm-fasilkom.vercel.app</span>
-                <span>📍 Gedung B, Universitas Mercu Buana</span>
-              </div>
+            
             </div>
 
           </div>
@@ -596,97 +627,69 @@ export default function StrukturView() {
       {/* ── VIEW 2: PROFILE CARDS DIRECTORY (RYNERTIA STYLE) ─────────── */}
       {viewMode === 'grid' && (
         <div className="space-y-6 animate-fadeIn">
-          {/* Filters & Search Toolbar */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-soft flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* Category Filter Pills */}
-            <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
-              {structuralCategories.map((cat) => (
+          {/* Category Filter Pills - Responsive & Accessible (No Horizontal Scroll) */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {structuralCategories.map((cat) => {
+              const isActive = activeCategory === cat.key;
+              return (
                 <button
                   key={cat.key}
                   type="button"
                   onClick={() => setActiveCategory(cat.key)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                    activeCategory === cat.key
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-blue-600 text-white font-semibold shadow-xs'
+                      : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80 shadow-2xs font-medium'
                   }`}
                 >
                   {cat.label}
                 </button>
-              ))}
-            </div>
-
-            {/* Search Input */}
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari nama, NIM, atau jabatan..."
-                className="pl-9 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 border-slate-200/80 focus:bg-white"
-              />
-            </div>
+              );
+            })}
           </div>
 
-          {/* Members Portrait Grid (Arched Style ala Rynertia Tech) */}
+          {/* Members Portrait Grid */}
           {filteredGridMembers.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredGridMembers.map((member) => (
                 <div
                   key={member.id}
                   onClick={() => setSelectedMember(member)}
-                  className="group block relative overflow-hidden rounded-tl-[40px] rounded-tr-2xl rounded-b-2xl shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer bg-slate-900 h-[380px]"
+                  className="group bg-white rounded-3xl p-4.5 border border-slate-200/80 shadow-soft hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-4"
                 >
-                  {/* Arched Background Gradient */}
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-b ${member.cardGradient} opacity-90 transition-opacity duration-300 group-hover:opacity-100`}
-                  />
-
-                  {/* Vertical Typography Watermark (Rynertia Signature) */}
-                  <span className="absolute top-6 left-3 text-white/10 font-extrabold tracking-widest text-2xl uppercase select-none pointer-events-none [writing-mode:vertical-rl] rotate-180">
-                    {member.watermark}
-                  </span>
-
-                  {/* Top Right Unit Badge */}
-                  <div className="absolute top-4 right-4 z-20">
-                    <span
-                      className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider backdrop-blur-md border ${member.badgeColor}`}
-                    >
-                      {member.unit}
+                  {/* Photo Border Placement Box */}
+                  <div className="relative w-full aspect-[4/5] rounded-2xl border-2 border-dashed border-slate-300 group-hover:border-blue-400 bg-slate-50/70 group-hover:bg-blue-50/30 flex flex-col items-center justify-center gap-2 text-slate-400 group-hover:text-blue-600 transition-all overflow-hidden">
+                    <div className="w-14 h-14 rounded-full border border-dashed border-slate-300 group-hover:border-blue-400 flex items-center justify-center bg-white shadow-2xs group-hover:scale-105 transition-all">
+                      <User className="w-7 h-7 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                    </div>
+                    <span className="text-[11px] font-semibold text-slate-400 group-hover:text-blue-600 tracking-wide transition-colors">
+                      Foto Personil
                     </span>
+
+                    {/* Quick View Floating Hint */}
+                    <div className="absolute top-3 right-3 w-7 h-7 rounded-xl bg-white/90 border border-slate-200/60 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:border-blue-200 shadow-2xs transition-colors">
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </div>
                   </div>
 
-                  {/* Member Portrait Image */}
-                  <div className="relative h-full w-full flex items-end justify-center overflow-hidden">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover object-top filter brightness-[0.97] group-hover:scale-105 transition-transform duration-500 ease-out"
-                      loading="lazy"
-                    />
-
-                    {/* Bottom Gradient Scrim Overlay */}
-                    <div className="absolute inset-x-0 bottom-0 pt-28 pb-6 px-5.5 bg-gradient-to-t from-slate-950 via-slate-950/85 to-transparent flex flex-col justify-end text-left z-10">
-                      <div className="flex items-end justify-between gap-3">
-                        <div className="min-w-0 flex-1 space-y-2">
-                          <h3 className="text-sm sm:text-base font-extrabold text-white group-hover:text-blue-200 transition-colors leading-snug drop-shadow-md truncate">
-                            {member.name}
-                          </h3>
-                          <div className="space-y-1.5">
-                            <p className="text-xs text-blue-200/90 font-medium tracking-normal line-clamp-1">
-                              {member.role}
-                            </p>
-                            <p className="text-[11px] text-slate-300/80 font-medium">
-                              {member.prodi}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="w-8.5 h-8.5 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 shadow-sm">
-                          <ArrowUpRight className="w-4 h-4" />
-                        </div>
-                      </div>
+                  {/* Profile Card Info */}
+                  <div className="px-1 pb-1 space-y-1">
+                    <h3 
+                      className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors leading-snug truncate"
+                      title={member.name}
+                    >
+                      {member.name}
+                    </h3>
+                    <div className="space-y-0.5">
+                      <p 
+                        className="text-xs text-blue-600 font-semibold truncate leading-tight"
+                        title={member.role}
+                      >
+                        {member.role}
+                      </p>
+                      <p className="text-[11px] text-slate-400 font-normal truncate">
+                        {member.prodi}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -706,78 +709,43 @@ export default function StrukturView() {
 
       {/* ── ROLE RESPONSIBILITY MATRIX (TUPOKSI RESMI) ─────────────────── */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-soft space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
           <div>
-            <span className="text-[11px] font-bold tracking-wider uppercase text-blue-600 block mb-1">
-              STANDAR AKUNTABILITAS DPM FASILKOM
-            </span>
-            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
-              Matriks Wewenang & Tanggung Jawab Komisi
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+              Wewenang & Tugas Pokok
             </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Pembagian peran, tanggung jawab, dan standar fungsi kerja DPM FASILKOM UMB.
+            </p>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
             <Scale className="w-4 h-4 text-blue-600" />
-            <span>Landasan Konstitusi Ormawa</span>
+            <span>Tata Kelola Parlemen</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {structuralRoleMatrix.map((matrix, idx) => (
-            <div
-              key={idx}
-              className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-blue-300 hover:shadow-md transition space-y-3.5 flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${matrix.badgeColor}`}>
-                    {matrix.unit}
-                  </span>
-                  <Award className="w-4 h-4 text-slate-400" />
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-900 tracking-tight">
-                    {matrix.role}
-                  </h4>
-                  {matrix.deskripsi && (
-                    <p className="text-xs text-slate-600 leading-relaxed font-normal mt-1">
-                      {matrix.deskripsi}
-                    </p>
-                  )}
-                </div>
+        {/* 1. Pimpinan & Badan Pengurus Harian (3 Kolom Seimbang) */}
+        <div className="space-y-3">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+            Pimpinan & Badan Pengurus Harian
+          </span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {structuralRoleMatrix.filter(m => m.group === 'bph').map((item) => (
+              <RoleCard key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
 
-                {/* Tugas dan Tanggung Jawab */}
-                <div className="space-y-1 pt-1 border-t border-slate-200/60">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
-                    Tugas & Tanggung Jawab:
-                  </span>
-                  <ul className="space-y-1.5">
-                    {matrix.responsibilities.map((r, rIdx) => (
-                      <li key={rIdx} className="flex items-start gap-2 text-xs text-slate-600 leading-relaxed font-normal">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                        <span>{r}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Inti Fokus Komisi */}
-                {matrix.fokusInti && (
-                  <div className="p-2.5 rounded-xl bg-blue-50/80 border border-blue-100 text-[11px] text-blue-950 font-medium leading-relaxed">
-                    <span className="font-extrabold text-blue-700 uppercase tracking-wider block text-[9px] mb-0.5">
-                      Intinya:
-                    </span>
-                    {matrix.fokusInti}
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-3 border-t border-slate-200/60 flex items-center gap-1.5 text-[11px] font-bold text-blue-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                <span>Akuntabilitas Resmi DPM UMB</span>
-              </div>
-            </div>
-          ))}
+        {/* 2. Komisi Parlemen (4 Kolom Seimbang) */}
+        <div className="space-y-3 pt-2">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+            Komisi Parlemen
+          </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {structuralRoleMatrix.filter(m => m.group === 'komisi').map((item) => (
+              <RoleCard key={item.id} item={item} />
+            ))}
+          </div>
         </div>
       </div>
 

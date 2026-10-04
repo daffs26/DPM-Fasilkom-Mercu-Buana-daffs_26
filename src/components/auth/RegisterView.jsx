@@ -79,10 +79,8 @@ export default function RegisterView({ onSwitchToLogin }) {
             </div>
 
             <div className="relative z-10">
-              <div className="w-9 h-9 text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 6v12"/><path d="M17.196 9 6.804 15"/><path d="m6.804 9 10.392 6"/>
-                </svg>
+              <div className="w-11 h-11 rounded-2xl bg-white/95 backdrop-blur-xs border border-white/40 p-1.5 flex items-center justify-center shadow-lg">
+                <img src="/logos/logo-dpm.png" alt="DPM FASILKOM UMB" className="w-full h-full object-contain" />
               </div>
             </div>
 
@@ -142,10 +140,8 @@ export default function RegisterView({ onSwitchToLogin }) {
           </div>
 
           <div className="relative z-10">
-            <div className="w-9 h-9 text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 6v12"/><path d="M17.196 9 6.804 15"/><path d="m6.804 9 10.392 6"/>
-              </svg>
+            <div className="w-11 h-11 rounded-2xl bg-white/95 backdrop-blur-xs border border-white/40 p-1.5 flex items-center justify-center shadow-lg">
+              <img src="/logos/logo-dpm.png" alt="DPM FASILKOM UMB" className="w-full h-full object-contain" />
             </div>
           </div>
 
@@ -162,11 +158,9 @@ export default function RegisterView({ onSwitchToLogin }) {
         {/* Right Side: Register Form with Smooth Top-Aligned Scrollbar */}
         <div className="w-full flex-1 flex flex-col h-full overflow-y-auto px-4 sm:px-8 lg:px-10 py-5 custom-scrollbar">
           
-          {/* Top Asterisk Icon */}
-          <div className="w-8 h-8 text-blue-600 mb-4 shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 6v12"/><path d="M17.196 9 6.804 15"/><path d="m6.804 9 10.392 6"/>
-            </svg>
+          {/* Top DPM Logo */}
+          <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200/90 p-1.5 flex items-center justify-center shadow-2xs mb-4 shrink-0">
+            <img src="/logos/logo-dpm.png" alt="DPM FASILKOM UMB" className="w-full h-full object-contain" />
           </div>
 
           <div className="mb-5 shrink-0">
