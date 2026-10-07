@@ -1004,55 +1004,104 @@ export default function KomisiBendaharaView() {
         )}
       </div>
 
-      {/* MODAL 1: CATAT TRANSAKSI PROKER */}
+      {/* MODAL 1: CATAT TRANSAKSI PROKER (Anti-Fatigue UX) */}
       {isTxModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="space-y-0.5">
-                <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">Catat Mutasi Kas Proker</h3>
-                <p className="text-xs text-slate-500">Pemasukan atau pengeluaran akan langsung dicatat pada proker terkait.</p>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header Modal */}
+            <div className="flex items-center justify-between p-4 sm:p-5 pb-3.5 border-b border-slate-100 bg-slate-50/60 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs border ${
+                  formTx.type === 'pemasukan' 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                  <Receipt className="w-5 h-5 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight">Catat Mutasi Kas Proker</h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Catatan kas terhubung langsung ke pembukuan proker terpilih</p>
+                </div>
               </div>
               <button 
                 type="button"
                 onClick={() => setIsTxModalOpen(false)} 
-                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer text-xs font-bold"
+                className="w-9 h-9 min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer active:scale-95 transition"
+                aria-label="Tutup"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddTransaction} className="space-y-3.5 text-xs sm:text-sm">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Pilih Program Kerja</label>
-                <DropdownSelect
-                  value={formTx.targetProkerId}
-                  onChange={(val) => setFormTx(prev => ({ ...prev, targetProkerId: val }))}
-                  options={prokerModalOptions}
-                  placeholder="Pilih Program Kerja"
-                  triggerClassName="min-h-[42px] h-10.5 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 w-full"
-                  contentClassName="w-full z-50 shadow-xl"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Form Body */}
+            <form onSubmit={handleAddTransaction} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm flex-1">
+                {/* 1. Pilih Proker */}
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Arus Kas</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <FolderOpen className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Target Program Kerja</span>
+                    </label>
+                    <span className="text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">Wajib</span>
+                  </div>
                   <DropdownSelect
-                    value={formTx.type}
-                    onChange={(val) => setFormTx(prev => ({ ...prev, type: val }))}
-                    options={[
-                      { value: 'pengeluaran', label: 'Pengeluaran (Biaya/Belanja)' },
-                      { value: 'pemasukan', label: 'Pemasukan (Dana/Sponsor)' }
-                    ]}
-                    placeholder="Pilih Arus"
-                    triggerClassName="min-h-[42px] h-10.5 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 w-full"
+                    value={formTx.targetProkerId}
+                    onChange={(val) => setFormTx(prev => ({ ...prev, targetProkerId: val }))}
+                    options={prokerModalOptions}
+                    placeholder="Pilih Program Kerja"
+                    triggerClassName="min-h-[44px] h-11 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 hover:bg-white border-slate-200/90 w-full font-medium"
                     contentClassName="w-full z-50 shadow-xl"
                   />
                 </div>
 
+                {/* 2. Jenis Arus Kas (Segmented Switcher) */}
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Kategori Biaya / Sumber</label>
+                  <label className="font-bold text-slate-800 block mb-1.5">
+                    Jenis Arus Kas
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormTx(prev => ({ 
+                        ...prev, 
+                        type: 'pengeluaran',
+                        category: 'Konsumsi & Logistik Makanan'
+                      }))}
+                      className={`min-h-[42px] py-2 px-3 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 ${
+                        formTx.type === 'pengeluaran'
+                          ? 'bg-rose-50 border-rose-300 text-rose-800 font-black shadow-2xs ring-2 ring-rose-400/20'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <ArrowUpRight className="w-4 h-4 text-rose-600" />
+                      <span>Pengeluaran (Biaya)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormTx(prev => ({ 
+                        ...prev, 
+                        type: 'pemasukan',
+                        category: 'Dana Kemahasiswaan Fakultas'
+                      }))}
+                      className={`min-h-[42px] py-2 px-3 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 ${
+                        formTx.type === 'pemasukan'
+                          ? 'bg-emerald-50 border-emerald-300 text-emerald-800 font-black shadow-2xs ring-2 ring-emerald-400/20'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <ArrowDownLeft className="w-4 h-4 text-emerald-600" />
+                      <span>Pemasukan (Dana)</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. Kategori Biaya / Sumber */}
+                <div>
+                  <label className="font-bold text-slate-800 block mb-1.5">
+                    Kategori {formTx.type === 'pemasukan' ? 'Sumber Penerimaan' : 'Pos Belanja'}
+                  </label>
                   <DropdownSelect
                     value={formTx.category}
                     onChange={(val) => setFormTx(prev => ({ ...prev, category: val }))}
@@ -1075,131 +1124,162 @@ export default function KomisiBendaharaView() {
                       { value: 'Biaya Tak Terduga', label: 'Biaya Tak Terduga' }
                     ]}
                     placeholder="Pilih Kategori"
-                    triggerClassName="min-h-[42px] h-10.5 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 w-full"
+                    triggerClassName="min-h-[44px] h-11 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 hover:bg-white border-slate-200/90 w-full font-medium"
                     contentClassName="w-full z-50 shadow-xl"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nominal (Rp)</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="Contoh: 350000"
-                    value={formTx.nominal}
-                    onChange={(e) => setFormTx({ ...formTx, nominal: e.target.value })}
-                    className="w-full min-h-[42px] h-10.5 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                  />
+                {/* 4. Nominal dengan Live Format Rupiah (Anti-Khawatir Angka Nol) */}
+                <div className="p-3 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <Coins className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Nominal Transaksi (Rp)</span>
+                    </label>
+                    {formTx.nominal && Number(formTx.nominal) > 0 && (
+                      <span className="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/70 animate-in fade-in">
+                        {formatRupiah(Number(formTx.nominal))}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">
+                      Rp
+                    </span>
+                    <input
+                      type="number"
+                      required
+                      placeholder="Contoh: 350000"
+                      value={formTx.nominal}
+                      onChange={(e) => setFormTx({ ...formTx, nominal: e.target.value })}
+                      className="w-full min-h-[44px] h-11 pl-10 pr-3.5 rounded-xl border border-slate-200/90 bg-white font-bold text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+                    />
+                  </div>
                 </div>
 
+                {/* 5. Nomor Nota / Kwitansi */}
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nomor Nota / Kwitansi</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <Receipt className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Nomor Nota / Kwitansi</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded-full">Opsional</span>
+                  </div>
                   <input
                     type="text"
                     placeholder="Contoh: NOTA-KTR-442"
                     value={formTx.receiptNumber}
                     onChange={(e) => setFormTx({ ...formTx, receiptNumber: e.target.value })}
-                    className="w-full min-h-[42px] h-10.5 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                    className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
                   />
+                </div>
+
+                {/* 6. Uraian Belanja */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800">Uraian / Keterangan Transaksi</label>
+                    <span className="text-[10px] text-slate-400">{formTx.description.length} karakter</span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="Jelaskan secara ringkas peruntukan belanja atau sumber penerimaan..."
+                    value={formTx.description}
+                    onChange={(e) => setFormTx({ ...formTx, description: e.target.value })}
+                    className="w-full p-3 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+                  />
+                </div>
+
+                {/* 7. Upload Foto Bukti Nota */}
+                <div className="space-y-2 pt-1 border-t border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <Camera className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Foto Bukti Fisik Nota / Kwitansi</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded-full">Opsional</span>
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleTxFileChange}
+                    accept="image/*"
+                    className="hidden" 
+                  />
+
+                  {!formTx.receiptPhoto ? (
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-200 hover:border-blue-400 bg-slate-50/70 hover:bg-blue-50/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-center gap-3 cursor-pointer transition text-slate-500 group active:scale-98"
+                    >
+                      <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 group-hover:border-blue-200 flex items-center justify-center text-slate-400 group-hover:text-blue-600 transition shrink-0 shadow-2xs">
+                        <Camera className="w-5 h-5" />
+                      </div>
+                      <div className="text-center sm:text-left">
+                        <span className="text-xs font-bold text-slate-700 group-hover:text-blue-700 block leading-snug">
+                          Klik untuk unggah foto nota fisik / struk belanja
+                        </span>
+                        <span className="text-[11px] text-slate-400 block mt-0.5">
+                          Format JPG, PNG, atau WebP (Maksimal 5 MB)
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border border-slate-200/90 rounded-2xl p-3 bg-slate-50/80 space-y-2.5 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <ImageIcon className="w-4 h-4 text-blue-600 shrink-0" />
+                          <span className="font-bold text-xs text-slate-800 truncate max-w-[200px] sm:max-w-xs">
+                            {formTx.receiptPhotoName} ({formTx.receiptPhotoSize})
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition cursor-pointer"
+                          >
+                            Ganti
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleRemoveTxPhoto}
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            title="Hapus foto bukti"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-white max-h-36 flex items-center justify-center p-1.5 shadow-2xs">
+                        <img 
+                          src={formTx.receiptPhoto} 
+                          alt="Preview Foto Bukti" 
+                          className="w-full h-auto max-h-32 object-contain rounded-lg" 
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Uraian / Keterangan Belanja</label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Jelaskan secara ringkas peruntukan belanja atau sumber penerimaan..."
-                  value={formTx.description}
-                  onChange={(e) => setFormTx({ ...formTx, description: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                />
-              </div>
-
-              {/* Upload Foto Bukti Nota / Kwitansi */}
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">
-                  Upload Foto Bukti Nota / Kwitansi (Opsional)
-                </label>
-                <input 
-                  type="file" 
-                  ref={fileInputRef}
-                  onChange={handleTxFileChange}
-                  accept="image/*"
-                  className="hidden" 
-                />
-
-                {!formTx.receiptPhoto ? (
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/70 hover:bg-slate-50 rounded-xl p-3.5 flex flex-col sm:flex-row items-center justify-center gap-2.5 cursor-pointer transition text-slate-500 group"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 group-hover:border-slate-300 flex items-center justify-center text-slate-400 group-hover:text-slate-700 transition shrink-0 shadow-2xs">
-                      <Camera className="w-4 h-4" />
-                    </div>
-                    <div className="text-center sm:text-left">
-                      <span className="text-xs font-bold text-slate-700 group-hover:text-slate-900 block leading-snug">
-                        Klik untuk unggah foto nota fisik atau bukti kwitansi
-                      </span>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">
-                        Format gambar JPG, PNG, atau WebP (Maksimal 5 MB)
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border border-slate-200/90 rounded-xl p-3 bg-slate-50/80 space-y-2.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <ImageIcon className="w-4 h-4 text-indigo-600 shrink-0" />
-                        <span className="font-bold text-xs text-slate-800 truncate max-w-[200px] sm:max-w-xs">
-                          {formTx.receiptPhotoName} ({formTx.receiptPhotoSize})
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition cursor-pointer"
-                        >
-                          Ganti
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleRemoveTxPhoto}
-                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                          title="Hapus foto bukti"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="relative rounded-lg overflow-hidden border border-slate-200 bg-white max-h-40 flex items-center justify-center p-1.5 shadow-2xs">
-                      <img 
-                        src={formTx.receiptPhoto} 
-                        alt="Preview Foto Bukti" 
-                        className="w-full h-auto max-h-36 object-contain rounded" 
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-slate-100">
+              {/* Action Buttons */}
+              <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/50 flex flex-col-reverse sm:flex-row justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsTxModalOpen(false)}
-                  className="min-h-[42px] px-4 rounded-xl border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 cursor-pointer active:scale-95 text-xs sm:text-sm transition"
+                  className="min-h-[42px] px-4 rounded-xl border border-slate-200 text-slate-700 font-bold hover:bg-slate-100 cursor-pointer active:scale-95 text-xs sm:text-sm transition"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="min-h-[42px] px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer active:scale-95 text-xs sm:text-sm transition shadow-xs"
+                  className="min-h-[42px] px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer active:scale-95 text-xs sm:text-sm transition shadow-xs flex items-center justify-center gap-1.5"
                 >
-                  Simpan Transaksi
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Simpan Transaksi Kas</span>
                 </button>
               </div>
             </form>
@@ -1207,96 +1287,133 @@ export default function KomisiBendaharaView() {
         </div>
       )}
 
-      {/* MODAL 2: TAMBAH POS PROKER BARU */}
+      {/* MODAL 2: TAMBAH POS PROKER BARU (Anti-Fatigue UX) */}
       {isAddProkerModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="space-y-0.5">
-                <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">Tambah Program Kerja Baru</h3>
-                <p className="text-xs text-slate-500">Buat pos kegiatan baru untuk mulai mencatat arus kas masuk dan keluarnya.</p>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header Modal */}
+            <div className="flex items-center justify-between p-4 sm:p-5 pb-3.5 border-b border-slate-100 bg-slate-50/60 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
+                  <FolderOpen className="w-5 h-5 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight">Buka Pos Program Kerja Baru</h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Daftarkan pos kegiatan untuk mencatat arus kas dan anggaran</p>
+                </div>
               </div>
               <button 
                 type="button"
                 onClick={() => setIsAddProkerModalOpen(false)} 
-                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer text-xs font-bold"
+                className="w-9 h-9 min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer active:scale-95 transition"
+                aria-label="Tutup"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddProker} className="space-y-3.5 text-xs sm:text-sm">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Nama Program Kerja</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Diskusi Publik Peraturan Mahasiswa"
-                  value={formNewProker.title}
-                  onChange={(e) => setFormNewProker({ ...formNewProker, title: e.target.value })}
-                  className="w-full min-h-[42px] h-10.5 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Form Body */}
+            <form onSubmit={handleAddProker} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm flex-1">
+                {/* 1. Nama Proker */}
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Target Anggaran (RAB Rp)</label>
-                  <input
-                    type="number"
-                    placeholder="Contoh: 2500000"
-                    value={formNewProker.rabTarget}
-                    onChange={(e) => setFormNewProker({ ...formNewProker, rabTarget: e.target.value })}
-                    className="w-full min-h-[42px] h-10.5 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Periode Pelaksanaan</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800">Nama Program Kerja</label>
+                    <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">Wajib</span>
+                  </div>
                   <input
                     type="text"
-                    placeholder="Contoh: 05 - 07 Des 2026"
-                    value={formNewProker.period}
-                    onChange={(e) => setFormNewProker({ ...formNewProker, period: e.target.value })}
-                    className="w-full min-h-[42px] h-10.5 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                    required
+                    placeholder="Contoh: Diskusi Publik Peraturan Mahasiswa"
+                    value={formNewProker.title}
+                    onChange={(e) => setFormNewProker({ ...formNewProker, title: e.target.value })}
+                    className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+                  />
+                </div>
+
+                {/* 2. Target Anggaran (RAB) dengan Live Format Rupiah */}
+                <div className="p-3 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <Coins className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Target Anggaran (RAB Rp)</span>
+                    </label>
+                    {formNewProker.rabTarget && Number(formNewProker.rabTarget) > 0 && (
+                      <span className="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/70">
+                        {formatRupiah(Number(formNewProker.rabTarget))}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">
+                      Rp
+                    </span>
+                    <input
+                      type="number"
+                      placeholder="Contoh: 2500000"
+                      value={formNewProker.rabTarget}
+                      onChange={(e) => setFormNewProker({ ...formNewProker, rabTarget: e.target.value })}
+                      className="w-full min-h-[44px] h-11 pl-10 pr-3.5 rounded-xl border border-slate-200/90 bg-white font-bold text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Periode & PIC */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1.5">Periode Pelaksanaan</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: 05 - 07 Des 2026"
+                      value={formNewProker.period}
+                      onChange={(e) => setFormNewProker({ ...formNewProker, period: e.target.value })}
+                      className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1.5">PIC / Bendahara Proker</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Siti Nurhaliza (Bendahara)"
+                      value={formNewProker.pic}
+                      onChange={(e) => setFormNewProker({ ...formNewProker, pic: e.target.value })}
+                      className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Deskripsi Singkat */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800">Deskripsi Agenda Kegiatan</label>
+                    <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded-full">Opsional</span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    placeholder="Jelaskan gambaran umum agenda kegiatan dan ruang lingkup pembukuannya..."
+                    value={formNewProker.description}
+                    onChange={(e) => setFormNewProker({ ...formNewProker, description: e.target.value })}
+                    className="w-full p-3 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">PIC Bendahara Pelaksana</label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Siti Nurhaliza (Bendahara)"
-                  value={formNewProker.pic}
-                  onChange={(e) => setFormNewProker({ ...formNewProker, pic: e.target.value })}
-                  className="w-full min-h-[42px] h-10.5 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Deskripsi Singkat</label>
-                <textarea
-                  rows={3}
-                  placeholder="Jelaskan gambaran umum agenda kegiatan..."
-                  value={formNewProker.description}
-                  onChange={(e) => setFormNewProker({ ...formNewProker, description: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                />
-              </div>
-
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-slate-100">
+              {/* Action Buttons */}
+              <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/50 flex flex-col-reverse sm:flex-row justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsAddProkerModalOpen(false)}
-                  className="min-h-[42px] px-4 rounded-xl border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 cursor-pointer active:scale-95 text-xs sm:text-sm transition"
+                  className="min-h-[42px] px-4 rounded-xl border border-slate-200 text-slate-700 font-bold hover:bg-slate-100 cursor-pointer active:scale-95 text-xs sm:text-sm transition"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="min-h-[42px] px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer active:scale-95 text-xs sm:text-sm transition shadow-xs"
+                  className="min-h-[42px] px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer active:scale-95 text-xs sm:text-sm transition shadow-xs flex items-center justify-center gap-1.5"
                 >
-                  Buat Proker Baru
+                  <Plus className="w-4 h-4" />
+                  <span>Buat Proker Baru</span>
                 </button>
               </div>
             </form>

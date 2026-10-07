@@ -486,116 +486,173 @@ export default function KomisiKeuanganView() {
         </div>
       </div>
 
-      {/* Modal Catat Evaluasi / Hal Penting Ormawa */}
+      {/* Modal Catat Evaluasi / Hal Penting Ormawa (Anti-Fatigue UX) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header Modal */}
+            <div className="flex items-center justify-between p-4 sm:p-5 pb-3.5 border-b border-slate-100 bg-slate-50/60 shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0">
-                  <FileText className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 shadow-2xs">
+                  <Lightbulb className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">Catat Hal Penting Ormawa</h3>
-                  <p className="text-[11px] sm:text-xs text-slate-400">Pencatatan resmi Komisi Keuangan DPM untuk Ormawa terpilih</p>
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight">Catat Evaluasi Anggaran Ormawa</h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Berikan arahan atau rekomendasi keuangan yang mudah dipahami Ormawa</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 min-h-[32px] min-w-[32px] flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer active:scale-95"
+                className="w-9 h-9 min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer active:scale-95 transition"
+                aria-label="Tutup"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddRec} className="space-y-3.5 text-xs sm:text-sm">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Ormawa yang Dipilih (Target Ormawa)</label>
-                <DropdownSelect
-                  value={newRec.ormawaId}
-                  onChange={(val) => setNewRec(prev => ({ ...prev, ormawaId: val }))}
-                  options={ormawaFormOptions}
-                  placeholder="Pilih Ormawa yang ingin dicatat"
-                  triggerClassName="min-h-[44px] h-11 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 w-full"
-                  contentClassName="w-full z-50 shadow-xl"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Judul Catatan / Pokok Masalah</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Misal: Penyesuaian Pos Konsumsi RAB Termin 1"
-                  value={newRec.title}
-                  onChange={(e) => setNewRec({ ...newRec, title: e.target.value })}
-                  className="w-full min-h-[44px] h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Form Body */}
+            <form onSubmit={handleAddRec} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm flex-1">
+                {/* 1. Target Ormawa */}
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Kategori Catatan</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Target Ormawa</span>
+                    </label>
+                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60">Wajib</span>
+                  </div>
                   <DropdownSelect
-                    value={newRec.category}
-                    onChange={(val) => setNewRec(prev => ({ ...prev, category: val }))}
-                    options={categoryOptions}
-                    placeholder="Pilih Kategori"
-                    triggerClassName="min-h-[44px] h-11 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 w-full"
+                    value={newRec.ormawaId}
+                    onChange={(val) => setNewRec(prev => ({ ...prev, ormawaId: val }))}
+                    options={ormawaFormOptions}
+                    placeholder="Pilih Ormawa yang ingin dicatat"
+                    triggerClassName="min-h-[44px] h-11 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 hover:bg-white border-slate-200/90 w-full font-medium"
                     contentClassName="w-full z-50 shadow-xl"
                   />
                 </div>
 
+                {/* 2. Judul Catatan */}
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Tingkat Prioritas</label>
-                  <DropdownSelect
-                    value={newRec.priority}
-                    onChange={(val) => setNewRec(prev => ({ ...prev, priority: val }))}
-                    options={priorityOptions}
-                    placeholder="Pilih Prioritas"
-                    triggerClassName="min-h-[44px] h-11 py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 w-full"
-                    contentClassName="w-full z-50 shadow-xl"
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Pokok Catatan / Topik Evaluasi</span>
+                    </label>
+                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60">Wajib</span>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Misal: Penyesuaian Pos Konsumsi RAB Termin 1"
+                    value={newRec.title}
+                    onChange={(e) => setNewRec({ ...newRec, title: e.target.value })}
+                    className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition shadow-2xs"
                   />
+                </div>
+
+                {/* 3. Kategori & Prioritas (Segmented Buttons for Zero Fatigue) */}
+                <div className="space-y-3.5 p-3 rounded-2xl bg-slate-50/70 border border-slate-200/70">
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1.5 text-xs">
+                      Kategori Evaluasi
+                    </label>
+                    <DropdownSelect
+                      value={newRec.category}
+                      onChange={(val) => setNewRec(prev => ({ ...prev, category: val }))}
+                      options={categoryOptions}
+                      placeholder="Pilih Kategori"
+                      triggerClassName="min-h-[42px] h-10.5 py-2 px-3 rounded-xl text-xs sm:text-sm bg-white border-slate-200 w-full font-medium"
+                      contentClassName="w-full z-50 shadow-xl"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1.5 text-xs">
+                      Tingkat Urgensi / Prioritas Tindak Lanjut
+                    </label>
+                    {/* Segmented Buttons: Menghilangkan dropdown fatigue */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { val: 'Sedang', label: 'Sedang', color: 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-400/20' },
+                        { val: 'Penting', label: 'Penting', color: 'bg-amber-50 text-amber-800 border-amber-300 ring-2 ring-amber-400/20' },
+                        { val: 'Tinggi', label: 'Tinggi', color: 'bg-rose-50 text-rose-800 border-rose-300 ring-2 ring-rose-400/20' }
+                      ].map(p => {
+                        const isSelected = newRec.priority === p.val;
+                        return (
+                          <button
+                            key={p.val}
+                            type="button"
+                            onClick={() => setNewRec(prev => ({ ...prev, priority: p.val }))}
+                            className={`min-h-[38px] py-1.5 px-2 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${
+                              isSelected 
+                                ? `${p.color} font-black shadow-2xs` 
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-current' : 'bg-slate-400'}`} />
+                            <span>{p.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Uraian Catatan */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <span>Uraian Penjelasan Evaluasi</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400">{newRec.content.length} karakter</span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="Uraikan temuan keuangan atau catatan audit dengan bahasa yang jelas dan konstruktif bagi Ormawa..."
+                    value={newRec.content}
+                    onChange={(e) => setNewRec({ ...newRec, content: e.target.value })}
+                    className="w-full p-3 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition shadow-2xs"
+                  />
+                </div>
+
+                {/* 5. Tindak Lanjut / Solusi (Opsional) */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <Target className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Rekomendasi Tindak Lanjut / Solusi</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded-full">Opsional</span>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Misal: Negosiasi paket katering mahasiswa atau submit revisi sebelum termin 2"
+                    value={newRec.impact}
+                    onChange={(e) => setNewRec({ ...newRec, impact: e.target.value })}
+                    className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-white focus:bg-white font-medium text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition shadow-2xs"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Langkah nyata yang disarankan agar ormawa dapat langsung mengeksekusi perbaikan.</p>
                 </div>
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Uraian Hal yang Perlu Dicatat untuk Ormawa</label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Tuliskan temuan, poin evaluasi, atau catatan penting yang perlu diperhatikan oleh Ormawa yang dipilih..."
-                  value={newRec.content}
-                  onChange={(e) => setNewRec({ ...newRec, content: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Tindak Lanjut / Solusi yang Diharapkan (Opsional)</label>
-                <input
-                  type="text"
-                  placeholder="Misal: Melakukan negosiasi katering mahasiswa atau menyerahkan revisi RAB sebelum termin 2"
-                  value={newRec.impact}
-                  onChange={(e) => setNewRec({ ...newRec, impact: e.target.value })}
-                  className="w-full min-h-[44px] h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                />
-              </div>
-
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-slate-100">
+              {/* Action Buttons */}
+              <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/50 flex flex-col-reverse sm:flex-row justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="min-h-[44px] h-11 px-4 rounded-xl border border-slate-200 text-slate-700 font-bold cursor-pointer hover:bg-slate-50 text-xs sm:text-sm active:scale-95 transition"
+                  className="min-h-[42px] px-4 rounded-xl border border-slate-200 text-slate-700 font-bold cursor-pointer hover:bg-slate-100 text-xs sm:text-sm active:scale-95 transition"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="min-h-[44px] h-11 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer shadow-xs active:scale-95 transition text-xs sm:text-sm"
+                  className="min-h-[42px] px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer shadow-xs active:scale-95 transition text-xs sm:text-sm flex items-center justify-center gap-1.5"
                 >
-                  Simpan Catatan Ormawa
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Simpan Catatan Ormawa</span>
                 </button>
               </div>
             </form>

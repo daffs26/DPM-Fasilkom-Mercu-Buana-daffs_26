@@ -604,313 +604,409 @@ export default function KomisiKominfoView() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
           <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 overflow-hidden">
-            <div className="flex items-center justify-between p-4 sm:p-5 pb-3 border-b border-slate-100 shrink-0">
-              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
-                {modalType === 'konten' ? 'Jadwalkan Konten Baru' : modalType === 'desain' ? 'Tambah Tugas Desain' : 'Catat Bukti Kehadiran Media Partner'}
-              </h3>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 shadow-2xs">
+                  {modalType === 'konten' ? (
+                    <Calendar className="w-4 h-4" />
+                  ) : modalType === 'desain' ? (
+                    <Palette className="w-4 h-4" />
+                  ) : (
+                    <Camera className="w-4 h-4" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight">
+                    {modalType === 'konten' ? 'Jadwalkan Konten Baru' : modalType === 'desain' ? 'Tambah Tugas Desain' : 'Catat Bukti Kehadiran Media Partner'}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    {modalType === 'konten' ? 'Rencanakan publikasi media sosial resmi DPM' : modalType === 'desain' ? 'Delegasikan pengerjaan materi visual' : 'Dokumentasikan kehadiran liputan acara ormawa'}
+                  </p>
+                </div>
+              </div>
               <button 
+                type="button"
                 onClick={() => {
                   setIsModalOpen(false);
                   setUploadError('');
                 }} 
-                className="w-8 h-8 min-h-[32px] min-w-[32px] flex items-center justify-center text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer rounded-lg active:scale-95"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer active:scale-95"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleSaveModal} className="flex flex-col flex-1 overflow-hidden">
-              <div className="p-4 sm:p-5 overflow-y-auto space-y-3.5 text-xs sm:text-sm flex-1">
+              <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm flex-1">
                 {modalType === 'konten' && (
-                  <>
+                  <div className="space-y-3.5">
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Judul Konten</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="font-bold text-slate-700">Judul Konten</label>
+                        <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">Wajib</span>
+                      </div>
                       <input
                         type="text"
                         required
-                        placeholder="Misal: Infografis Anggaran Triwulan"
+                        placeholder="Misal: Infografis Anggaran Triwulan DPM"
                         value={formKonten.title}
                         onChange={(e) => setFormKonten({ ...formKonten, title: e.target.value })}
-                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/70 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition"
                       />
                     </div>
+
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Platform Publikasi</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="font-bold text-slate-700">Platform Publikasi</label>
+                        <span className="text-[10px] text-slate-400 font-medium">Pilih cepat atau ketik</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {['Instagram Feed', 'Instagram Story', 'Reels', 'TikTok', 'Website', 'LinkedIn'].map((p) => {
+                          const isActive = formKonten.platform === p;
+                          return (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => setFormKonten({ ...formKonten, platform: p })}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
+                                isActive 
+                                  ? 'bg-purple-600 text-white shadow-2xs' 
+                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          );
+                        })}
+                      </div>
                       <input
                         type="text"
-                        placeholder="Instagram Feed / Story / Website"
+                        placeholder="Atau ketik platform lainnya..."
                         value={formKonten.platform}
                         onChange={(e) => setFormKonten({ ...formKonten, platform: e.target.value })}
-                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/70 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition"
                       />
                     </div>
+
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Rencana Tanggal Tayang</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="font-bold text-slate-700">Rencana Tanggal Tayang</label>
+                        <span className="text-[10px] text-slate-400 font-medium">Format bebas / tanggal</span>
+                      </div>
                       <input
                         type="text"
-                        placeholder="Misal: 15 Okt 2026"
+                        placeholder="Misal: 15 Okt 2026 atau Minggu Ke-3 Oktober"
                         value={formKonten.publishDate}
                         onChange={(e) => setFormKonten({ ...formKonten, publishDate: e.target.value })}
-                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/70 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition"
                       />
                     </div>
+
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Draf Copywriting / Deskripsi</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="font-bold text-slate-700">Draf Copywriting / Deskripsi</label>
+                        <span className="text-[10px] text-slate-400 tabular-nums">
+                          {(formKonten.copywriting || '').length} karakter
+                        </span>
+                      </div>
                       <textarea
                         rows={3}
-                        placeholder="Tuliskan intisari caption atau materi konten..."
+                        placeholder="Tuliskan intisari caption, poin utama informasi, atau tagar yang akan digunakan..."
                         value={formKonten.copywriting}
                         onChange={(e) => setFormKonten({ ...formKonten, copywriting: e.target.value })}
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50/70 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition resize-none"
                       />
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {modalType === 'desain' && (
-                  <>
+                  <div className="space-y-3.5">
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Judul Desain</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="font-bold text-slate-700">Judul Desain</label>
+                        <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">Wajib</span>
+                      </div>
                       <input
                         type="text"
                         required
-                        placeholder="Misal: Desain Feed Instagram Sambutan"
+                        placeholder="Misal: Desain Feed Instagram Sambutan Maba"
                         value={formDesain.title}
                         onChange={(e) => setFormDesain({ ...formDesain, title: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-hidden"
+                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/70 font-medium text-xs sm:text-sm focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition outline-hidden"
                       />
                     </div>
+
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Tools Desain</label>
-                      <DropdownSelect
-                        value={formDesain.format}
-                        onChange={(val) => setFormDesain(prev => ({ ...prev, format: val }))}
-                        options={TOOL_OPTIONS}
-                        placeholder="Pilih Tools Desain"
-                        triggerClassName="min-h-[42px] py-2 px-3 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 font-medium"
-                        contentClassName="w-full z-50 shadow-xl"
-                      />
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="font-bold text-slate-700">Tools / Software Desain</label>
+                        <span className="text-[10px] text-slate-400 font-medium">Klik untuk memilih</span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {TOOL_OPTIONS.map((tool) => {
+                          const isSelected = formDesain.format === tool.value;
+                          return (
+                            <button
+                              key={tool.value}
+                              type="button"
+                              onClick={() => setFormDesain(prev => ({ ...prev, format: tool.value }))}
+                              className={`min-h-[40px] py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center text-center cursor-pointer ${
+                                isSelected
+                                  ? 'bg-purple-600 text-white shadow-sm ring-2 ring-purple-600/30'
+                                  : 'bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100'
+                              }`}
+                            >
+                              {tool.label}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
+
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">
-                        Link Desain {formDesain.format ? `(${formDesain.format})` : ''}
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="font-bold text-slate-700">
+                          Tautan Project / Berkas {formDesain.format ? `(${formDesain.format})` : ''}
+                        </label>
+                        <span className="text-[10px] text-slate-400 font-medium">Tautan cloud / file</span>
+                      </div>
                       <input
                         type="text"
                         placeholder={
                           formDesain.format === 'Canva' 
-                            ? 'Misal: https://canva.com/design/...' 
+                            ? 'https://canva.com/design/...' 
                             : formDesain.format === 'CapCut'
-                              ? 'Misal: https://capcut.com/...' 
+                              ? 'https://capcut.com/...' 
                               : formDesain.format === 'Adobe Photoshop'
-                                ? 'Misal: https://assets.adobe.com/... atau tautan Drive'
-                                : 'Misal: https://figma.com/file/...'
+                                ? 'Tautan Google Drive atau Adobe Creative Cloud'
+                                : 'https://figma.com/file/...'
                         }
                         value={formDesain.linkFigma}
                         onChange={(e) => setFormDesain({ ...formDesain, linkFigma: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-hidden"
+                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/70 font-medium text-xs sm:text-sm focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition outline-hidden"
                       />
                     </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Tenggat Waktu</label>
-                      <input
-                        type="text"
-                        placeholder="Misal: 12 Okt 2026"
-                        value={formDesain.deadline}
-                        onChange={(e) => setFormDesain({ ...formDesain, deadline: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-hidden"
-                      />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1.5">Tenggat Waktu (Deadline)</label>
+                        <input
+                          type="text"
+                          placeholder="Misal: 12 Okt 2026"
+                          value={formDesain.deadline}
+                          onChange={(e) => setFormDesain({ ...formDesain, deadline: e.target.value })}
+                          className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/70 font-medium text-xs sm:text-sm focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition outline-hidden"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="font-bold text-slate-700">Desainer / PIC</label>
+                          <span className="text-[10px] text-slate-400">Opsional</span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Nama anggota desainer"
+                          value={formDesain.designer}
+                          onChange={(e) => setFormDesain({ ...formDesain, designer: e.target.value })}
+                          className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/70 font-medium text-xs sm:text-sm focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition outline-hidden"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Desainer / PIC (Opsional)</label>
-                      <input
-                        type="text"
-                        placeholder="Nama anggota desainer yang mengerjakan"
-                        value={formDesain.designer}
-                        onChange={(e) => setFormDesain({ ...formDesain, designer: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-hidden"
-                      />
-                    </div>
-                  </>
+                  </div>
                 )}
 
                 {modalType === 'mediapartner' && (
-                  <>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Nama Acara / Kegiatan Ormawa</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Misal: Seminar AI BEM FASILKOM"
-                        value={formMP.eventTitle}
-                        onChange={(e) => setFormMP({ ...formMP, eventTitle: e.target.value })}
-                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Lokasi &amp; Tanggal Acara</label>
-                      <input
-                        type="text"
-                        placeholder="Misal: Auditorium UMB • 10 Okt 2026"
-                        value={formMP.location}
-                        onChange={(e) => setFormMP({ ...formMP, location: e.target.value })}
-                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Delegasi Hadir (Kominfo DPM)</label>
-                      <input
-                        type="text"
-                        placeholder="Nama-nama anggota yang bertugas di lokasi"
-                        value={formMP.repsAttended}
-                        onChange={(e) => setFormMP({ ...formMP, repsAttended: e.target.value })}
-                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Catatan Liputan / Bukti Kehadiran</label>
-                      <textarea
-                        rows={3}
-                        placeholder="Uraikan laporan jalannya liputan media di lapangan..."
-                        value={formMP.coverageNote}
-                        onChange={(e) => setFormMP({ ...formMP, coverageNote: e.target.value })}
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Tautan Drive Dokumentasi</label>
-                      <input
-                        type="text"
-                        placeholder="https://drive.google.com/..."
-                        value={formMP.documentationLink}
-                        onChange={(e) => setFormMP({ ...formMP, documentationLink: e.target.value })}
-                        className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20"
-                      />
-                    </div>
-
-                    {/* Section Upload Foto / Video Bukti Kehadiran (Max 10 MB per section) */}
-                    <div className="space-y-2.5 pt-2 border-t border-slate-100">
-                      <div className="flex items-center justify-between">
-                        <label className="font-bold text-slate-800 flex items-center gap-1.5">
-                          <Camera className="w-3.5 h-3.5 text-purple-600" />
-                          <span>Upload Foto atau Video Liputan</span>
-                        </label>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                          Section Max 10 MB
-                        </span>
+                  <div className="space-y-4">
+                    {/* Grup 1: Detail Kegiatan */}
+                    <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                        <Users className="w-3.5 h-3.5 text-purple-600" />
+                        <span>1. Detail Acara &amp; Delegasi</span>
                       </div>
-
-                      {/* Progress Bar Kapasitas Section */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
-                          <span>Total Kapasitas Terpakai:</span>
-                          <span className="font-bold text-slate-700 tabular-nums">
-                            {((formMP.mediaFiles || []).reduce((acc, m) => acc + (m.sizeBytes || 0), 0) / (1024 * 1024)).toFixed(1)} MB / 10.0 MB
-                          </span>
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">Nama Acara / Kegiatan Ormawa</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Misal: Seminar AI BEM FASILKOM"
+                          value={formMP.eventTitle}
+                          onChange={(e) => setFormMP({ ...formMP, eventTitle: e.target.value })}
+                          className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Lokasi &amp; Tanggal Acara</label>
+                          <input
+                            type="text"
+                            placeholder="Misal: Audit UMB • 10 Okt"
+                            value={formMP.location}
+                            onChange={(e) => setFormMP({ ...formMP, location: e.target.value })}
+                            className="w-full min-h-[44px] h-11 px-3 rounded-xl border border-slate-200 bg-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                          />
                         </div>
-                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full transition-all duration-300 rounded-full ${
-                              ((formMP.mediaFiles || []).reduce((acc, m) => acc + (m.sizeBytes || 0), 0) / (1024 * 1024)) > 8
-                                ? 'bg-amber-500'
-                                : 'bg-purple-600'
-                            }`}
-                            style={{
-                              width: `${Math.min(100, (((formMP.mediaFiles || []).reduce((acc, m) => acc + (m.sizeBytes || 0), 0)) / (10 * 1024 * 1024)) * 100)}%`
-                            }}
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Delegasi Hadir (Kominfo DPM)</label>
+                          <input
+                            type="text"
+                            placeholder="Nama-nama anggota hadir"
+                            value={formMP.repsAttended}
+                            onChange={(e) => setFormMP({ ...formMP, repsAttended: e.target.value })}
+                            className="w-full min-h-[44px] h-11 px-3 rounded-xl border border-slate-200 bg-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                           />
                         </div>
                       </div>
+                    </div>
 
-                      {/* Alert Validasi jika ukuran melebihi 10 MB */}
-                      {uploadError && (
-                        <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-[11px] flex items-start gap-2 animate-in fade-in">
-                          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
-                          <span className="font-medium leading-tight">{uploadError}</span>
-                        </div>
-                      )}
-
-                      {/* Upload Dropzone */}
-                      <div 
-                        onClick={() => mediaInputRef.current?.click()}
-                        className="border-2 border-dashed border-purple-200 hover:border-purple-400 bg-purple-50/30 hover:bg-purple-50/60 rounded-2xl p-4 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1.5 group"
-                      >
-                        <input 
-                          ref={mediaInputRef}
-                          type="file" 
-                          accept="image/*,video/*"
-                          multiple
-                          onChange={handleMediaUpload}
-                          className="hidden" 
+                    {/* Grup 2: Bukti Liputan & Media */}
+                    <div className="p-3.5 rounded-2xl bg-purple-50/30 border border-purple-100 space-y-3">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
+                        <Camera className="w-3.5 h-3.5 text-purple-600" />
+                        <span>2. Laporan Liputan &amp; Dokumentasi</span>
+                      </div>
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">Catatan Liputan / Hasil Kehadiran</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Ringkasan jalannya liputan atau catatan penting selama acara berlangsung..."
+                          value={formMP.coverageNote}
+                          onChange={(e) => setFormMP({ ...formMP, coverageNote: e.target.value })}
+                          className="w-full p-3 rounded-xl border border-slate-200 bg-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 resize-none"
                         />
-                        <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition">
-                          <UploadCloud className="w-5 h-5" />
-                        </div>
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-slate-800 text-[11px]">
-                            Klik atau tarik berkas foto / video ke sini
-                          </p>
-                          <p className="text-[10px] text-slate-400">
-                            Format: JPG, PNG, WEBP, MP4, MOV • Maks. 10 MB per section
-                          </p>
-                        </div>
+                      </div>
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">Tautan Drive Dokumentasi Lengkap</label>
+                        <input
+                          type="text"
+                          placeholder="https://drive.google.com/..."
+                          value={formMP.documentationLink}
+                          onChange={(e) => setFormMP({ ...formMP, documentationLink: e.target.value })}
+                          className="w-full min-h-[44px] h-11 px-3.5 rounded-xl border border-slate-200 bg-white font-medium text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        />
                       </div>
 
-                      {/* List Berkas Terunggah */}
-                      {(formMP.mediaFiles && formMP.mediaFiles.length > 0) && (
-                        <div className="space-y-1.5 pt-1">
-                          <p className="text-[11px] font-bold text-slate-700">
-                            Berkas Terunggah ({formMP.mediaFiles.length}):
-                          </p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
-                            {formMP.mediaFiles.map((m) => {
-                              const isVid = m.type === 'video';
-                              return (
-                                <div 
-                                  key={m.id}
-                                  className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs group relative"
-                                >
-                                  <div className="w-12 h-12 rounded-lg bg-slate-900 shrink-0 overflow-hidden relative flex items-center justify-center">
-                                    {isVid ? (
-                                      <>
-                                        <video src={m.url} className="w-full h-full object-cover opacity-80" />
-                                        <Play className="w-3.5 h-3.5 fill-white text-white absolute" />
-                                      </>
-                                    ) : (
-                                      <img src={m.url} alt={m.name} className="w-full h-full object-cover" />
-                                    )}
-                                    <span className={`absolute top-0.5 left-0.5 text-[8px] font-bold px-1 rounded text-white ${isVid ? 'bg-rose-600' : 'bg-purple-600'}`}>
-                                      {isVid ? 'VID' : 'IMG'}
-                                    </span>
-                                  </div>
+                      {/* Upload Foto / Video Bukti Kehadiran */}
+                      <div className="space-y-2 pt-1">
+                        <div className="flex items-center justify-between">
+                          <label className="font-bold text-slate-800 text-xs">
+                            Unggah Foto / Video Liputan
+                          </label>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                            Maks. 10 MB total
+                          </span>
+                        </div>
 
-                                  <div className="flex-1 min-w-0 pr-6">
-                                    <p className="font-bold text-slate-800 truncate text-[11px]">{m.name}</p>
-                                    <p className="text-[10px] text-slate-400 font-medium tabular-nums">{m.sizeStr}</p>
-                                  </div>
-
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveMedia(m.id);
-                                    }}
-                                    className="absolute right-2 top-2 p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                                    title="Hapus berkas"
-                                  >
-                                    <X className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              );
-                            })}
+                        {/* Progress Bar Kapasitas */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                            <span>Kapasitas Terpakai:</span>
+                            <span className="font-bold text-slate-700 tabular-nums">
+                              {((formMP.mediaFiles || []).reduce((acc, m) => acc + (m.sizeBytes || 0), 0) / (1024 * 1024)).toFixed(1)} MB / 10.0 MB
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full transition-all duration-300 rounded-full ${
+                                ((formMP.mediaFiles || []).reduce((acc, m) => acc + (m.sizeBytes || 0), 0) / (1024 * 1024)) > 8
+                                  ? 'bg-amber-500'
+                                  : 'bg-purple-600'
+                              }`}
+                              style={{
+                                width: `${Math.min(100, (((formMP.mediaFiles || []).reduce((acc, m) => acc + (m.sizeBytes || 0), 0)) / (10 * 1024 * 1024)) * 100)}%`
+                              }}
+                            />
                           </div>
                         </div>
-                      )}
+
+                        {uploadError && (
+                          <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-[11px] flex items-start gap-2 animate-in fade-in">
+                            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
+                            <span className="font-medium leading-tight">{uploadError}</span>
+                          </div>
+                        )}
+
+                        {/* Upload Dropzone */}
+                        <div 
+                          onClick={() => mediaInputRef.current?.click()}
+                          className="border-2 border-dashed border-purple-200 hover:border-purple-400 bg-white hover:bg-purple-50/50 rounded-2xl p-3.5 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1 group"
+                        >
+                          <input 
+                            ref={mediaInputRef}
+                            type="file" 
+                            accept="image/*,video/*"
+                            multiple
+                            onChange={handleMediaUpload}
+                            className="hidden" 
+                          />
+                          <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-105 transition">
+                            <UploadCloud className="w-4 h-4" />
+                          </div>
+                          <p className="font-bold text-slate-800 text-[11px]">
+                            Klik untuk unggah foto atau rekaman video
+                          </p>
+                          <p className="text-[10px] text-slate-400">
+                            Mendukung JPG, PNG, WEBP, MP4
+                          </p>
+                        </div>
+
+                        {/* List Berkas Terunggah */}
+                        {(formMP.mediaFiles && formMP.mediaFiles.length > 0) && (
+                          <div className="space-y-1.5 pt-1">
+                            <p className="text-[11px] font-bold text-slate-700">
+                              Berkas Terunggah ({formMP.mediaFiles.length}):
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
+                              {formMP.mediaFiles.map((m) => {
+                                const isVid = m.type === 'video';
+                                return (
+                                  <div 
+                                    key={m.id}
+                                    className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 shadow-2xs group relative"
+                                  >
+                                    <div className="w-10 h-10 rounded-lg bg-slate-900 shrink-0 overflow-hidden relative flex items-center justify-center">
+                                      {isVid ? (
+                                        <>
+                                          <video src={m.url} className="w-full h-full object-cover opacity-80" />
+                                          <Play className="w-3 h-3 fill-white text-white absolute" />
+                                        </>
+                                      ) : (
+                                        <img src={m.url} alt={m.name} className="w-full h-full object-cover" />
+                                      )}
+                                      <span className={`absolute top-0.5 left-0.5 text-[7px] font-bold px-1 rounded text-white ${isVid ? 'bg-rose-600' : 'bg-purple-600'}`}>
+                                        {isVid ? 'VID' : 'IMG'}
+                                      </span>
+                                    </div>
+
+                                    <div className="flex-1 min-w-0 pr-6">
+                                      <p className="font-bold text-slate-800 truncate text-[11px]">{m.name}</p>
+                                      <p className="text-[9px] text-slate-400 font-medium tabular-nums">{m.sizeStr}</p>
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveMedia(m.id);
+                                      }}
+                                      className="absolute right-1.5 top-1.5 p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                                      title="Hapus berkas"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
 
+              {/* Modal Footer */}
               <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 p-4 sm:p-5 border-t border-slate-100 bg-slate-50/70 shrink-0">
                 <button
                   type="button"
@@ -926,7 +1022,8 @@ export default function KomisiKominfoView() {
                   type="submit"
                   className="min-h-[44px] h-11 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold transition-all cursor-pointer shadow-md shadow-purple-500/25 hover:shadow-purple-500/35 active:scale-95 text-xs sm:text-sm flex items-center justify-center gap-2"
                 >
-                  Simpan Data
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Simpan Data</span>
                 </button>
               </div>
             </form>
