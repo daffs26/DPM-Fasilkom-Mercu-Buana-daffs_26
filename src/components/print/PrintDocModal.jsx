@@ -1,5 +1,8 @@
 import React from 'react';
-import { X, Printer } from 'lucide-react';
+import { X, Printer, ShieldAlert } from 'lucide-react';
+import { useStore } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import { canPrintSP } from '@/utils/permissions';
 import { 
   PrintRekapAnggaran, 
   PrintSuratPeringatan, 
@@ -8,15 +11,22 @@ import {
 } from './PrintTemplates';
 
 export default function PrintDocModal({ isOpen, onClose, documentData }) {
-  if (!isOpen || !documentData) return null;
+  const { currentUser } = useStore(useShallow(state => ({
+    currentUser: state.currentUser
+  })));
 
-  const handlePrint = () => {
-    window.print();
-  };
+  if (!isOpen || !documentData) return null;
 
   const isSP = documentData.type === 'sp';
   const isRundown = documentData.type === 'rundown';
   const isRekapAnggaran = documentData.type === 'rekap_anggaran';
+
+  const canPrint = !isSP || canPrintSP(currentUser?.role, currentUser?.ormawaId);
+
+  const handlePrint = () => {
+    if (!canPrint) return;
+    window.print();
+  };
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-xs animate-fadeIn">
@@ -35,13 +45,24 @@ export default function PrintDocModal({ isOpen, onClose, documentData }) {
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer"
-            >
-              <Printer className="w-3.5 h-3.5 text-amber-400" />
-              <span>Cetak / Simpan PDF</span>
-            </button>
+            {canPrint ? (
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5 text-amber-400" />
+                <span>Cetak / Simpan PDF</span>
+              </button>
+            ) : (
+              <div 
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs font-semibold select-none cursor-not-allowed"
+                title="Pencetakan Surat Peringatan (SP) hanya berwenang dilakukan oleh Ketua dan Wakil Ketua DPM"
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span className="hidden sm:inline">Cetak Terkunci (Khusus Ketua / Wakil)</span>
+                <span className="sm:hidden">Terkunci</span>
+              </div>
+            )}
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
@@ -53,6 +74,14 @@ export default function PrintDocModal({ isOpen, onClose, documentData }) {
 
         {/* Printable Document Paper */}
         <div className="p-4 sm:p-8 md:p-12 overflow-y-auto bg-white text-slate-900 font-sans print-page">
+          {isSP && !canPrint && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-2.5 text-amber-800 text-xs no-print">
+              <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>
+                <strong>Mode Pratinjau Terbatas:</strong> Anda dapat meninjau isi surat ini, namun wewenang mencetak fisik/PDF resmi hanya dimiliki oleh <strong>Ketua</strong> dan <strong>Wakil Ketua DPM FASILKOM</strong>.
+              </span>
+            </div>
+          )}
           {/* Official Kop Surat DPM FASILKOM UMB */}
           <div className="flex items-center justify-between pb-3 sm:pb-4 border-b-2 sm:border-b-4 border-double border-slate-900 gap-2 sm:gap-4">
             <div className="w-14 h-14 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center">

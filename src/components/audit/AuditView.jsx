@@ -12,15 +12,10 @@ import {
   ChevronUp, 
   Printer,
   Search,
-  CheckCircle2,
-  AlertCircle,
-  FileEdit,
-  ShieldCheck,
-  TrendingUp,
-  BarChart3
+  ShieldCheck
 } from 'lucide-react';
-import DropdownSelect from '@/components/ui/dropdown-select';
 import { formatDateIndo, formatRupiah } from '@/utils/formatters';
+import { canAuditProker } from '@/utils/permissions';
 
 const AUDIT_PARAMETERS = [
   { no: '01', title: 'Kedisiplinan Rundown', bobot: '20 Poin', pct: '20%', desc: 'Ketepatan waktu dan alur rundown sesi di lapangan.', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
@@ -234,7 +229,7 @@ const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, proke
           return (
             <div 
               key={o.id}
-              className={`p-6 rounded-3xl border flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+              className={`p-4 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl border flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
                 hasOverdue 
                   ? 'border-rose-200/90 bg-white hover:border-rose-300' 
                   : 'border-slate-200/80 bg-white hover:border-slate-300 shadow-2xs'
@@ -242,15 +237,15 @@ const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, proke
             >
               <div>
                 {/* Centered Circular Logo Avatar (Fitur Mail & Star dihapus) */}
-                <div className="flex justify-center mb-4">
-                  <div className="w-18 h-18 sm:w-20 sm:h-20 p-3 rounded-full bg-slate-50 border border-slate-200/80 shadow-xs flex items-center justify-center shrink-0">
+                <div className="flex justify-center mb-3 sm:mb-4">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 p-2.5 sm:p-3 rounded-full bg-slate-50 border border-slate-200/80 shadow-xs flex items-center justify-center shrink-0">
                     <img src={o.logo} alt={ormawaName} className="w-full h-full object-contain" />
                   </div>
                 </div>
 
                 {/* Identity: Centered Name, Instagram Handle, Lingkup & Nama Ketua */}
                 <div className="text-center space-y-1">
-                  <h4 className="font-bold text-slate-900 text-base tracking-tight truncate leading-snug" title={ormawaName}>
+                  <h4 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight truncate leading-snug" title={ormawaName}>
                     {ormawaName}
                   </h4>
                   <a 
@@ -275,28 +270,28 @@ const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, proke
                 </div>
 
                 {/* 3-Kolom Statistik Ringkas (Bahasa Indonesia) */}
-                <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 text-center">
+                <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-slate-100 grid grid-cols-3 text-center">
                   <div>
-                    <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                    <span className="text-sm sm:text-lg font-bold text-slate-900 block leading-tight">
                       {oProkers.length}
                     </span>
-                    <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-1 block">
                       Total Proker
                     </span>
                   </div>
                   <div>
-                    <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                    <span className="text-sm sm:text-lg font-bold text-slate-900 block leading-tight">
                       {auditedProkers.length}
                     </span>
-                    <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-1 block">
                       Diaudit
                     </span>
                   </div>
                   <div>
-                    <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
+                    <span className="text-sm sm:text-lg font-bold text-slate-900 block leading-tight">
                       {complianceRate}%
                     </span>
-                    <span className="text-[11px] text-slate-400 font-medium mt-1 block">
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-1 block">
                       Kepatuhan
                     </span>
                   </div>
@@ -312,10 +307,10 @@ const AuditOrmawaReport = React.memo(function AuditOrmawaReport({ ormawas, proke
 
 function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
   const currentUser = useStore(state => state.currentUser);
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = currentUser?.role === 'guest' || currentUser?.role === 'civitas';
+  const canAudit = canAuditProker(currentUser?.role);
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'pending', 'audited'
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedParam, setSelectedParam] = useState('all');
   const [collapsedCards, setCollapsedCards] = useState({});
 
   const toggleCardCollapse = (id) => {
@@ -346,7 +341,7 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
   const auditedCount = prokers.filter(p => p.lpj?.auditDetails).length;
 
   return (
-    <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-soft w-full max-w-full overflow-hidden space-y-4">
+    <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-soft w-full max-w-full overflow-hidden space-y-4">
       {/* Top Header & Search/Filter Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div>
@@ -361,11 +356,11 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
         {/* Action Controls: Search & Filter Tabs */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {/* Status Tabs */}
-          <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/70 text-xs">
+          <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/70 text-xs overflow-x-auto hide-scrollbar w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setFilterStatus('all')}
-              className={`px-3 py-1 rounded-lg font-bold text-xs transition cursor-pointer ${
+              className={`flex-1 sm:flex-initial min-h-[36px] px-3 py-1.5 rounded-lg font-bold text-xs transition cursor-pointer text-center ${
                 filterStatus === 'all'
                   ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -376,7 +371,7 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
             <button
               type="button"
               onClick={() => setFilterStatus('pending')}
-              className={`px-3 py-1 rounded-lg font-bold text-xs transition cursor-pointer ${
+              className={`flex-1 sm:flex-initial min-h-[36px] px-3 py-1.5 rounded-lg font-bold text-xs transition cursor-pointer text-center ${
                 filterStatus === 'pending'
                   ? 'bg-blue-600 text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -387,7 +382,7 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
             <button
               type="button"
               onClick={() => setFilterStatus('audited')}
-              className={`px-3 py-1 rounded-lg font-bold text-xs transition cursor-pointer ${
+              className={`flex-1 sm:flex-initial min-h-[36px] px-3 py-1.5 rounded-lg font-bold text-xs transition cursor-pointer text-center ${
                 filterStatus === 'audited'
                   ? 'bg-emerald-600 text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -399,13 +394,13 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
 
           {/* Search Box */}
           <div className="relative min-w-[200px]">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Cari proker atau ormawa..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200/80 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
+              className="w-full min-h-[44px] sm:min-h-[38px] h-11 sm:h-9.5 bg-slate-50 border border-slate-200/80 rounded-xl pl-9 pr-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs"
             />
           </div>
         </div>
@@ -431,7 +426,7 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
               return (
                 <div
                   key={`mob-audit-${p.id}`}
-                  className="p-3.5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs space-y-3 w-full max-w-full overflow-hidden"
+                  className="p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 bg-white shadow-2xs space-y-3 w-full max-w-full overflow-hidden"
                 >
                   <div 
                     onClick={() => toggleCardCollapse(p.id)}
@@ -448,7 +443,7 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
                     </div>
                     <button
                       type="button"
-                      className="p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/60 shrink-0 transition"
+                      className="p-1.5 min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/60 shrink-0 transition"
                       title={isCollapsed ? 'Buka Detail Parameter' : 'Tutup Detail Parameter'}
                     >
                       {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
@@ -473,22 +468,24 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
                       </div>
 
                       <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
-                        {isGuest ? (
+                        {!canAudit ? (
                           audit ? (
                             <button
+                              type="button"
                               onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
-                              className="flex-1 min-h-[36px] py-1.5 px-3 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center justify-center gap-1.5 transition cursor-pointer"
+                              className="flex-1 min-h-[42px] h-11 py-2 px-3 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs inline-flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95"
                             >
                               <Printer className="w-3.5 h-3.5 text-amber-500" /> Cetak Berita Acara
                             </button>
                           ) : (
-                            <span className="text-[11px] text-slate-400 italic py-1">Belum Ada Berita Acara</span>
+                            <span className="text-[11px] text-slate-400 italic py-2">Belum Ada Berita Acara</span>
                           )
                         ) : (
                           <>
                             <button
+                              type="button"
                               onClick={() => onAuditLPJ(p)}
-                              className={`flex-1 min-h-[36px] py-1.5 px-3 rounded-xl font-bold text-xs shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                              className={`flex-1 min-h-[42px] h-11 py-2 px-3 rounded-xl font-bold text-xs shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 ${
                                 audit
                                   ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200'
                                   : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -499,11 +496,12 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
                             </button>
                             {audit && (
                               <button
+                                type="button"
                                 onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
-                                className="min-h-[36px] min-w-[36px] p-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition flex items-center justify-center shrink-0 cursor-pointer"
+                                className="min-h-[42px] min-w-[42px] h-11 w-11 p-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
                                 title="Cetak Berita Acara Audit"
                               >
-                                <Printer className="w-3.5 h-3.5 text-amber-500" />
+                                <Printer className="w-4 h-4 text-amber-500" />
                               </button>
                             )}
                           </>
@@ -585,7 +583,7 @@ function AuditProkerTable({ prokers, ormawas, onAuditLPJ, onPrintDoc }) {
                     </td>
 
                     <td className="py-3.5 text-right whitespace-nowrap">
-                      {isGuest ? (
+                      {!canAudit ? (
                         audit ? (
                           <button
                             onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
@@ -653,7 +651,6 @@ export default function AuditView({ onAuditLPJ, onPrintDoc }) {
     ? Math.round(auditedList.reduce((acc, p) => acc + p.lpj.auditScore, 0) / auditedList.length)
     : 0;
   const passedCount = auditedList.filter(p => p.lpj.auditScore >= 70).length;
-  const evalCount = auditedList.filter(p => p.lpj.auditScore < 70).length;
 
   return (
     <div className="space-y-5">

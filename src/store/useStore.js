@@ -6,8 +6,7 @@ import {
   INITIAL_SP, 
   INITIAL_ACTIVITY_LOGS, 
   INITIAL_BUDGET_TRANSACTIONS,
-  INITIAL_USERS,
-  INITIAL_PENDING_USERS
+  INITIAL_USERS
 } from '../data/initialData';
 import { INITIAL_TEMPLATES } from '../data/templatesData';
 import {
@@ -31,13 +30,12 @@ export const useStore = create(
       templates: INITIAL_TEMPLATES,
       budgetTransactions: INITIAL_BUDGET_TRANSACTIONS,
       
-      // Approval & Workflow State
+      // Workflow State
       deletionRequests: [], // { id, prokerId, prokerTitle, ormawaId, requesterName, reasonCategory, reasonDetails, date, status: 'pending'|'approved'|'rejected', reviewNote }
       notifications: [], // { id, title, message, time, date, type, targetOrmawaId, isRead, linkTab, linkId }
       
-      // Auth State
+      // Auth State (DPM Komisi & Civitas)
       users: INITIAL_USERS,
-      pendingAccounts: INITIAL_PENDING_USERS,
       currentUser: null, // null means not logged in
       
       // UI State
@@ -47,37 +45,52 @@ export const useStore = create(
 
       // Setters
       setActiveTab: (tab) => set({ activeTab: tab }),
-      setSelectedOrmawaFilter: (filter) => {
-        const user = get().currentUser;
-        if (user && user.ormawaId !== 'dpm') {
-          set({ selectedOrmawaFilter: user.ormawaId });
-        } else {
-          set({ selectedOrmawaFilter: filter });
-        }
-      },
+      setSelectedOrmawaFilter: (filter) => set({ selectedOrmawaFilter: filter }),
       setSearchQuery: (query) => set({ searchQuery: query }),
 
       // Auth Methods
       login: async (identifier, password) => {
         if (isSupabaseConfigured) {
-          const res = await authService.login(identifier, password);
-          if (res.success) {
-            const profile = res.profile;
-            const mappedUser = {
-              id: profile.id,
-              name: profile.name,
-              username: profile.username,
-              nim: profile.nim,
-              role: profile.role,
-              ormawaId: profile.ormawa_id,
-              status: profile.status,
-              isGuest: false,
+          try {
+            const res = await authService.login(identifier, password);
+            if (res.success) {
+              const profile = res.profile;
+              const mappedUser = {
+                id: profile.id,
+                name: profile.name,
+                username: profile.username,
+                nim: profile.nim,
+                role: profile.role,
+                ormawaId: profile.ormawa_id || 'dpm',
+                status: profile.status,
+                isViewer: profile.role === 'civitas',
+                lastLogin: profile.last_login || '27 September 2026'
+              };
+              set({ currentUser: mappedUser, selectedOrmawaFilter: 'all' });
+              return { success: true };
+            }
+          } catch (e) {
+            console.warn('[useStore] Supabase login error:', e);
+          }
+
+          // Fallback lokal jika Supabase mengembalikan error / schema issue
+          const clean = (identifier || '').trim().toLowerCase();
+          const localUser = get().users.find(u => 
+            (u.username.toLowerCase() === clean || (u.nim && u.nim.trim() === identifier.trim())) && 
+            u.password === password && 
+            u.status === 'approved'
+          );
+          if (localUser) {
+            console.info('[useStore] Berhasil masuk menggunakan fallback akun lokal:', clean);
+            const userWithLogin = {
+              ...localUser,
+              lastLogin: localUser.lastLogin || '27 September 2026'
             };
-            const initialFilter = mappedUser.ormawaId === 'dpm' ? 'all' : mappedUser.ormawaId;
-            set({ currentUser: mappedUser, selectedOrmawaFilter: initialFilter });
+            set({ currentUser: userWithLogin, selectedOrmawaFilter: 'all' });
             return { success: true };
           }
-          return { success: false, message: res.message };
+
+          return { success: false, message: 'Username/NIM atau kata sandi tidak sesuai.' };
         }
 
         // Fallback lokal jika Supabase belum terkonfigurasi
@@ -88,14 +101,17 @@ export const useStore = create(
           u.status === 'approved'
         );
         if (user) {
-          const initialFilter = user.ormawaId === 'dpm' ? 'all' : user.ormawaId;
-          set({ currentUser: user, selectedOrmawaFilter: initialFilter });
+          const userWithLogin = {
+            ...user,
+            lastLogin: user.lastLogin || '27 September 2026'
+          };
+          set({ currentUser: userWithLogin, selectedOrmawaFilter: 'all' });
           return { success: true };
         }
-        return { success: false, message: 'Username/NIM atau kata sandi salah, atau akun belum disetujui DPM.' };
+        return { success: false, message: 'Username/NIM atau kata sandi tidak sesuai.' };
       },
 
-      // Direct Login khusus akun demo (akan dihapus saat integrasi backend)
+      // Direct Login khusus akun komisi DPM
       directLogin: (identifier) => {
         const clean = (identifier || '').trim().toLowerCase();
         const user = get().users.find(u => 
@@ -103,25 +119,34 @@ export const useStore = create(
           u.status === 'approved'
         );
         if (user) {
-          const initialFilter = user.ormawaId === 'dpm' ? 'all' : user.ormawaId;
-          set({ currentUser: user, selectedOrmawaFilter: initialFilter });
+          const userWithLogin = {
+            ...user,
+            lastLogin: user.lastLogin || '27 September 2026'
+          };
+          set({ currentUser: userWithLogin, selectedOrmawaFilter: 'all' });
           return { success: true };
         }
-        return { success: false, message: `Akun demo ${identifier} tidak ditemukan.` };
+        return { success: false, message: `Akun komisi ${identifier} tidak ditemukan.` };
       },
 
-      // Akses Tamu Publik (Mode Transparansi Ormawa)
-      loginAsGuest: () => {
-        const guestUser = {
-          id: 'guest-public',
-          name: 'Tamu / Mahasiswa Umum',
-          username: 'tamu_publik',
-          role: 'guest',
-          ormawaId: 'dpm', // agar dapat melihat seluruh data ormawa secara transparan
-          isGuest: true
+      // Akses Civitas Akademik / Umum (Mode Transparansi & Pelihat Publik)
+      loginAsCivitas: () => {
+        const civitasUser = {
+          id: 'civitas-public',
+          name: 'Civitas Akademik UMB',
+          username: 'civitas_umb',
+          role: 'civitas',
+          ormawaId: 'dpm',
+          isViewer: true,
+          lastLogin: '07 Oktober 2026'
         };
-        set({ currentUser: guestUser, selectedOrmawaFilter: 'all', activeTab: 'dashboard' });
+        set({ currentUser: civitasUser, selectedOrmawaFilter: 'all', activeTab: 'dashboard' });
         return { success: true };
+      },
+
+      // Kompatibilitas alias untuk loginAsGuest
+      loginAsGuest: () => {
+        return get().loginAsCivitas();
       },
 
       logout: async () => {
@@ -164,166 +189,73 @@ export const useStore = create(
         return { success: true, message: 'Password berhasil diperbarui!' };
       },
 
-      resetPasswordWithTicket: async ({ nim, ticketNumber, newPassword }) => {
+      // Registrasi Pengurus DPM Resmi
+      register: async (name, nim, role, username, password, securityToken = null) => {
+        const ormawaId = 'dpm';
         if (isSupabaseConfigured) {
-          return await authService.resetPasswordWithTicket({ nim, ticketNumber, newPassword });
-        }
-
-        // Local fallback
-        const cleanNim = (nim || '').trim().toLowerCase();
-        const cleanTicket = (ticketNumber || '').trim().toUpperCase();
-
-        const user = get().users.find(u => 
-          (u.nim && u.nim.trim().toLowerCase() === cleanNim) && 
-          ((u.ticketNumber && u.ticketNumber.toUpperCase() === cleanTicket) || cleanTicket === 'REG-DEMO')
-        );
-
-        if (!user) {
-          return { success: false, message: 'Kombinasi NIM dan Nomor Tiket tidak ditemukan atau tidak cocok.' };
-        }
-
-        if (!newPassword || newPassword.length < 6) {
-          return { success: false, message: 'Kata sandi baru minimal 6 karakter demi keamanan akun.' };
-        }
-
-        set((state) => ({
-          users: state.users.map(u => u.id === user.id ? { ...u, password: newPassword } : u)
-        }));
-
-        return { success: true, message: 'Kata sandi berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.' };
-      },
-
-      register: async (name, nim, ormawaId, role, username, password, securityToken = null, ticketNumber = null) => {
-        if (isSupabaseConfigured) {
-          const res = await authService.register({ name, nim, ormawaId, role, username, password, securityToken, ticketNumber });
+          const res = await authService.register({ name, nim, ormawaId, role, username, password, securityToken });
           if (!res.success) {
             return { success: false, message: res.message };
           }
           return {
             success: true,
-            ticketNumber: res.ticketNumber || ticketNumber,
             status: res.status,
             data: res,
             message: res.message,
           };
         }
 
-        // Fallback lokal jika Supabase belum terkonfigurasi
-        const exists = get().users.find(u => u.username.toLowerCase() === username.toLowerCase()) || 
-                       get().pendingAccounts.find(u => u.username.toLowerCase() === username.toLowerCase());
+        // Fallback lokal
+        const cleanUser = (username || '').toLowerCase().trim();
+        const exists = get().users.find(u => u.username.toLowerCase() === cleanUser);
         if (exists) {
           return { success: false, message: 'Username sudah digunakan oleh akun lain.' };
         }
 
-        const nimExists = get().users.find(u => u.nim === nim) || 
-                          get().pendingAccounts.find(u => u.nim === nim);
+        const cleanNim = (nim || '').trim();
+        const nimExists = get().users.find(u => u.nim === cleanNim);
         if (nimExists) {
           return { success: false, message: 'NIM ini sudah terdaftar pada akun lain. 1 NIM hanya dapat digunakan untuk 1 akun pengurus.' };
         }
-        
-        const activeTicket = ticketNumber ? ticketNumber.trim() : `REG-${ormawaId.toUpperCase()}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
         const validDpmToken = (import.meta.env.VITE_DPM_SECURITY_TOKEN || 'DPM-FASILKOM-2026').trim();
-        const isApprovedDpm = ormawaId === 'dpm' && securityToken?.trim() === validDpmToken;
-        const initStatus = isApprovedDpm ? 'approved' : 'pending';
+        if (securityToken?.trim() !== validDpmToken) {
+          return { success: false, message: 'Kode Otorisasi Keamanan DPM tidak valid. Hubungi Pimpinan Parlemen DPM.' };
+        }
 
         const newAccount = {
           id: `user-${Date.now()}`,
-          name,
-          nim,
-          ormawaId,
+          name: name.trim(),
+          nim: cleanNim,
+          ormawaId: 'dpm',
           role,
-          username,
+          username: cleanUser,
           password,
-          status: initStatus,
-          ticketNumber: activeTicket,
+          status: 'approved',
         };
-        
+
         const newNotif = {
           id: `notif-${Date.now()}`,
-          title: isApprovedDpm ? 'Akun DPM Baru Terdaftar' : 'Registrasi Akun Baru Menunggu ACC',
-          message: `${name} (${role.toUpperCase()} ${ormawaId.toUpperCase()}) telah mendaftar${isApprovedDpm ? ' dan langsung aktif.' : ' dan menunggu validasi DPM.'}`,
+          title: 'Akun Pengurus DPM Terdaftar',
+          message: `${name} resmi terdaftar sebagai ${role.toUpperCase()} DPM FASILKOM.`,
           time: 'Baru saja',
           date: get().getFormattedDate(),
-          type: isApprovedDpm ? 'account_approved' : 'account_pending',
+          type: 'account_approved',
           targetOrmawaId: 'dpm',
           isRead: false,
           linkTab: 'dashboard'
         };
 
-        if (isApprovedDpm) {
-          set((state) => ({
-            users: [...state.users, newAccount],
-            notifications: [newNotif, ...state.notifications]
-          }));
-        } else {
-          set((state) => ({
-            pendingAccounts: [newAccount, ...state.pendingAccounts],
-            notifications: [newNotif, ...state.notifications]
-          }));
-        }
-        
+        set((state) => ({
+          users: [...state.users, newAccount],
+          notifications: [newNotif, ...state.notifications]
+        }));
+
         return { 
           success: true, 
-          ticketNumber: activeTicket,
-          status: initStatus,
-          message: isApprovedDpm ? 'Pendaftaran berhasil dan akun aktif.' : 'Pendaftaran berhasil dan menunggu validasi DPM.'
+          status: 'approved',
+          message: 'Pendaftaran pengurus DPM berhasil. Akun Anda langsung aktif.' 
         };
-      },
-
-      fetchPendingAccounts: async () => {
-        if (isSupabaseConfigured) {
-          try {
-            const accounts = await authService.getPendingAccounts();
-            set({ pendingAccounts: accounts });
-            return accounts;
-          } catch (e) {
-            console.error('[useStore] fetchPendingAccounts error:', e);
-          }
-        }
-        return get().pendingAccounts;
-      },
-
-      approveAccount: async (userId) => {
-        if (isSupabaseConfigured) {
-          const currentUserId = get().currentUser?.id;
-          await authService.approveAccount(userId, currentUserId);
-        }
-
-        set((state) => {
-          const account = state.pendingAccounts.find(a => a.id === userId);
-          if (!account) return state;
-          
-          const approvedNotif = {
-            id: `notif-${Date.now()}`,
-            title: 'Akun Anda Telah Disetujui DPM',
-            message: `Akun ${account.name} resmi disetujui. Anda kini memiliki akses penuh sebagai pengurus ${(account.ormawa_id || account.ormawaId || 'ORMAWA').toUpperCase()}.`,
-            time: 'Baru saja',
-            date: get().getFormattedDate(),
-            type: 'account_approved',
-            targetOrmawaId: account.ormawa_id || account.ormawaId,
-            isRead: false,
-            linkTab: 'dashboard'
-          };
-
-          return {
-            pendingAccounts: state.pendingAccounts.filter(a => a.id !== userId),
-            users: [...state.users, { ...account, status: 'approved' }],
-            notifications: [approvedNotif, ...state.notifications]
-          };
-        });
-        return { success: true };
-      },
-
-      rejectAccount: async (userId, reason = null) => {
-        if (isSupabaseConfigured) {
-          const currentUserId = get().currentUser?.id;
-          await authService.rejectAccount(userId, currentUserId, reason);
-        }
-
-        set((state) => ({
-          pendingAccounts: state.pendingAccounts.filter(a => a.id !== userId)
-        }));
-        return { success: true };
       },
 
       // Helper: Format tanggal lokal
@@ -1124,6 +1056,14 @@ export const useStore = create(
         const count = get().suratPeringatan.length + 1;
         const noSurat = `0${count}/SP-${spPayload.level}/DPM-FASILKOM/UMB/${currentMonth}/${currentYear}`;
 
+        const currentUser = get().currentUser;
+        const isWakil = currentUser?.role === 'wakil';
+        const signerName = currentUser?.name || (isWakil ? 'Ahmad Raihan' : 'Muhammad Daffa Aulia Syahrul');
+        const signerRole = isWakil 
+          ? 'Wakil Ketua DPM FASILKOM Universitas Mercu Buana' 
+          : 'Ketua DPM FASILKOM Universitas Mercu Buana';
+        const roleLabel = isWakil ? 'Wakil Ketua DPM' : 'Ketua DPM';
+
         const spItem = {
           id: `sp-${Date.now()}`,
           noSurat,
@@ -1135,8 +1075,8 @@ export const useStore = create(
           prokerId: spPayload.prokerId,
           prokerTitle: spPayload.prokerTitle,
           date: todayStr,
-          signer: 'Muhammad Daffa Aulia Syahrul',
-          signerRole: 'Ketua DPM FASILKOM Universitas Mercu Buana',
+          signer: signerName,
+          signerRole: signerRole,
           status: 'active', // 'active' | 'clarification_submitted' | 'resolved'
           clarification: null,
           resolveNote: null,
@@ -1148,8 +1088,8 @@ export const useStore = create(
           ormawaId: spPayload.ormawaId,
           type: 'sp_issued',
           title: `Penerbitan ${spItem.title}`,
-          description: `Ketua DPM menerbitkan ${spItem.title} dengan No: ${noSurat}. Alasan: ${spPayload.reason}`,
-          actor: (get().currentUser?.name || 'Sistem'),
+          description: `${roleLabel} menerbitkan ${spItem.title} dengan No: ${noSurat}. Alasan: ${spPayload.reason}`,
+          actor: (currentUser?.name || roleLabel),
           formattedDate: get().getFormattedDate()
         });
 
@@ -1186,106 +1126,6 @@ export const useStore = create(
             resolvedDate: todayStr
           } : s)
         }));
-      },
-
-      // SUBMIT KLARIFIKASI / TANGGAPAN SP OLEH ORMAWA
-      submitSPClarification: (spId, clarificationData) => {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const sp = get().suratPeringatan.find(s => s.id === spId);
-        if (!sp) return { success: false, message: 'SP tidak ditemukan' };
-
-        const clarificationObj = {
-          text: clarificationData.text || '',
-          fileName: clarificationData.fileName || 'Surat_Tanggapan_SP.pdf',
-          fileSize: clarificationData.fileSize || '1.5 MB',
-          targetDate: clarificationData.targetDate || '',
-          date: todayStr,
-          submittedBy: get().currentUser?.name || 'Pengurus Ormawa'
-        };
-
-        const newLog = createLogEntry({
-          ormawaId: sp.ormawaId,
-          type: 'sp_clarification_submitted',
-          title: `Tanggapan SP Diajukan: ${sp.title}`,
-          description: `${sp.ormawaName} mengajukan klarifikasi & tanggapan atas ${sp.title}. Catatan: "${clarificationObj.text}". Komitmen penyelesaian: ${clarificationObj.targetDate || '-'}.`,
-          actor: clarificationObj.submittedBy,
-          formattedDate: get().getFormattedDate()
-        });
-
-        const dpmNotif = {
-          id: `notif-${Date.now()}`,
-          title: `Tanggapan SP Masuk: ${sp.ormawaName}`,
-          message: `${sp.ormawaName} mengajukan surat tanggapan/klarifikasi atas ${sp.title}. Menunggu evaluasi DPM.`,
-          time: 'Baru saja',
-          date: get().getFormattedDate(),
-          type: 'sp_clarification',
-          targetOrmawaId: 'dpm',
-          isRead: false,
-          linkTab: 'sp',
-          linkId: sp.id
-        };
-
-        set((state) => ({
-          suratPeringatan: state.suratPeringatan.map(s => s.id === spId ? {
-            ...s,
-            status: 'clarification_submitted',
-            clarification: clarificationObj
-          } : s),
-          activityLogs: [newLog, ...state.activityLogs],
-          notifications: [dpmNotif, ...state.notifications]
-        }));
-
-        return { success: true };
-      },
-
-      // REVIEW KLARIFIKASI SP OLEH DPM
-      reviewSPClarification: (spId, { decision, reviewNotes }) => {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const sp = get().suratPeringatan.find(s => s.id === spId);
-        if (!sp) return { success: false, message: 'SP tidak ditemukan' };
-
-        const reviewerName = get().currentUser?.name || 'Ketua DPM';
-        const isAccepted = decision === 'approved';
-
-        const newLog = createLogEntry({
-          ormawaId: sp.ormawaId,
-          type: isAccepted ? 'sp_resolved' : 'sp_clarification_rejected',
-          title: isAccepted ? `SP Diselesaikan (Resolved): ${sp.title}` : `Tanggapan SP Ditolak DPM: ${sp.title}`,
-          description: isAccepted 
-            ? `DPM menerima klarifikasi dari ${sp.ormawaName}. SP No: ${sp.noSurat} resmi ditandai Terselesaikan. Catatan: "${reviewNotes || 'Sanksi dicabut dan evaluasi diterima.'}"`
-            : `DPM menolak klarifikasi dari ${sp.ormawaName}. Alasan: "${reviewNotes}". Status SP tetap Aktif.`,
-          actor: reviewerName,
-          formattedDate: get().getFormattedDate()
-        });
-
-        const ormawaNotif = {
-          id: `notif-${Date.now()}`,
-          title: isAccepted ? `Klarifikasi SP Diterima DPM (Resolved)` : `Tanggapan SP Belum Diterima DPM`,
-          message: isAccepted 
-            ? `DPM telah menerima klarifikasi atas ${sp.title}. Status sanksi administratif telah diselesaikan.`
-            : `DPM belum menerima tanggapan atas ${sp.title}. Catatan evaluasi: "${reviewNotes}". SP tetap berlaku aktif.`,
-          time: 'Baru saja',
-          date: get().getFormattedDate(),
-          type: isAccepted ? 'sp_resolved' : 'sp_rejected',
-          targetOrmawaId: sp.ormawaId,
-          isRead: false,
-          linkTab: 'sp',
-          linkId: sp.id
-        };
-
-        set((state) => ({
-          suratPeringatan: state.suratPeringatan.map(s => s.id === spId ? {
-            ...s,
-            status: isAccepted ? 'resolved' : 'active',
-            resolveNote: isAccepted ? reviewNotes : s.resolveNote,
-            clarificationRejectNote: !isAccepted ? reviewNotes : null,
-            resolvedDate: isAccepted ? todayStr : s.resolvedDate
-          } : s),
-          activityLogs: [newLog, ...state.activityLogs],
-          notifications: [ormawaNotif, ...state.notifications]
-        }));
-
-        return { success: true };
       },
 
       // 9. BANK TEMPLATE DOKUMEN
@@ -1579,7 +1419,6 @@ export const useStore = create(
           deletionRequests: [],
           notifications: [],
           users: INITIAL_USERS,
-          pendingAccounts: INITIAL_PENDING_USERS,
           lastReadHistoryCount: 0,
           hasSeenTemplateTab: false
         });
@@ -1616,7 +1455,6 @@ export const useStore = create(
         deletionRequests: state.deletionRequests,
         notifications: state.notifications,
         users: state.users,
-        pendingAccounts: state.pendingAccounts,
         lastReadHistoryCount: state.lastReadHistoryCount,
         hasSeenTemplateTab: state.hasSeenTemplateTab
       }),
@@ -1624,15 +1462,7 @@ export const useStore = create(
         ...currentState,
         ...persistedState,
         currentUser: null,
-        users: (persistedState && Array.isArray(persistedState.users) && persistedState.users.length > 0)
-          ? [
-              ...persistedState.users.filter(u => !(u.ormawaId === 'dpm' && u.role === 'wakil')),
-              ...currentState.users.filter(u => !persistedState.users.some(pu => pu.username === u.username))
-            ]
-          : currentState.users,
-        pendingAccounts: (persistedState && Array.isArray(persistedState.pendingAccounts))
-          ? persistedState.pendingAccounts.filter(u => !(u.ormawaId === 'dpm' && u.role === 'wakil'))
-          : currentState.pendingAccounts,
+        users: currentState.users,
         deletionRequests: (persistedState && Array.isArray(persistedState.deletionRequests))
           ? persistedState.deletionRequests
           : currentState.deletionRequests,

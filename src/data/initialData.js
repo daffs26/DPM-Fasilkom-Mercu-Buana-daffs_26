@@ -110,43 +110,100 @@ export const INITIAL_USERS = [
   {
     id: 'user-dpm-ketua',
     name: 'Muhammad Daffa Aulia Syahrul',
+    nim: '41822010001',
+    ormawaId: 'dpm',
+    role: 'ketua',
+    username: 'ketua',
+    password: '123',
+    status: 'approved',
+    lastLogin: '27 September 2026'
+  },
+  {
+    id: 'user-dpm-admin',
+    name: 'Muhammad Daffa Aulia Syahrul (Admin)',
     nim: '41822010000',
     ormawaId: 'dpm',
-    role: 'ketua', // ketua, wakil, sekre, bendahara
+    role: 'ketua',
     username: 'admin',
-    password: '123', // Demo purpose
-    status: 'approved'
-  },
-  {
-    id: 'user-bem-ketua',
-    name: 'Rafi Pratama',
-    nim: '41822010001',
-    ormawaId: 'bem',
-    role: 'ketua',
-    username: 'bem',
     password: '123',
-    status: 'approved'
+    status: 'approved',
+    lastLogin: '27 September 2026'
   },
   {
-    id: 'user-himti-ketua',
-    name: 'Aldi Renaldi',
-    nim: '41522010002',
-    ormawaId: 'himti',
-    role: 'ketua',
-    username: 'himti',
+    id: 'user-dpm-wakil',
+    name: 'Ahmad Raihan',
+    nim: '41822010002',
+    ormawaId: 'dpm',
+    role: 'wakil',
+    username: 'wakil',
     password: '123',
-    status: 'approved'
+    status: 'approved',
+    lastLogin: '28 September 2026'
   },
   {
-    id: 'user-himsisfo-ketua',
-    name: 'Fadlan Maulana',
+    id: 'user-dpm-sekretaris',
+    name: 'Nabila Azzahra',
     nim: '41822010003',
-    ormawaId: 'himsisfo',
-    role: 'ketua',
-    username: 'himsisfo',
+    ormawaId: 'dpm',
+    role: 'sekretaris',
+    username: 'sekretaris',
     password: '123',
-    status: 'approved'
+    status: 'approved',
+    lastLogin: '01 Oktober 2026'
+  },
+  {
+    id: 'user-dpm-bendahara',
+    name: 'Siti Nurhaliza',
+    nim: '41822010004',
+    ormawaId: 'dpm',
+    role: 'bendahara',
+    username: 'bendahara',
+    password: '123',
+    status: 'approved',
+    lastLogin: '05 Oktober 2026'
+  },
+  {
+    id: 'user-dpm-pengawasan',
+    name: 'Bintang Perkasa',
+    nim: '41822010005',
+    ormawaId: 'dpm',
+    role: 'komisi_pengawasan',
+    username: 'pengawasan',
+    password: '123',
+    status: 'approved',
+    lastLogin: '03 Oktober 2026'
+  },
+  {
+    id: 'user-dpm-keuangan',
+    name: 'Fikri Haikal',
+    nim: '41822010006',
+    ormawaId: 'dpm',
+    role: 'komisi_keuangan',
+    username: 'keuangan',
+    password: '123',
+    status: 'approved',
+    lastLogin: '04 Oktober 2026'
+  },
+  {
+    id: 'user-dpm-kominfo',
+    name: 'Salma Putri',
+    nim: '41822010007',
+    ormawaId: 'dpm',
+    role: 'komisi_kominfo',
+    username: 'kominfo',
+    password: '123',
+    status: 'approved',
+    lastLogin: '06 Oktober 2026'
+  },
+  {
+    id: 'user-dpm-advokasi',
+    name: 'Dimas Wicaksono',
+    nim: '41822010008',
+    ormawaId: 'dpm',
+    role: 'komisi_advokasi',
+    username: 'advokasi',
+    password: '123',
+    status: 'approved',
+    lastLogin: '02 Oktober 2026'
   }
 ];
-
-export const INITIAL_PENDING_USERS = [];

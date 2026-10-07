@@ -136,7 +136,7 @@ export function PrintSuratPeringatan({ documentData }) {
             {documentData.signer || 'Muhammad Daffa Aulia Syahrul'}
           </p>
           <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">
-            Ketua DPM FASILKOM UMB
+            {documentData.signerRole || 'Ketua DPM FASILKOM UMB'}
           </p>
         </div>
       </div>

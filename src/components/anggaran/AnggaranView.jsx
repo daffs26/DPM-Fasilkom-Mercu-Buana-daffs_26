@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dialog';
 import { exportFinancialWorkbook, exportFormattedCSV } from '@/utils/exportExcel';
 import { formatRupiah, getTransactionTypeBadge } from '@/utils/formatters';
+import { canManageOrmawaBudget, canAddTransaction } from '@/utils/permissions';
 
 const ORMAWA_DISPLAY_NAMES = {
   dpm: 'DPM Fasilkom',
@@ -158,6 +159,7 @@ function AnggaranOrmawaGrid({
   setSelectedOrmawaFilter,
   onOpenAddTransaction
 }) {
+  const currentUser = useStore(state => state.currentUser);
   return (
     <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200/80 shadow-soft w-full max-w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
@@ -179,7 +181,7 @@ function AnggaranOrmawaGrid({
             Klik pada salah satu kartu ormawa untuk mengelola pencatatan kas masuk &amp; keluar
           </p>
         </div>
-        {onOpenSetPagu && (
+        {onOpenSetPagu && canManageOrmawaBudget(currentUser?.role) && (
           <button
             type="button"
             onClick={onOpenSetPagu}
@@ -255,7 +257,7 @@ function AnggaranOrmawaGrid({
                 </div>
               </div>
 
-              {isSelected && onOpenAddTransaction && (
+              {isSelected && onOpenAddTransaction && canAddTransaction(currentUser?.role, o.id) && (
                 <div 
                   className="pt-2.5 mt-1 border-t border-blue-200/60 flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-200" 
                   onClick={(e) => e.stopPropagation()}
@@ -507,7 +509,7 @@ function AnggaranTransactionTable({ filteredTransactions, ormawas, deleteBudgetT
                 </span>
                 <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">Tercatat di Kas</span>
               </div>
-              {!isGuest && (
+              {!isGuest && canAddTransaction(currentUser?.role, tx.ormawaId) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -794,12 +796,12 @@ export default function AnggaranView({ onOpenSetPagu, onOpenAddTransaction, onPr
             </button>
 
             {/* Pemisah Halus Desktop */}
-            {!isGuest && onOpenSetPagu && (
+            {!isGuest && onOpenSetPagu && canManageOrmawaBudget(currentUser?.role) && (
               <div className="hidden sm:block w-px h-5 bg-slate-200" />
             )}
 
             {/* Tombol Primary: Atur Anggaran */}
-            {!isGuest && onOpenSetPagu && (
+            {!isGuest && onOpenSetPagu && canManageOrmawaBudget(currentUser?.role) && (
               <button
                 type="button"
                 onClick={onOpenSetPagu}

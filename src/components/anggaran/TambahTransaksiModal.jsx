@@ -19,6 +19,7 @@ import {
 import DropdownSelect from '@/components/ui/dropdown-select';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
+import { canAddTransaction } from '@/utils/permissions';
 
 export default function AddTransactionModal({ 
   isOpen, 
@@ -26,10 +27,19 @@ export default function AddTransactionModal({
   initialMode = 'pengeluaran', 
   initialOrmawa = '' 
 }) {
-  const { ormawas, prokers, addBudgetTransaction, currentUserName } = useStore(useShallow(state => ({ ormawas: state.ormawas, prokers: state.prokers, addBudgetTransaction: state.addBudgetTransaction, currentUserName: state.currentUserName })));
+  const { ormawas, prokers, addBudgetTransaction, currentUserName, currentUser } = useStore(useShallow(state => ({ 
+    ormawas: state.ormawas, 
+    prokers: state.prokers, 
+    addBudgetTransaction: state.addBudgetTransaction, 
+    currentUserName: state.currentUserName,
+    currentUser: state.currentUser
+  })));
+
+  const isBendaharaOnly = currentUser?.role === 'bendahara';
+  const allowedOrmawas = isBendaharaOnly ? ormawas.filter(o => o.id === 'dpm') : ormawas;
 
   const [mode, setMode] = useState(initialMode); // 'pemasukan' | 'pengeluaran'
-  const [selectedOrmawa, setSelectedOrmawa] = useState(initialOrmawa || ormawas[0]?.id || 'dpm');
+  const [selectedOrmawa, setSelectedOrmawa] = useState(isBendaharaOnly ? 'dpm' : (initialOrmawa || ormawas[0]?.id || 'dpm'));
   const [selectedProkerId, setSelectedProkerId] = useState('none');
   const [type, setType] = useState('termin1');
   const [category, setCategory] = useState('Dana Kampus / Fakultas');
@@ -50,7 +60,9 @@ export default function AddTransactionModal({
     if (isOpen) {
       const activeMode = initialMode === 'pemasukan' ? 'pemasukan' : 'pengeluaran';
       setMode(activeMode);
-      if (initialOrmawa) {
+      if (isBendaharaOnly) {
+        setSelectedOrmawa('dpm');
+      } else if (initialOrmawa) {
         setSelectedOrmawa(initialOrmawa);
       } else if (!selectedOrmawa) {
         setSelectedOrmawa(ormawas[0]?.id || 'dpm');
@@ -63,14 +75,14 @@ export default function AddTransactionModal({
       setReceiptNumber(`KW-${Date.now().toString().slice(-6)}`);
       setDate(new Date().toISOString().split('T')[0]);
     }
-  }, [isOpen, initialMode, initialOrmawa]);
+  }, [isOpen, initialMode, initialOrmawa, isBendaharaOnly]);
 
   if (!isOpen) return null;
 
   // Filter proker untuk ormawa yang dipilih
   const availableProkers = prokers.filter(p => p.ormawaId === selectedOrmawa);
 
-  const ormawaOptions = ormawas.map(o => ({
+  const ormawaOptions = allowedOrmawas.map(o => ({
     value: o.id,
     label: o.name
   }));

@@ -18,6 +18,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { formatRupiah, formatDateRange } from '@/utils/formatters';
+import { canAuditProker } from '@/utils/permissions';
 
 // Konfigurasi visual 5 Pilar Audit
 const PILLAR_CONFIGS = {
@@ -158,7 +159,8 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
     currentUser: state.currentUser
   })));
 
-  const isGuest = currentUser?.role === 'guest';
+  const canAudit = canAuditProker(currentUser?.role);
+  const isGuest = !canAudit;
   const ormawa = ormawas?.find(o => o.id === proker?.ormawaId);
 
   const initialRealisasi = proker?.realisasiDana || proker?.rab || 0;

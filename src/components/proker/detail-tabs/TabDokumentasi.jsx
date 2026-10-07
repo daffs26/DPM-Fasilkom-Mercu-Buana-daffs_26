@@ -25,6 +25,7 @@ import {
   DialogDescription, 
   DialogFooter 
 } from '@/components/ui/dialog';
+import DropdownSelect from '@/components/ui/dropdown-select';
 
 // Helper mengekstrak embed URL YouTube
 export function getYouTubeEmbedUrl(url) {
@@ -354,18 +355,21 @@ export default function DetailDokumentasiTab({
               <label className="block text-[11px] font-bold text-slate-700">
                 Kategori Dokumentasi:
               </label>
-              <select
+              <DropdownSelect
                 value={mediaCategory}
-                onChange={(e) => setMediaCategory(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="Acara Utama">Acara Utama</option>
-                <option value="Pembukaan">Pembukaan &amp; Sambutan</option>
-                <option value="Sesi Materi">Sesi Materi &amp; Diskusi</option>
-                <option value="Foto Bersama">Foto Bersama</option>
-                <option value="Dokumentasi Panitia">Dokumentasi Panitia</option>
-                <option value="Penutupan">Penutupan &amp; Penyerahan Plakat</option>
-              </select>
+                onChange={setMediaCategory}
+                options={[
+                  { value: 'Acara Utama', label: 'Acara Utama' },
+                  { value: 'Pembukaan', label: 'Pembukaan & Sambutan' },
+                  { value: 'Sesi Materi', label: 'Sesi Materi & Diskusi' },
+                  { value: 'Foto Bersama', label: 'Foto Bersama' },
+                  { value: 'Dokumentasi Panitia', label: 'Dokumentasi Panitia' },
+                  { value: 'Penutupan', label: 'Penutupan & Penyerahan Plakat' }
+                ]}
+                placeholder="Pilih Kategori"
+                triggerClassName="min-h-[38px] py-2 px-3 rounded-xl text-xs bg-white border-slate-200"
+                contentClassName="w-full z-50 shadow-xl"
+              />
             </div>
           </div>
 

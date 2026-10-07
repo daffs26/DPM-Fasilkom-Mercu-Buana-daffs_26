@@ -64,10 +64,10 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
   const activeOrmawa = isFiltered ? ormawas?.find(o => o.id === selectedOrmawaFilter) : null;
 
   return (
-    <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft flex flex-col justify-start gap-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
+    <Card className="rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border-slate-200/80 shadow-soft flex flex-col justify-start gap-3.5 sm:gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-3.5 border-b border-slate-100 gap-2">
         <div>
-          <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">
+          <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight">
             Indeks Kinerja Ormawa{isFiltered && activeOrmawa ? `: ${ORMAWA_DISPLAY_NAMES[activeOrmawa.id] || activeOrmawa.shortName}` : ''}
           </h3>
         </div>
@@ -77,7 +77,7 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
             <button
               type="button"
               onClick={() => setSelectedOrmawaFilter('all')}
-              className="text-xs font-bold text-slate-600 hover:text-blue-700 bg-slate-100 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 px-2.5 py-1 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="text-xs font-bold text-slate-600 hover:text-blue-700 bg-slate-100 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 min-h-[34px] px-3 py-1 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
               title="Tampilkan data seluruh ormawa"
             >
               <RotateCcw className="w-3 h-3 text-slate-500" />
@@ -90,7 +90,7 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-1">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 my-1">
         {ormawas.map((o) => {
           const oProkers = prokers.filter(p => p.ormawaId === o.id);
           const oAudited = oProkers.filter(p => p.lpj?.auditScore);
@@ -104,7 +104,7 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
             <div 
               key={o.id}
               onClick={() => canViewAll && setSelectedOrmawaFilter(isSelected ? 'all' : o.id)}
-              className={`p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 flex flex-col items-center text-center justify-between min-h-[160px] relative group ${
+              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-200 flex flex-col items-center text-center justify-between min-h-[148px] sm:min-h-[160px] relative group ${
                 canViewAll ? 'cursor-pointer hover:shadow-xs' : 'cursor-default'
               } ${
                 isSelected 
@@ -257,10 +257,10 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
   const isGuest = currentUser?.role === 'guest';
 
   return (
-    <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft">
-      <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+    <Card className="rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border-slate-200/80 shadow-soft">
+      <div className="flex items-center justify-between pb-3 sm:pb-3.5 border-b border-slate-100">
         <div>
-          <h3 className="font-extrabold text-slate-900 text-sm">Status Program Kerja Terbaru</h3>
+          <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">Status Program Kerja Terbaru</h3>
         </div>
       </div>
 
@@ -286,7 +286,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                     <h4 className="text-sm font-extrabold text-slate-900">Belum Ada Program Kerja</h4>
                     <p className="text-xs text-slate-400 mt-1 max-w-sm">Daftarkan kegiatan baru atau pilih ormawa lain untuk melihat data.</p>
                     {!isGuest && (
-                      <Button onClick={onOpenAddProker} className="mt-3" size="sm">
+                      <Button onClick={onOpenAddProker} className="mt-3 min-h-[40px]" size="sm">
                         + Tambah Proker Baru
                       </Button>
                     )}
@@ -334,7 +334,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
         </Table>
       </div>
 
-      <div className="lg:hidden mt-3.5 space-y-3">
+      <div className="lg:hidden mt-3 space-y-2.5">
         {filteredProkers.length === 0 ? (
           <div className="py-8 text-center bg-slate-50/50 rounded-2xl border border-slate-200/80 p-4">
             <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 ring-6 ring-blue-50/50 flex items-center justify-center mx-auto mb-2">
@@ -347,14 +347,14 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
           filteredProkers.slice(0, 5).map((p) => {
             const ormawa = ormawas.find(o => o.id === p.ormawaId);
             return (
-              <div key={`mob-proker-${p.id}`} className="p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/40 space-y-3">
+              <div key={`mob-proker-${p.id}`} className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200/80 bg-slate-50/40 space-y-3">
                 <div className="flex items-start gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 p-0.5 shrink-0 flex items-center justify-center mt-0.5">
                     <img src={ormawa?.logo} alt={ormawa?.name} className="w-full h-full object-contain" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-bold text-slate-900 text-xs leading-snug line-clamp-2">{p.title}</h4>
-                    <p className="text-[10px] text-slate-500 mt-0.5">{ormawa?.shortName} • PIC: {p.pic}</p>
+                    <h4 className="font-bold text-slate-900 text-xs sm:text-sm leading-snug line-clamp-2">{p.title}</h4>
+                    <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">{ormawa?.shortName} • PIC: {p.pic}</p>
                   </div>
                 </div>
 
@@ -374,7 +374,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                     <button
                       type="button"
                       onClick={() => onReviewProposal(p)}
-                      className="flex-1 h-9 min-h-[38px] px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs"
+                      className="flex-1 min-h-[42px] h-11 px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs active:scale-95"
                     >
                       {isGuest ? 'Lihat Proposal' : 'Review'}
                     </button>
@@ -383,7 +383,7 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
                     <button
                       type="button"
                       onClick={() => onAuditLPJ(p)}
-                      className="flex-1 h-9 min-h-[38px] px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs"
+                      className="flex-1 min-h-[42px] h-11 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs active:scale-95"
                     >
                       {isGuest ? 'Lihat LPJ' : 'Audit'}
                     </button>
@@ -400,8 +400,8 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
 
 function DashboardBudgetCard({ totalSerapan, totalPagu, serapanPercent, ormawas }) {
   return (
-    <Card className="rounded-3xl p-5 sm:p-6 border-slate-200/80 shadow-soft">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 border-b border-slate-100 text-left">
+    <Card className="rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border-slate-200/80 shadow-soft">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 sm:pb-3.5 border-b border-slate-100 text-left">
         <div>
           <h3 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight text-left">Serapan Dana Kemahasiswaan</h3>
           <p className="text-[11px] text-slate-500 mt-0.5 text-left">Ringkasan alokasi &amp; realisasi anggaran periode 2026/2027</p>

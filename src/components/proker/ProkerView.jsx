@@ -32,6 +32,7 @@ import DropdownSelect from '@/components/ui/dropdown-select';
 import { AjukanHapusProkerModal, KelolaHapusProkerModal } from './ProkerHapusModal';
 import UploadRevisiModal from './UploadRevisiModal';
 import { formatDateIndo, formatDateRange } from '@/utils/formatters';
+import { canModifyProker, canDeleteProker } from '@/utils/permissions';
 
 const ORMAWA_ORDER = ['dpm', 'bem', 'himti', 'himsisfo'];
 
@@ -149,10 +150,8 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
   }, [prokers, selectedOrmawaFilter, searchQuery, statusFilter]);
 
   const handleInitiateDelete = (p) => {
-    if (currentUser?.ormawaId === 'dpm') {
+    if (canDeleteProker(currentUser?.role)) {
       setProkerToDelete(p);
-    } else {
-      setProkerToRequestDelete(p);
     }
   };
 
@@ -196,8 +195,8 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
   return (
     <div className="space-y-4 sm:space-y-5">
       {/* Top Filter & Quick KPI Strip */}
-      <div className="bg-white rounded-3xl p-3.5 sm:p-4.5 border border-slate-200/80 shadow-soft transition-all duration-300">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-100">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 border border-slate-200/80 shadow-soft transition-all duration-300">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
               <Layers className="w-4 h-4" />
@@ -208,11 +207,11 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
           </div>
 
           <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
-            {currentUser?.ormawaId === 'dpm' && currentUser?.role !== 'guest' && pendingDeletionCount > 0 && (
+            {canDeleteProker(currentUser?.role) && pendingDeletionCount > 0 && (
               <button
                 type="button"
                 onClick={() => setIsManageDeletionOpen(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 min-h-[40px] h-10 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer animate-pulse active:scale-95"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] sm:min-h-[40px] h-11 sm:h-10 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer animate-pulse active:scale-95"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline tracking-tight">Permohonan Hapus</span>
@@ -222,17 +221,18 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
             <button
               type="button"
               onClick={() => setIsKpiExpanded(!isKpiExpanded)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-3 py-2 min-h-[40px] h-10 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200/80 rounded-xl text-[11px] font-bold transition shadow-2xs cursor-pointer active:scale-95"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-3 py-2 min-h-[44px] sm:min-h-[40px] h-11 sm:h-10 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200/80 rounded-xl text-xs sm:text-[11px] font-bold transition shadow-2xs cursor-pointer active:scale-95"
               title={isKpiExpanded ? 'Tutup Ringkasan' : 'Buka Ringkasan KPI'}
             >
               {isKpiExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline tracking-tight">{isKpiExpanded ? 'Ringkas KPI' : 'Statistik KPI'}</span>
               <span className="sm:hidden tracking-tight">KPI</span>
             </button>
-            {currentUser?.role !== 'guest' && (
+            {canModifyProker(currentUser?.role) && (
               <button
+                type="button"
                 onClick={onOpenAddProker}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 min-h-[40px] h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 min-h-[44px] sm:min-h-[40px] h-11 sm:h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline tracking-tight">Tambah Proker</span>
@@ -269,7 +269,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                   onChange={setSelectedOrmawaFilter}
                   options={ormawaOptions}
                   placeholder="Pilih Ormawa"
-                  triggerClassName="min-h-[42px] py-2.5 rounded-xl text-xs bg-slate-50 border-slate-200 hover:bg-white hover:border-slate-300"
+                  triggerClassName="min-h-[44px] py-2.5 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 hover:bg-white hover:border-slate-300"
                   contentClassName="w-64 z-50 shadow-xl"
                 />
               </div>
@@ -281,7 +281,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 onChange={setStatusFilter}
                 options={statusOptions}
                 placeholder="Pilih Status Proker"
-                triggerClassName="min-h-[42px] py-2.5 rounded-xl text-xs bg-slate-50 border-slate-200 hover:bg-white hover:border-slate-300"
+                triggerClassName="min-h-[44px] py-2.5 rounded-xl text-xs sm:text-sm bg-slate-50 border-slate-200 hover:bg-white hover:border-slate-300"
                 contentClassName="w-72 z-50 shadow-xl"
               />
             </div>
@@ -320,7 +320,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
           return (
             <div
               key={p.id}
-              className={`bg-white rounded-3xl p-4 sm:p-5 lg:p-6 border transition-all duration-200 hover:shadow-card flex flex-col justify-between ${
+              className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border transition-all duration-200 hover:shadow-card flex flex-col justify-between ${
                 isOverdue ? 'border-red-300 ring-2 ring-red-500/10' : 'border-slate-200/80 shadow-soft'
               }`}
             >
@@ -344,7 +344,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                       pendingRevisions={pendingRevisions} 
                     />
 
-                    {currentUser?.role !== 'guest' && (
+                    {canDeleteProker(currentUser?.role) && (
                       <button
                         type="button"
                         onClick={(e) => {
@@ -352,7 +352,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                           handleInitiateDelete(p);
                         }}
                         className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer active:scale-95"
-                        title={currentUser?.ormawaId === 'dpm' ? "Hapus Program Kerja" : "Ajukan Permohonan Hapus"}
+                        title="Hapus Program Kerja"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -418,12 +418,12 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 </div>
               </div>
 
-              <div className="mt-4.5 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+              <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                 <div className="grid grid-cols-2 gap-2 flex-1 sm:flex sm:items-center sm:gap-1.5">
                   <button
                     type="button"
                     onClick={() => onOpenDetailProker ? onOpenDetailProker(p) : onReviewProposal(p)}
-                    className="h-10 sm:h-9 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] flex-1 tracking-tight"
+                    className="min-h-[44px] sm:min-h-[38px] h-11 sm:h-9 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] flex-1 tracking-tight"
                   >
                     <Eye className="w-3.5 h-3.5 text-slate-600" />
                     <span>Detail</span>
@@ -433,7 +433,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                     <button
                       type="button"
                       onClick={() => setProkerToRevise(p)}
-                      className="h-10 sm:h-9 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] flex-1 tracking-tight"
+                      className="min-h-[44px] sm:min-h-[38px] h-11 sm:h-9 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] flex-1 tracking-tight"
                       title="Unggah Berkas Revisi"
                     >
                       <UploadCloud className="w-3.5 h-3.5" />
@@ -443,7 +443,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                     <button
                       type="button"
                       onClick={() => onAuditLPJ(p)}
-                      className="h-10 sm:h-9 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] flex-1 tracking-tight"
+                      className="min-h-[44px] sm:min-h-[38px] h-11 sm:h-9 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] flex-1 tracking-tight"
                     >
                       <span>{p.lpj?.auditScore ? 'Hasil Audit' : 'Audit LPJ'}</span>
                     </button>
@@ -454,7 +454,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                   <button
                     type="button"
                     onClick={() => onPrintDoc({ type: 'audit', ...p, ormawaName: ormawa?.name })}
-                    className="h-10 sm:h-9 px-3 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold shrink-0 active:scale-[0.98] tracking-tight"
+                    className="min-h-[44px] sm:min-h-[38px] h-11 sm:h-9 px-3 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold shrink-0 active:scale-[0.98] tracking-tight"
                     title="Cetak Berita Acara DPM"
                   >
                     <Printer className="w-3.5 h-3.5 text-slate-600" />

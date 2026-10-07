@@ -4,134 +4,36 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  Lock, 
   AlertCircle, 
   Globe, 
-  Search, 
-  CheckCircle2, 
-  Clock, 
-  XCircle, 
-  ArrowRight, 
-  UserCheck,
-  KeyRound,
-  Download,
-  Check
+  Eye,
+  EyeOff
 } from 'lucide-react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
-} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { authService } from '@/services/authService';
-import { downloadReceiptAsPng } from '@/utils/generateReceiptImage';
+
+const DPM_DEMO_ACCOUNTS = [
+  { username: 'ketua', title: 'Ketua', sub: 'Pimpinan', badge: 'KT', badgeBg: 'bg-slate-900 text-white' },
+  { username: 'wakil', title: 'Wakil', sub: 'Pimpinan', badge: 'WK', badgeBg: 'bg-slate-800 text-white' },
+  { username: 'sekretaris', title: 'Sekretaris', sub: 'Kesekretariatan', badge: 'SK', badgeBg: 'bg-emerald-800 text-white' },
+  { username: 'bendahara', title: 'Bendahara', sub: 'Kebendaharaan', badge: 'BD', badgeBg: 'bg-amber-800 text-white' },
+  { username: 'pengawasan', title: 'Pengawasan', sub: 'Komisi I', badge: 'K1', badgeBg: 'bg-blue-800 text-white' },
+  { username: 'keuangan', title: 'Keuangan', sub: 'Komisi II', badge: 'K2', badgeBg: 'bg-indigo-800 text-white' },
+  { username: 'kominfo', title: 'Kominfo', sub: 'Komisi III', badge: 'K3', badgeBg: 'bg-purple-800 text-white' },
+  { username: 'advokasi', title: 'Advokasi', sub: 'Komisi IV', badge: 'K4', badgeBg: 'bg-teal-800 text-white' }
+];
 
 export default function LoginView({ onSwitchToRegister, notice, onClearNotice }) {
-  const { login, loginAsGuest, ormawas, resetPasswordWithTicket } = useStore(useShallow(state => ({ 
+  const { login, directLogin, loginAsGuest } = useStore(useShallow(state => ({ 
     login: state.login, 
-    loginAsGuest: state.loginAsGuest,
-    ormawas: state.ormawas,
-    resetPasswordWithTicket: state.resetPasswordWithTicket
+    directLogin: state.directLogin,
+    loginAsGuest: state.loginAsGuest
   })));
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-
-  // State untuk Cek Status Pengajuan Akun
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [statusQuery, setStatusQuery] = useState('');
-  const [statusResult, setStatusResult] = useState(null);
-  const [statusLoading, setStatusLoading] = useState(false);
-  const [statusError, setStatusError] = useState('');
-
-  // State untuk Modal Lupa Kata Sandi (NIM + Nomor Tiket)
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [resetNim, setResetNim] = useState('');
-  const [resetTicket, setResetTicket] = useState('');
-  const [resetPassword, setResetPassword] = useState('');
-  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
-  const [resetLoading, setResetLoading] = useState(false);
-  const [resetError, setResetError] = useState('');
-  const [resetSuccess, setResetSuccess] = useState('');
-
-  const handleResetPassword = async (e) => {
-    e?.preventDefault();
-    setResetError('');
-    setResetSuccess('');
-
-    if (!resetNim || !resetNim.trim()) {
-      setResetError('Mohon masukkan NIM Anda.');
-      return;
-    }
-
-    if (!resetTicket || !resetTicket.trim()) {
-      setResetError('Mohon masukkan Nomor Tiket pendaftaran Anda.');
-      return;
-    }
-
-    if (!resetPassword || resetPassword.length < 6) {
-      setResetError('Kata sandi baru minimal 6 karakter demi keamanan akun.');
-      return;
-    }
-
-    if (resetPassword !== resetConfirmPassword) {
-      setResetError('Konfirmasi kata sandi baru tidak cocok.');
-      return;
-    }
-
-    setResetLoading(true);
-    try {
-      const res = await resetPasswordWithTicket({
-        nim: resetNim.trim(),
-        ticketNumber: resetTicket.trim(),
-        newPassword: resetPassword,
-      });
-
-      if (res && res.success) {
-        setResetSuccess(res.message || 'Kata sandi berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.');
-        setUsername(resetNim.trim());
-        setPassword(resetPassword);
-        setTimeout(() => {
-          setIsResetModalOpen(false);
-        }, 2200);
-      } else {
-        setResetError(res?.message || 'Gagal memproses permohonan. Pastikan NIM dan Nomor Tiket sesuai.');
-      }
-    } catch (err) {
-      console.error('[LoginView] Error reset password:', err);
-      setResetError('Terjadi kendala saat mereset kata sandi. Silakan periksa koneksi Anda.');
-    } finally {
-      setResetLoading(false);
-    }
-  };
-
-  const handleCheckStatus = async (e) => {
-    e?.preventDefault();
-    if (!statusQuery || statusQuery.trim().length < 3) {
-      setStatusError('Masukkan minimal 3 karakter username atau NIM.');
-      return;
-    }
-    setStatusLoading(true);
-    setStatusError('');
-    setStatusResult(null);
-    try {
-      const res = await authService.checkAccountStatus(statusQuery.trim());
-      if (res && res.found) {
-        setStatusResult(res);
-      } else {
-        setStatusError(res?.message || 'Pengajuan akun dengan username atau NIM tersebut tidak ditemukan.');
-      }
-    } catch (err) {
-      console.error('[LoginView] Error check status:', err);
-      setStatusError('Terjadi kendala koneksi saat memeriksa status.');
-    } finally {
-      setStatusLoading(false);
-    }
-  };
 
   const isNumericOnly = /^\d+$/.test(username.trim());
 
@@ -177,6 +79,25 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
     }
   };
 
+  const handleDemoLogin = async (demoUsername) => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await login(demoUsername, '123');
+      if (!res?.success) {
+        // Fallback langsung ke directLogin jika ada kendala jaringan / DB
+        const directRes = directLogin(demoUsername);
+        if (!directRes?.success) {
+          setError(res?.message || directRes?.message);
+        }
+      }
+    } catch {
+      directLogin(demoUsername);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#f3f4f9] p-4 sm:p-6 lg:p-8">
       {/* Mobile Background: UMB Building Photo */}
@@ -212,20 +133,18 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
 
           {/* Bottom Left Text */}
           <div className="relative z-10 mt-auto pt-16">
-            <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">Sistem Informasi Pengawasan</p>
             <h2 className="text-2xl lg:text-3xl font-extrabold leading-tight tracking-tight text-white">
-              Pusat Kendali &<br />
-              Pengawasan Ormawa<br />
-              Fasilkom UMB
+              Sistem Informasi<br />
+              Audit Ormawa Fasilkom UMB
             </h2>
           </div>
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="w-full flex-1 flex flex-col justify-center px-4 sm:px-8 lg:px-12 py-6">
-          <div className="mb-6">
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Masuk ke Akun</h1>
-            <p className="text-slate-500 text-sm leading-relaxed">
+        <div className="w-full flex-1 flex flex-col justify-center px-3 sm:px-8 lg:px-12 py-5 sm:py-6">
+          <div className="mb-5 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5 sm:mb-2">Masuk ke Akun</h1>
+            <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
               Akses dasbor pengawasan, pemantauan proker, dan administrasi ormawa dalam satu platform terpadu.
             </p>
           </div>
@@ -297,35 +216,29 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
                 )}>
                   Kata Sandi
                 </label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsResetModalOpen(true);
-                    setResetNim(username || '');
-                    setResetTicket('');
-                    setResetPassword('');
-                    setResetConfirmPassword('');
-                    setResetError('');
-                    setResetSuccess('');
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-semibold hover:underline cursor-pointer"
-                >
-                  Lupa Kata Sandi?
-                </button>
+                <span className="text-xs text-slate-400 font-mono">Demo: 123</span>
               </div>
-              <div className="relative">
+              <div className="relative flex items-center">
                 <Input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={cn(
-                    "h-12 rounded-xl bg-white text-sm placeholder:text-slate-400 transition-all pr-10",
+                    "h-12 rounded-xl bg-white text-sm placeholder:text-slate-400 transition-all pr-11",
                     showPasswordError
                       ? "border-rose-400 ring-2 ring-rose-100 text-rose-950 focus-visible:ring-rose-200 focus-visible:border-rose-500 bg-rose-50/15"
                       : "border-slate-200 focus-visible:ring-blue-600 focus-visible:border-blue-600 shadow-sm"
                   )}
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                  title={showPassword ? "Sembunyikan sandi" : "Lihat sandi"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
               {showPasswordError && (
                 <p className="text-[12px] text-rose-500 font-medium mt-1 leading-tight animate-in fade-in duration-150">
@@ -337,7 +250,7 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all mt-4"
+              className="w-full h-12 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all mt-4 cursor-pointer active:scale-98"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -355,107 +268,35 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
             <div className="flex items-center justify-between gap-2 mb-2.5">
               <span className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                Akses Demo 1-Klik
+                Akses Cepat Komisi DPM (1-Klik)
               </span>
               <span className="text-[10px] font-bold text-amber-700 bg-amber-100/70 border border-amber-300 px-2 py-0.5 rounded-full">
-                Mode Uji Coba
+                Mode Demo
               </span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={async () => {
-                  setLoading(true);
-                  setError('');
-                  try {
-                    const res = await login('admin', '123');
-                    if (!res.success) setError(res.message);
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 hover:border-slate-800 hover:bg-slate-900 hover:text-white transition shadow-2xs group text-left cursor-pointer"
-              >
-                <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-slate-900">
-                  DPM
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold truncate">DPM Ketua</p>
-                  <p className="text-[10px] text-slate-400 group-hover:text-slate-300">Legislatif</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  setLoading(true);
-                  setError('');
-                  try {
-                    const res = await login('bem', '123');
-                    if (!res.success) setError(res.message);
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 hover:border-sky-500 hover:bg-sky-600 hover:text-white transition shadow-2xs group text-left cursor-pointer"
-              >
-                <div className="w-6 h-6 rounded-lg bg-sky-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-sky-600">
-                  BEM
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold truncate">BEM Fasilkom</p>
-                  <p className="text-[10px] text-slate-400 group-hover:text-sky-100">Eksekutif</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  setLoading(true);
-                  setError('');
-                  try {
-                    const res = await login('himti', '123');
-                    if (!res.success) setError(res.message);
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 hover:border-blue-900 hover:bg-blue-950 hover:text-white transition shadow-2xs group text-left cursor-pointer"
-              >
-                <div className="w-6 h-6 rounded-lg bg-blue-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-blue-950">
-                  TI
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold truncate">HiMTI</p>
-                  <p className="text-[10px] text-slate-400 group-hover:text-blue-200">Teknik Informatika</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  setLoading(true);
-                  setError('');
-                  try {
-                    const res = await login('himsisfo', '123');
-                    if (!res.success) setError(res.message);
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 hover:border-amber-800 hover:bg-amber-900 hover:text-white transition shadow-2xs group text-left cursor-pointer"
-              >
-                <div className="w-6 h-6 rounded-lg bg-amber-800 text-white flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-amber-900">
-                  SI
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold truncate">HIMSISFO</p>
-                  <p className="text-[10px] text-slate-400 group-hover:text-amber-200">Sistem Informasi</p>
-                </div>
-              </button>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {DPM_DEMO_ACCOUNTS.map((acc) => (
+                <button
+                  key={acc.username}
+                  type="button"
+                  onClick={() => handleDemoLogin(acc.username)}
+                  className="flex items-center gap-2 p-2 sm:p-2.5 min-h-[44px] rounded-xl bg-white border border-slate-200 hover:border-slate-800 hover:bg-slate-900 hover:text-white transition shadow-2xs group text-left cursor-pointer active:scale-95"
+                >
+                  <div className={cn(
+                    "w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:bg-white group-hover:text-slate-900 transition-colors",
+                    acc.badgeBg
+                  )}>
+                    {acc.badge}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold truncate leading-tight">{acc.title}</p>
+                    <p className="text-[10px] text-slate-400 group-hover:text-slate-300 truncate leading-tight">{acc.sub}</p>
+                  </div>
+                </button>
+              ))}
             </div>
             <p className="text-[10px] text-slate-400 text-center mt-2 italic">
-              *Akses instan ini akan dihapus otomatis setelah integrasi database.
+              *Klik komisi untuk langsung mencoba wewenang dan batasan fiturnya (sandi demo: 123).
             </p>
           </div>
 
@@ -468,46 +309,21 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
                 setTimeout(() => {
                   loginAsGuest();
                   setLoading(false);
-                }, 200);
+                }, 150);
               }}
-              className="w-full py-2.5 px-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100/80 text-blue-800 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group cursor-pointer hover:border-blue-300"
+              className="w-full min-h-[44px] py-2.5 px-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100/80 text-blue-800 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group cursor-pointer hover:border-blue-300 active:scale-98"
             >
               <Globe className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
-              <span>Eksplorasi Transparansi (Masuk sebagai Tamu Publik)</span>
+              <span>Eksplorasi Transparansi (Masuk sebagai Civitas / Tamu Publik)</span>
             </button>
             <p className="text-[10px] text-slate-400 text-center mt-1">
-              Akses terbuka untuk mahasiswa & umum memantau akuntabilitas tanpa login.
+              Akses terbuka untuk civitas akademik &amp; umum memantau akuntabilitas tanpa login.
             </p>
           </div>
 
-          <div className="mt-6 text-center flex flex-col gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-slate-400 font-medium">Bantuan &amp; Pendaftaran</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsStatusModalOpen(true);
-                  setStatusQuery(username || '');
-                  setStatusResult(null);
-                  setStatusError('');
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-blue-700 font-bold text-xs transition cursor-pointer active:scale-95 shadow-2xs"
-              >
-                <Search className="w-3.5 h-3.5 text-blue-600" />
-                <span>Cek Status Pengajuan Akun</span>
-              </button>
-            </div>
-            
+          <div className="mt-5 text-center">
             <p className="text-sm text-slate-500 font-medium">
-              Belum memiliki akun?{' '}
+              Belum memiliki akun pengurus?{' '}
               <button 
                 type="button" 
                 onClick={onSwitchToRegister}
@@ -519,277 +335,6 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
           </div>
         </div>
       </div>
-
-      {/* Modal Cek Status Pendaftaran Akun */}
-      <Dialog open={isStatusModalOpen} onOpenChange={setIsStatusModalOpen}>
-        <DialogContent className="w-[95vw] sm:max-w-md p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-2xl">
-          <DialogHeader className="px-5 pt-5 pb-3 border-b border-slate-100 bg-slate-50/60 space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-bold">
-                AUDITMAWA TRACKER
-              </span>
-            </div>
-            <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-              Pelacakan Status Akun Pengurus
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Ketikkan Username atau NIM Anda untuk memeriksa status verifikasi secara real-time.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="p-5 space-y-4">
-            <form onSubmit={handleCheckStatus} className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <Input
-                  value={statusQuery}
-                  onChange={(e) => setStatusQuery(e.target.value)}
-                  placeholder="Ketik Username atau NIM..."
-                  className="pl-9 h-11 rounded-xl text-xs bg-slate-50 focus:bg-white"
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={statusLoading}
-                className="h-11 px-4 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white text-xs shrink-0 cursor-pointer shadow-md shadow-blue-500/20"
-              >
-                {statusLoading ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <span>Periksa</span>
-                )}
-              </Button>
-            </form>
-
-            {statusError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2 animate-in fade-in">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{statusError}</span>
-              </div>
-            )}
-
-            {statusResult && (
-              <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-2xs animate-in fade-in zoom-in-95">
-                <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900">{statusResult.name}</h4>
-                    <p className="text-xs text-slate-500 font-mono mt-0.5">
-                      {statusResult.nim} • @{statusResult.username}
-                    </p>
-                  </div>
-                  <span className={cn(
-                    "px-2.5 py-1 rounded-full text-[10px] font-extrabold tracking-wide uppercase flex items-center gap-1 shrink-0",
-                    statusResult.status === 'approved' && "bg-emerald-100 text-emerald-800 border border-emerald-300",
-                    statusResult.status === 'pending' && "bg-amber-100 text-amber-800 border border-amber-300",
-                    statusResult.status === 'rejected' && "bg-rose-100 text-rose-800 border border-rose-300"
-                  )}>
-                    {statusResult.status === 'approved' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                    {statusResult.status === 'pending' && <Clock className="w-3 h-3 text-amber-600 animate-spin" />}
-                    {statusResult.status === 'rejected' && <XCircle className="w-3 h-3 text-rose-600" />}
-                    {statusResult.status === 'approved' ? 'Disetujui' : statusResult.status === 'rejected' ? 'Ditolak' : 'Menunggu ACC'}
-                  </span>
-                </div>
-
-                {statusResult.ticket_number && (
-                  <div className="text-[11px] text-slate-500 flex justify-between bg-slate-50 p-2 rounded-xl border border-slate-100">
-                    <span className="text-slate-400">No. Tiket:</span>
-                    <span className="font-mono font-bold text-blue-600">{statusResult.ticket_number}</span>
-                  </div>
-                )}
-
-                <div className="text-xs leading-relaxed">
-                  {statusResult.status === 'pending' && (
-                    <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-[11px] space-y-1">
-                      <p className="font-bold flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-amber-600" />
-                        Sedang Dalam Antrean Verifikasi DPM
-                      </p>
-                      <p className="text-amber-800">
-                        Pengajuan akun kepengurusan {(statusResult.ormawa_id || '').toUpperCase()} Anda sedang ditinjau oleh pimpinan DPM FASILKOM UMB. Anda akan dapat masuk setelah diverifikasi.
-                      </p>
-                    </div>
-                  )}
-
-                  {statusResult.status === 'approved' && (
-                    <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 text-[11px] space-y-2">
-                      <p className="font-bold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        Akun Anda Telah Aktif!
-                      </p>
-                      <p className="text-emerald-800">
-                        Pimpinan DPM telah menyetujui akun Anda. Silakan masuk menggunakan kata sandi yang Anda buat saat pendaftaran.
-                      </p>
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          setUsername(statusResult.username);
-                          setIsStatusModalOpen(false);
-                        }}
-                        className="w-full h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-sm"
-                      >
-                        <UserCheck className="w-3.5 h-3.5 mr-1.5" />
-                        <span>Gunakan Akun Ini untuk Masuk</span>
-                      </Button>
-                    </div>
-                  )}
-
-                  {statusResult.status === 'rejected' && (
-                    <div className="p-3 bg-rose-50 rounded-xl border border-rose-200 text-rose-900 text-[11px] space-y-1">
-                      <p className="font-bold flex items-center gap-1.5">
-                        <XCircle className="w-3.5 h-3.5 text-rose-600" />
-                        Pengajuan Ditolak oleh Pimpinan DPM
-                      </p>
-                      <p className="text-rose-800">
-                        <strong>Alasan:</strong> {statusResult.rejection_reason || 'Data kepengurusan tidak valid atau tidak memenuhi kualifikasi.'}
-                      </p>
-                      <p className="text-rose-700 text-[10px] pt-1">
-                        Silakan hubungi narahubung resmi DPM FASILKOM jika ini merupakan kekeliruan.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Tombol Unduh PNG Kartu Tanda Terima */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => downloadReceiptAsPng({
-                      ticketNumber: statusResult.ticket_number,
-                      name: statusResult.name,
-                      nim: statusResult.nim,
-                      ormawaId: statusResult.ormawa_id,
-                      role: statusResult.role,
-                      username: statusResult.username,
-                      status: statusResult.status,
-                      createdAt: statusResult.created_at,
-                    })}
-                    className="w-full h-9 rounded-xl border-blue-200 text-blue-700 hover:bg-blue-50 font-bold text-xs cursor-pointer shadow-2xs flex items-center justify-center gap-1.5 mt-2"
-                  >
-                    <Download className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Unduh Kartu Tanda Terima (PNG)</span>
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal Pemulihan Kata Sandi Mandiri (NIM + Nomor Tiket) */}
-      <Dialog open={isResetModalOpen} onOpenChange={setIsResetModalOpen}>
-        <DialogContent className="w-[95vw] sm:max-w-md p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-2xl">
-          <DialogHeader className="px-5 pt-5 pb-3 border-b border-slate-100 bg-slate-50/60 space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-bold">
-                AUDITMAWA RECOVERY
-              </span>
-            </div>
-            <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <KeyRound className="w-5 h-5 text-blue-600" />
-              <span>Pemulihan Kata Sandi Akun</span>
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Ketikkan NIM dan Nomor Tiket pendaftaran Anda untuk mereset kata sandi secara instan tanpa perlu email.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="p-5 space-y-4">
-            {resetSuccess ? (
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-2 animate-in fade-in">
-                <p className="font-bold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Kata Sandi Berhasil Diperbarui!</span>
-                </p>
-                <p className="text-emerald-800 leading-relaxed">
-                  {resetSuccess} Mengalihkan ke halaman masuk...
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleResetPassword} className="space-y-3.5">
-                {resetError && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2 animate-in fade-in">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>{resetError}</span>
-                  </div>
-                )}
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700 block">NIM Pengurus</label>
-                  <Input
-                    type="text"
-                    value={resetNim}
-                    onChange={(e) => setResetNim(e.target.value.replace(/\D/g, ''))}
-                    placeholder="Masukkan NIM Anda"
-                    className="h-10 text-xs rounded-xl"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-700 block">Nomor Tiket Registrasi</label>
-                    <span className="text-[10px] text-blue-600 font-medium">Kunci Pemulihan</span>
-                  </div>
-                  <Input
-                    type="text"
-                    value={resetTicket}
-                    onChange={(e) => setResetTicket(e.target.value.toUpperCase().trim())}
-                    placeholder="Contoh: REG-BEM-20261004-8921"
-                    className="h-10 text-xs font-mono rounded-xl uppercase tracking-wider"
-                  />
-                  <p className="text-[10px] text-slate-400 leading-tight">
-                    *Lihat nomor tiket pada berkas gambar PNG atau salinan pendaftaran Anda.
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700 block">Kata Sandi Baru</label>
-                  <Input
-                    type="password"
-                    value={resetPassword}
-                    onChange={(e) => setResetPassword(e.target.value)}
-                    placeholder="Minimal 6 karakter"
-                    className="h-10 text-xs rounded-xl"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700 block">Konfirmasi Kata Sandi Baru</label>
-                  <Input
-                    type="password"
-                    value={resetConfirmPassword}
-                    onChange={(e) => setResetConfirmPassword(e.target.value)}
-                    placeholder="Ulangi kata sandi baru"
-                    className="h-10 text-xs rounded-xl"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={resetLoading}
-                  className="w-full h-11 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white text-xs cursor-pointer shadow-md shadow-blue-500/20 mt-2"
-                >
-                  {resetLoading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Memproses Pembaruan...</span>
-                    </div>
-                  ) : (
-                    <span>Simpan Kata Sandi Baru</span>
-                  )}
-                </Button>
-
-                <div className="pt-2 border-t border-slate-100 text-center">
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Kehilangan bukti nomor tiket Anda?{' '}
-                    <span className="text-slate-600 font-semibold">
-                      Silakan hubungi pimpinan DPM di sekretariat kampus untuk verifikasi fisik.
-                    </span>
-                  </p>
-                </div>
-              </form>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

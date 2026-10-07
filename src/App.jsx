@@ -10,12 +10,17 @@ import LoginView from './components/auth/LoginView';
 import RegisterView from './components/auth/RegisterView';
 import { Analytics } from '@vercel/analytics/react';
 import { notificationService } from './services/notificationService';
+import { canPrintSP, useIsMobile, getMobileDirectPathForRole } from './utils/permissions';
 
 // Consolidated primary domain containers loaded on-demand
 const ProkerContainerView = lazy(() => import('./components/proker/ProkerContainerView'));
 const TransparansiContainerView = lazy(() => import('./components/berkas/TransparansiContainerView'));
 const PengawasanContainerView = lazy(() => import('./components/audit/PengawasanContainerView'));
 const StrukturView = lazy(() => import('./components/struktur/StrukturView'));
+const KomisiKeuanganView = lazy(() => import('./components/komisi/KomisiKeuanganView'));
+const KomisiKominfoView = lazy(() => import('./components/komisi/KomisiKominfoView'));
+const KomisiAdvokasiView = lazy(() => import('./components/komisi/KomisiAdvokasiView'));
+const KomisiBendaharaView = lazy(() => import('./components/komisi/KomisiBendaharaView'));
 
 // Modals loaded on-demand (Disederhanakan & Lokasi Per Fitur)
 const AddProkerModal = lazy(() => import('./components/proker/TambahProkerModal'));
@@ -151,6 +156,8 @@ export default function App() {
   })));
   const isGuest = currentUser?.role === 'guest';
   const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
+  const isMobile = useIsMobile();
+  const directPath = (isMobile && isDpm) ? getMobileDirectPathForRole(currentUser?.role) : null;
   const [idleNotice, setIdleNotice] = useState('');
   const lastActivityRef = useRef(Date.now());
 
@@ -165,11 +172,35 @@ export default function App() {
   const currentPathTab = getActiveTabFromPath(rawPathTab);
 
   useEffect(() => {
-    const validTabs = ['dashboard', 'proker', 'transparansi', 'audit', 'struktur'];
+    const validTabs = [
+      'dashboard', 
+      'proker', 
+      'transparansi', 
+      'audit', 
+      'struktur',
+      'komisi/keuangan',
+      'komisi/kominfo',
+      'komisi/advokasi',
+      'komisi/bendahara'
+    ];
     if (validTabs.includes(currentPathTab) && currentPathTab !== activeTab) {
       useStore.getState().setActiveTab(currentPathTab);
     }
   }, [currentPathTab, activeTab]);
+
+  // Auto-direct komisi role on mobile device (Kecuali Ketua & Wakil)
+  useEffect(() => {
+    if (!currentUser || !isDpm || !isMobile) return;
+
+    const targetPath = getMobileDirectPathForRole(currentUser.role);
+    if (!targetPath) return;
+
+    // Saat user membuka web di HP atau login (pada root / dashboard / login), direct langsung ke komisi masing-masing
+    const curPath = location.pathname;
+    if (curPath === '/' || curPath === '/dashboard' || curPath === '/login' || curPath === '') {
+      navigate(targetPath, { replace: true });
+    }
+  }, [currentUser, isDpm, isMobile, location.pathname, navigate]);
 
   // 15-Minute Inactivity Auto-Logout (15 * 60 * 1000 ms)
   useEffect(() => {
@@ -306,20 +337,24 @@ export default function App() {
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
         />
 
-        <main className="flex-1 p-3.5 sm:p-5 lg:p-7 xl:p-8 max-w-[1440px] w-full mx-auto overflow-x-hidden">
+        <main className="flex-1 p-3 sm:p-5 lg:p-7 xl:p-8 max-w-[1440px] w-full mx-auto overflow-x-hidden">
           <Suspense fallback={<ViewLoadingFallback tab={currentPathTab} />}>
             <RouteErrorBoundary>
               <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/register" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/" element={<Navigate to={directPath || '/dashboard'} replace />} />
+                <Route path="/login" element={<Navigate to={directPath || '/dashboard'} replace />} />
+                <Route path="/register" element={<Navigate to={directPath || '/dashboard'} replace />} />
                 
                 <Route path="/dashboard" element={
-                  <DashboardView 
-                    onOpenAddProker={() => handleOpenAddProker('')}
-                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
-                    onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
-                  />
+                  directPath ? (
+                    <Navigate to={directPath} replace />
+                  ) : (
+                    <DashboardView 
+                      onOpenAddProker={() => handleOpenAddProker('')}
+                      onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                      onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
+                    />
+                  )
                 } />
 
                 <Route path="/proker" element={
@@ -367,6 +402,12 @@ export default function App() {
                 {/* Struktur Organisasi DPM (Khusus Role DPM) */}
                 <Route path="/struktur" element={isDpm ? <StrukturView /> : <Navigate to="/dashboard" replace />} />
 
+                {/* Sub-menu Khusus Per-Komisi DPM (Workspace Tree) */}
+                <Route path="/komisi/keuangan" element={isDpm ? <KomisiKeuanganView /> : <Navigate to="/dashboard" replace />} />
+                <Route path="/komisi/kominfo" element={isDpm ? <KomisiKominfoView /> : <Navigate to="/dashboard" replace />} />
+                <Route path="/komisi/advokasi" element={isDpm ? <KomisiAdvokasiView /> : <Navigate to="/dashboard" replace />} />
+                <Route path="/komisi/bendahara" element={isDpm ? <KomisiBendaharaView /> : <Navigate to="/dashboard" replace />} />
+
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </RouteErrorBoundary>
@@ -402,7 +443,7 @@ export default function App() {
           />
         )}
 
-        {isIssueSPOpen && !isGuest && (
+        {isIssueSPOpen && canPrintSP(currentUser?.role, currentUser?.ormawaId) && (
           <IssueSPModal 
             isOpen={isIssueSPOpen} 
             onClose={() => setIsIssueSPOpen(false)}

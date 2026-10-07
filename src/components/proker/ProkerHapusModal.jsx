@@ -19,6 +19,7 @@ import {
   CheckCircle, 
   XCircle 
 } from 'lucide-react';
+import DropdownSelect from '@/components/ui/dropdown-select';
 
 const REASON_CATEGORIES = [
   'Perubahan Kalender Akademik Kampus',
@@ -104,15 +105,14 @@ export function AjukanHapusProkerModal({ isOpen, onClose, proker }) {
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 block">Kategori Alasan Pembatalan</label>
-            <select
+            <DropdownSelect
               value={reasonCategory}
-              onChange={(e) => setReasonCategory(e.target.value)}
-              className="w-full h-10 px-3 rounded-xl bg-white border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              {REASON_CATEGORIES.map((cat, idx) => (
-                <option key={idx} value={cat}>{cat}</option>
-              ))}
-            </select>
+              onChange={setReasonCategory}
+              options={REASON_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+              placeholder="Pilih Kategori Alasan"
+              triggerClassName="min-h-[40px] py-2 px-3 rounded-xl text-xs bg-white border-slate-200"
+              contentClassName="w-full z-50 shadow-xl"
+            />
           </div>
 
           <div className="space-y-1.5">

@@ -19,6 +19,7 @@ import {
   Lock,
   Save
 } from 'lucide-react';
+import LastLoginWidget from './LastLoginWidget';
 
 export default function ProfileModal({ isOpen, onClose }) {
   const { currentUser, updateUserProfile, changeUserPassword, ormawas } = useStore(useShallow(state => ({ currentUser: state.currentUser, updateUserProfile: state.updateUserProfile, changeUserPassword: state.changeUserPassword, ormawas: state.ormawas })));
@@ -199,6 +200,11 @@ export default function ProfileModal({ isOpen, onClose }) {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jabatan / Role</span>
                   <span className="text-xs font-bold text-slate-800 capitalize truncate block">{currentUser.role}</span>
                 </div>
+              </div>
+
+              {/* Status Login & Tanggal */}
+              <div className="pt-1">
+                <LastLoginWidget currentUser={currentUser} variant="dropdown" />
               </div>
 
               <div className="pt-2 flex justify-end">

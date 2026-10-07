@@ -188,92 +188,59 @@ export const authService = {
   },
 
   /**
-   * Pendaftaran akun baru pengurus ormawa (Status default: pending, DPM with valid token: approved)
+   * Pendaftaran akun baru pengurus DPM FASILKOM (Wajib Kode Otorisasi DPM)
    */
-  async register({ name, nim, ormawaId, role, username, password, securityToken, ticketNumber }) {
+  async register({ name, nim, ormawaId = 'dpm', role, username, password, securityToken }) {
     if (!isSupabaseConfigured) {
       return { success: false, fallback: true, message: 'Supabase belum terkonfigurasi' };
     }
 
     // Validasi otorisasi DPM sebelum proses pendaftaran
     const validDpmToken = (import.meta.env.VITE_DPM_SECURITY_TOKEN || 'DPM-FASILKOM-2026').trim();
-    if (ormawaId === 'dpm' && (!securityToken || securityToken.trim() !== validDpmToken)) {
+    if (!securityToken || securityToken.trim() !== validDpmToken) {
       return {
         success: false,
-        message: 'Kode Otorisasi Keamanan DPM tidak valid. Hanya pimpinan resmi DPM yang memiliki akses pendaftaran ini.'
+        message: 'Kode Otorisasi Keamanan DPM tidak valid. Hanya pengurus resmi DPM yang dapat mendaftar.'
       };
     }
 
     const cleanUsername = username.toLowerCase().trim();
-    const activeTicket = ticketNumber ? ticketNumber.trim() : `REG-${ormawaId.toUpperCase()}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const normalizedRole = (role === 'sekre' || role === 'sekretaris') ? 'sekretaris' : (role ? role.toLowerCase().trim() : 'anggota');
+    let normalizedRole = (role || '').toLowerCase().trim();
+    if (normalizedRole === 'sekre') normalizedRole = 'sekretaris';
 
-    // 1. Registrasi via RPC register_member (Bypass Email Rate Limit, Proteksi Token DPM, & Tiket Registrasi)
+    // 1. Registrasi via RPC register_member (Bypass Email Rate Limit & Proteksi Token DPM)
     try {
       let rpcRes = null;
       let rpcErr = null;
 
-      // Coba versi 8 parameter terlebih dahulu
-      const res8 = await supabase.rpc('register_member', {
+      const res = await supabase.rpc('register_member', {
         p_name: name.trim(),
         p_nim: nim.trim(),
-        p_ormawa_id: ormawaId,
+        p_ormawa_id: 'dpm',
         p_role: normalizedRole,
         p_username: cleanUsername,
         p_password: password,
-        p_security_token: securityToken ? securityToken.trim() : null,
-        p_ticket_number: activeTicket,
+        p_security_token: securityToken.trim(),
       });
 
-      rpcRes = res8.data;
-      rpcErr = res8.error;
-
-      // Jika versi 8 parameter belum terpasang di database (PGRST202 / schema cache), panggil versi 6 parameter yang ada
-      if (rpcErr && (rpcErr.code === 'PGRST202' || rpcErr.message?.includes('schema cache'))) {
-        console.warn('[authService] RPC 8-params not found in schema cache, fallback to 6-params register_member...');
-        const res6 = await supabase.rpc('register_member', {
-          p_name: name.trim(),
-          p_nim: nim.trim(),
-          p_ormawa_id: ormawaId,
-          p_role: normalizedRole,
-          p_username: cleanUsername,
-          p_password: password,
-        });
-        rpcRes = res6.data;
-        rpcErr = res6.error;
-      }
+      rpcRes = res.data;
+      rpcErr = res.error;
 
       if (!rpcErr && rpcRes) {
         if (!rpcRes.success) {
           return { success: false, message: rpcRes.message };
         }
 
-        const finalStatus = ormawaId === 'dpm' ? 'approved' : (rpcRes.status || 'pending');
-
-        // Update profiles jika kolom ticket_number ada di database
-        try {
-          await supabase
-            .from('profiles')
-            .update({ 
-              status: finalStatus,
-              ticket_number: activeTicket 
-            })
-            .eq('username', cleanUsername);
-        } catch (updErr) {
-          console.warn('[authService] Optional profiles update ticket_number warning:', updErr);
-        }
-
         return {
           success: true,
-          ticketNumber: activeTicket,
-          status: finalStatus,
+          status: 'approved',
           username: cleanUsername,
           name: name.trim(),
           nim: nim.trim(),
-          ormawaId,
-          role,
+          ormawaId: 'dpm',
+          role: normalizedRole,
           createdAt: new Date().toISOString(),
-          message: rpcRes.message || (finalStatus === 'approved' ? 'Pendaftaran berhasil dan akun Anda langsung aktif sebagai pengurus DPM.' : 'Pendaftaran berhasil. Akun Anda menunggu verifikasi (ACC) oleh pimpinan DPM.'),
+          message: 'Pendaftaran berhasil dan akun Anda langsung aktif sebagai pengurus DPM FASILKOM.',
         };
       }
       if (rpcErr) {
@@ -314,7 +281,6 @@ export const authService = {
           nim: nim.trim(),
           ormawa_id: ormawaId,
           role: role === 'sekre' ? 'sekretaris' : role,
-          ticket_number: activeTicket,
         },
       },
     });
@@ -345,16 +311,15 @@ export const authService = {
 
     return {
       success: true,
-      ticketNumber: activeTicket,
-      status: ormawaId === 'dpm' ? 'approved' : 'pending',
+      status: 'approved',
       username: cleanUsername,
       name: name.trim(),
       nim: nim.trim(),
-      ormawaId,
+      ormawaId: 'dpm',
       role,
       createdAt: new Date().toISOString(),
       user: data.user,
-      message: 'Pendaftaran berhasil. Akun Anda berstatus menunggu verifikasi (ACC) oleh pimpinan DPM.',
+      message: 'Pendaftaran berhasil dan akun Anda langsung aktif sebagai pengurus DPM FASILKOM.',
     };
   },
 
@@ -441,96 +406,11 @@ export const authService = {
   },
 
   /**
-   * Ambil daftar akun pengurus yang masih pending (Khusus Pimpinan DPM)
-   */
-  async getPendingAccounts() {
-    if (!isSupabaseConfigured) return [];
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('[authService] Gagal mengambil pending accounts:', error);
-      return [];
-    }
-    return data || [];
-  },
-
-  /**
-   * ACC (Setujui) Akun Pengurus Baru oleh Pimpinan DPM
-   */
-  async approveAccount(targetUserId, approverId) {
-    if (!isSupabaseConfigured) return { success: false };
-
-    // Coba RPC approve_pending_account
-    try {
-      const { data: rpcRes, error: rpcErr } = await supabase.rpc('approve_pending_account', {
-        p_user_id: targetUserId,
-      });
-      if (!rpcErr && rpcRes && rpcRes.success) {
-        return { success: true };
-      }
-    } catch (e) {
-      console.warn('[authService] RPC approve error, fallback:', e);
-    }
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        status: 'approved',
-        rejection_reason: null,
-        approved_by: approverId,
-        approved_at: new Date().toISOString(),
-      })
-      .eq('id', targetUserId);
-
-    if (error) return { success: false, message: error.message };
-    return { success: true };
-  },
-
-  /**
-   * Tolak Akun Pengurus oleh Pimpinan DPM
-   */
-  async rejectAccount(targetUserId, approverId, reason = null) {
-    if (!isSupabaseConfigured) return { success: false };
-
-    // Coba RPC reject_pending_account
-    try {
-      const { data: rpcRes, error: rpcErr } = await supabase.rpc('reject_pending_account', {
-        p_user_id: targetUserId,
-        p_reason: reason,
-      });
-      if (!rpcErr && rpcRes && rpcRes.success) {
-        return { success: true };
-      }
-    } catch (e) {
-      console.warn('[authService] RPC reject error, fallback:', e);
-    }
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        status: 'rejected',
-        rejection_reason: reason || 'Data kepengurusan tidak memenuhi kualifikasi resmi.',
-        approved_by: approverId,
-        approved_at: new Date().toISOString(),
-      })
-      .eq('id', targetUserId);
-
-    if (error) return { success: false, message: error.message };
-    return { success: true };
-  },
-
-  /**
    * Reset password manual untuk pengurus oleh Admin DPM
    */
   async resetPasswordByAdmin(targetUserId, newPassword) {
     if (!isSupabaseConfigured) return { success: false };
 
-    // Memanggil RPC atau edge function khusus jika tersedia
     const { error } = await supabase.rpc('admin_reset_user_password', {
       p_user_id: targetUserId,
       p_new_password: newPassword,
@@ -541,32 +421,6 @@ export const authService = {
   },
 
   /**
-   * Reset Kata Sandi Mandiri Menggunakan NIM dan Nomor Tiket Registrasi
-   */
-  async resetPasswordWithTicket({ nim, ticketNumber, newPassword }) {
-    if (!isSupabaseConfigured) {
-      return { success: false, fallback: true, message: 'Supabase belum terkonfigurasi' };
-    }
-
-    try {
-      const { data, error } = await supabase.rpc('reset_password_with_ticket', {
-        p_nim: nim.trim(),
-        p_ticket_number: ticketNumber.trim(),
-        p_new_password: newPassword,
-      });
-
-      if (error) {
-        return { success: false, message: error.message };
-      }
-
-      return data || { success: false, message: 'Gagal memproses permohonan reset sandi.' };
-    } catch (err) {
-      console.error('[authService] Error reset password with ticket:', err);
-      return { success: false, message: 'Terjadi kendala koneksi saat mereset kata sandi.' };
-    }
-  },
-
-  /**
    * Helper pembersihan akun uji coba Wakil DPM
    */
   async cleanupWakilDpm() {
@@ -574,7 +428,6 @@ export const authService = {
     try {
       await supabase.rpc('cleanup_wakil_dpm');
     } catch {
-      // fallback delete directly if RPC is not deployed yet
       try {
         await supabase.from('profiles').delete().match({ ormawa_id: 'dpm', role: 'wakil' });
       } catch {

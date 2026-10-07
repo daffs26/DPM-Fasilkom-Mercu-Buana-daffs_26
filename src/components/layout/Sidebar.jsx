@@ -7,11 +7,20 @@ import {
   Layers, 
   FolderOpen, 
   Award, 
-  Network,
-  RotateCcw,
-  X,
-  LogOut
+  Network, 
+  RotateCcw, 
+  X, 
+  LogOut,
+  ChevronDown,
+  SlidersHorizontal
 } from 'lucide-react';
+import { 
+  isViewerOnly, 
+  getRoleConfig, 
+  useIsMobile, 
+  getMobileDirectPathForRole 
+} from '@/utils/permissions';
+import LastLoginWidget from './LastLoginWidget';
 
 function getActiveMenuId(path) {
   const clean = path.replace(/^\//, '') || 'dashboard';
@@ -21,9 +30,36 @@ function getActiveMenuId(path) {
   return clean;
 }
 
-function SidebarNavList({ items, activeTab, currentPathTab, onSelectTab }) {
+function SidebarNavList({ 
+  items, 
+  activeTab, 
+  currentPathTab, 
+  onSelectTab,
+  isDpm = true,
+  isKomisiOpen,
+  setIsKomisiOpen,
+  currentUser,
+  isMobileDrawer = false 
+}) {
+  const directPath = isMobileDrawer ? getMobileDirectPathForRole(currentUser?.role) : null;
+  const isAnyKomisiActive = currentPathTab.startsWith('komisi/') || (directPath && currentPathTab === directPath.replace(/^\//, ''));
+
+  const allKomisiItems = [
+    { id: 'komisi/keuangan', label: 'Keuangan', path: '/komisi/keuangan' },
+    { id: 'komisi/kominfo', label: 'Kominfo', path: '/komisi/kominfo' },
+    { id: 'komisi/advokasi', label: 'Advokasi', path: '/komisi/advokasi' },
+    { id: 'komisi/bendahara', label: 'Bendahara', path: '/komisi/bendahara' },
+    { id: 'audit', label: 'Pengawasan', path: '/audit' }
+  ];
+
+  // Pada HP untuk anggota komisi tertentu, langsung tampilkan sub-menu komisinya sendiri
+  // Untuk Ketua, Wakil, atau tampilan Desktop, tampilkan seluruh daftar komisi
+  const komisiItems = (isMobileDrawer && directPath)
+    ? allKomisiItems.filter(sub => sub.path === directPath)
+    : allKomisiItems.filter(sub => sub.id !== 'audit');
+
   return (
-    <div className="p-3.5 space-y-1.5">
+    <div className="p-3.5 space-y-1">
       <p className="px-3 text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
         Menu Utama
       </p>
@@ -53,6 +89,51 @@ function SidebarNavList({ items, activeTab, currentPathTab, onSelectTab }) {
           </Link>
         );
       })}
+
+      {/* Sub-menu Khusus Per-Komisi DPM (Konsep Workspace Tree) */}
+      {isDpm && (
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => setIsKomisiOpen(prev => !prev)}
+            className={`w-full min-h-[42px] flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold tracking-normal transition-all duration-150 cursor-pointer select-none active:scale-[0.98] ${
+              isAnyKomisiActive
+                ? 'text-slate-900 bg-slate-100/80 font-bold'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 truncate">
+              <div className="w-6 h-6 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0">
+                <SlidersHorizontal className="w-3.5 h-3.5 stroke-[2]" />
+              </div>
+              <span className="truncate tracking-tight font-bold text-slate-800">Komisi</span>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isKomisiOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {isKomisiOpen && (
+            <div className="relative ml-6 pl-3 border-l border-slate-200/90 my-1 space-y-0.5 animate-in fade-in duration-150">
+              {komisiItems.map((sub) => {
+                const isSubActive = currentPathTab === sub.id;
+                return (
+                  <Link
+                    key={sub.id}
+                    to={sub.path}
+                    onClick={() => onSelectTab(sub.id)}
+                    className={`w-full min-h-[38px] flex items-center justify-between px-3 py-2 rounded-lg text-xs tracking-normal transition-all duration-150 cursor-pointer select-none active:scale-[0.98] ${
+                      isSubActive
+                        ? 'bg-slate-100 text-slate-900 font-bold shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
+                    }`}
+                  >
+                    <span className="truncate">{sub.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -64,12 +145,13 @@ function SidebarRegulatoryCard() {
 function SidebarFooter({ currentUser, onLogout, onReset }) {
   const ormawas = useStore(state => state.ormawas);
   if (!currentUser) return null;
-  const isGuest = currentUser.role === 'guest';
+  const isViewer = isViewerOnly(currentUser.role);
+  const roleCfg = getRoleConfig(currentUser.role);
   const userOrmawa = ormawas?.find(o => o.id === currentUser?.ormawaId) || ormawas?.find(o => o.id === 'dpm');
   const userLogo = userOrmawa?.logo || '/logos/logo-dpm.png';
 
   return (
-    <div className="p-3.5 border-t border-slate-100 bg-slate-50/60 space-y-2.5 shrink-0">
+    <div className="p-3.5 border-t border-slate-100 bg-slate-50/60 space-y-2 shrink-0">
       <div className="flex items-center gap-3 p-2.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
         <div 
           className="w-9 h-9 min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-full bg-white border border-slate-200/90 p-1 flex items-center justify-center shadow-2xs shrink-0 overflow-hidden"
@@ -95,23 +177,25 @@ function SidebarFooter({ currentUser, onLogout, onReset }) {
             {currentUser.name}
           </p>
           <p className="text-[10px] text-blue-700 font-semibold truncate capitalize">
-            {isGuest ? 'Akses Transparansi Publik' : `${currentUser.role} • ${userOrmawa?.shortName || currentUser.ormawaId.toUpperCase()}`}
+            {isViewer ? 'Akses Transparansi Publik' : `${roleCfg.label} • DPM`}
           </p>
         </div>
       </div>
 
       <button
+        type="button"
         onClick={onLogout}
-        className="w-full flex items-center justify-center gap-1.5 text-[11px] text-red-600 hover:text-red-700 py-1.5 font-bold transition bg-red-50 hover:bg-red-100 rounded-xl cursor-pointer"
+        className="w-full min-h-[40px] flex items-center justify-center gap-1.5 text-xs text-red-600 hover:text-red-700 py-2 font-bold transition bg-red-50 hover:bg-red-100 rounded-xl cursor-pointer active:scale-98"
       >
         <LogOut className="w-3.5 h-3.5" />
-        <span>{isGuest ? 'Keluar Mode Tamu' : 'Keluar Akun'}</span>
+        <span>{isViewer ? 'Keluar Mode Pelihat' : 'Keluar Akun'}</span>
       </button>
 
-      {!isGuest && (
+      {!isViewer && (
         <button
+          type="button"
           onClick={onReset}
-          className="w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-800 py-1 font-medium transition cursor-pointer"
+          className="w-full min-h-[36px] flex items-center justify-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 py-1.5 font-medium transition cursor-pointer active:scale-98"
         >
           <RotateCcw className="w-3 h-3 text-slate-400" />
           <span>Reset Data Demo</span>
@@ -169,11 +253,20 @@ export default function Sidebar({ isOpen, onClose }) {
     }
   }, [activeTab, currentPathTab, unreadProkerLogsCount, markHistoryAsRead, hasSeenTemplateTab, markTemplateTabAsSeen]);
 
+  const isMobile = useIsMobile();
+  const isGuest = currentUser?.role === 'guest';
+  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
+  const directPath = (isMobile && isDpm) ? getMobileDirectPathForRole(currentUser?.role) : null;
+
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
     if (tabId === 'proker' && unreadProkerLogsCount > 0) markHistoryAsRead?.();
     if (tabId === 'transparansi' && !hasSeenTemplateTab) markTemplateTabAsSeen?.();
-    navigate(`/${tabId}`);
+    if (tabId === 'dashboard' && directPath) {
+      navigate(directPath);
+    } else {
+      navigate(`/${tabId}`);
+    }
     onClose?.();
   };
 
@@ -188,8 +281,6 @@ export default function Sidebar({ isOpen, onClose }) {
       resetToDefaultData();
     }
   };
-
-  const isGuest = currentUser?.role === 'guest';
 
   const menuItems = [
     { 
@@ -234,8 +325,6 @@ export default function Sidebar({ isOpen, onClose }) {
     }
   ];
 
-  const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
-
   const filteredMenuItems = menuItems.filter(item => {
     if (!currentUser) return false;
     if (item.id === 'struktur') {
@@ -244,20 +333,30 @@ export default function Sidebar({ isOpen, onClose }) {
     return true;
   });
 
+  const [isKomisiOpen, setIsKomisiOpen] = React.useState(true);
+
   return (
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-[280px] h-screen sticky top-0 bg-white border-r border-slate-200/80 flex-col justify-between shrink-0 select-none z-30 overflow-hidden">
         <div className="flex-1 overflow-y-auto flex flex-col">
-          <div className="p-5 border-b border-slate-100 flex items-center gap-3 shrink-0">
-            <div className="w-11 h-11 min-w-[44px] min-h-[44px] max-w-[44px] max-h-[44px] rounded-2xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-xs" style={{ width: '44px', height: '44px' }}>
-              <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full max-w-full max-h-full object-contain block" />
+          <div className="p-3.5 sm:p-4 border-b border-slate-100 flex flex-col gap-2 shrink-0 bg-slate-50/30">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] rounded-2xl bg-white border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-2xs">
+                <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full max-w-full max-h-full object-contain block" />
+              </div>
+              <div className="overflow-hidden min-w-0">
+                <h1 className="text-sm font-extrabold text-slate-900 tracking-tight truncate leading-tight">
+                  DPM FASILKOM
+                </h1>
+                <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                  Portal Pengawasan Ormawa
+                </p>
+              </div>
             </div>
-            <div className="overflow-hidden">
-              <h1 className="text-sm font-extrabold text-slate-900 tracking-normal mt-0.5 truncate">
-                DPM FASILKOM
-              </h1>
-            </div>
+
+            {/* Fitur Last Login Di Bawah Teks DPM Fasilkom */}
+            <LastLoginWidget currentUser={currentUser} variant="sidebar" />
           </div>
 
           <SidebarNavList 
@@ -265,6 +364,11 @@ export default function Sidebar({ isOpen, onClose }) {
             activeTab={activeTab} 
             currentPathTab={currentPathTab} 
             onSelectTab={handleSelectTab} 
+            isDpm={isDpm}
+            isKomisiOpen={isKomisiOpen}
+            setIsKomisiOpen={setIsKomisiOpen}
+            currentUser={currentUser}
+            isMobileDrawer={false}
           />
 
           <SidebarRegulatoryCard />
@@ -282,25 +386,33 @@ export default function Sidebar({ isOpen, onClose }) {
         isOpen ? 'sidebar-drawer-open opacity-100 pointer-events-auto visible' : 'sidebar-drawer-closed opacity-0 pointer-events-none invisible'
       }`}>
         <div className="flex-1 overflow-y-auto flex flex-col min-h-0 pb-4">
-          <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] rounded-2xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-xs" style={{ width: '40px', height: '40px' }}>
-                <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full max-w-full max-h-full object-contain block" />
+          <div className="p-3.5 sm:p-4 border-b border-slate-100 flex flex-col gap-2 shrink-0 bg-slate-50/30">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-xl bg-white border border-slate-200/80 p-1 flex items-center justify-center shrink-0 shadow-2xs">
+                  <img src="/logos/logo-dpm.png" alt="Logo DPM Fasilkom UMB" className="w-full h-full max-w-full max-h-full object-contain block" />
+                </div>
+                <div className="overflow-hidden min-w-0">
+                  <h1 className="text-sm font-black text-slate-900 tracking-tight truncate leading-tight">
+                    DPM FASILKOM
+                  </h1>
+                  <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                    Portal Pengawasan Ormawa
+                  </p>
+                </div>
               </div>
-              <div className="overflow-hidden">
-                <h1 className="text-sm font-black text-slate-900 tracking-tight mt-0.5 truncate">
-                  DPM FASILKOM
-                </h1>
-              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Tutup Menu"
+                className="w-10 h-10 min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition shrink-0 cursor-pointer active:scale-95"
+              >
+                <X className="w-5 h-5 stroke-[2]" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Tutup Menu"
-              className="w-10 h-10 min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0 cursor-pointer active:scale-95"
-            >
-              <X className="w-5 h-5 stroke-[2]" />
-            </button>
+
+            {/* Fitur Last Login Di Bawah Teks DPM Fasilkom (Mobile) */}
+            <LastLoginWidget currentUser={currentUser} variant="sidebar" />
           </div>
 
           <SidebarNavList 
@@ -308,6 +420,11 @@ export default function Sidebar({ isOpen, onClose }) {
             activeTab={activeTab} 
             currentPathTab={currentPathTab} 
             onSelectTab={handleSelectTab} 
+            isDpm={isDpm}
+            isKomisiOpen={isKomisiOpen}
+            setIsKomisiOpen={setIsKomisiOpen}
+            currentUser={currentUser}
+            isMobileDrawer={true}
           />
 
           <SidebarRegulatoryCard />

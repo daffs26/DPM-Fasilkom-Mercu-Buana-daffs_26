@@ -75,7 +75,7 @@ export default function TransparansiContainerView({
           </p>
         </div>
 
-        <div className="inline-flex p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 shadow-2xs self-start md:self-auto gap-1 max-w-full overflow-x-auto hide-scrollbar">
+        <div className="inline-flex p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 shadow-2xs self-stretch sm:self-start md:self-auto gap-1 max-w-full overflow-x-auto hide-scrollbar">
           {visibleTabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = currentTab === tab.id;
@@ -84,7 +84,7 @@ export default function TransparansiContainerView({
                 key={tab.id}
                 type="button"
                 onClick={() => setSearchParams({ tab: tab.id })}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer select-none shrink-0 active:scale-[0.98] ${
+                className={`flex-1 sm:flex-initial min-h-[40px] flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer select-none shrink-0 active:scale-[0.98] ${
                   isActive
                     ? 'bg-white text-blue-700 shadow-2xs border border-slate-200/80'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent'
