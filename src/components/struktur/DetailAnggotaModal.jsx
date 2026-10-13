@@ -45,7 +45,7 @@ export default function DetailAnggotaModal({ member, isOpen, onClose }) {
             </div>
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">
                   {member.unit}
                 </span>
                 {member.isLead && (

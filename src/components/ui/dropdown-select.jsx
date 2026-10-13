@@ -77,7 +77,11 @@ export default function DropdownSelect({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full min-h-[42px] bg-slate-50 hover:bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-semibold tracking-normal text-slate-800 flex items-center justify-between gap-2 transition focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white shadow-2xs active:scale-[0.99] ${
+        className={`w-full min-h-[42px] bg-slate-50 hover:bg-white border rounded-xl px-3.5 py-2.5 text-xs font-semibold tracking-normal text-slate-800 flex items-center justify-between gap-2 transition shadow-2xs active:scale-[0.99] ${
+          isOpen
+            ? 'border-red-500 ring-2 ring-red-500/20 bg-white'
+            : 'border-slate-200 hover:border-slate-300'
+        } focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 ${
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         } ${triggerClassName}`}
       >
@@ -98,8 +102,8 @@ export default function DropdownSelect({
         </span>
 
         <ChevronDown
-          className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-slate-700' : ''
+          className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-red-600' : 'text-slate-400'
           }`}
         />
       </button>
@@ -130,7 +134,7 @@ export default function DropdownSelect({
                     onClick={() => handleSelect(opt.value)}
                     className={`w-full min-h-[40px] px-3.5 py-2.5 rounded-xl text-xs font-medium text-left flex items-center justify-between gap-2 transition-colors cursor-pointer active:scale-[0.99] ${
                       isSelected
-                        ? 'bg-blue-50 text-blue-700 font-bold ring-1 ring-blue-200/80 shadow-2xs'
+                        ? 'bg-red-50 text-red-700 font-bold ring-1 ring-red-200/80 shadow-2xs'
                         : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                     }`}
                   >
@@ -139,7 +143,7 @@ export default function DropdownSelect({
                       <span className="truncate tracking-tight">{opt.label}</span>
                       {opt.badge && (
                         <span className={`text-[10px] tracking-wider px-2 py-0.5 rounded-md font-bold tabular-nums ${
-                          isSelected ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
+                          isSelected ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600'
                         }`}>
                           {opt.badge}
                         </span>
@@ -147,7 +151,7 @@ export default function DropdownSelect({
                     </span>
 
                     {isSelected && (
-                      <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-red-600 shrink-0" />
                     )}
                   </button>
                 );

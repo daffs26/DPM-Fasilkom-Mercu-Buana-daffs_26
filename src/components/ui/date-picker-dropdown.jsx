@@ -192,7 +192,7 @@ export default function DatePickerDropdown({
       {/* Input Trigger */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 flex items-center justify-between cursor-pointer hover:bg-white hover:border-slate-300 focus-within:ring-2 focus-within:ring-slate-900 transition"
+        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 flex items-center justify-between cursor-pointer hover:bg-white hover:border-slate-300 focus-within:ring-2 focus-within:ring-red-500/20 focus-within:border-red-500 transition"
       >
         <span className={value ? 'text-slate-800 font-medium' : 'text-slate-400 font-normal'}>
           {displayFormatted() || placeholder}
@@ -252,7 +252,7 @@ export default function DatePickerDropdown({
                 key={name}
                 className={`text-[11px] font-bold py-1 ${
                   idx === activeDayColumn
-                    ? 'text-blue-600 font-extrabold'
+                    ? 'text-red-600 font-extrabold'
                     : 'text-slate-800'
                 }`}
               >
@@ -273,7 +273,7 @@ export default function DatePickerDropdown({
                   onClick={() => handleSelectDate(cell.year, cell.month, cell.day)}
                   className={`w-8 h-8 rounded-full flex flex-col items-center justify-center transition-all relative ${
                     isSelected
-                      ? 'bg-blue-50 text-blue-600 font-bold ring-1 ring-blue-200'
+                      ? 'bg-red-50 text-red-600 font-bold ring-1 ring-red-200'
                       : cell.isCurrentMonth
                       ? 'text-slate-700 font-medium hover:bg-slate-100'
                       : 'text-slate-300 font-normal hover:bg-slate-50'
@@ -282,7 +282,7 @@ export default function DatePickerDropdown({
                   <span className="leading-none text-[12px]">{cell.day}</span>
                   {cell.hasDot && (
                     <span className={`w-1 h-1 rounded-full mt-0.5 ${
-                      isSelected ? 'bg-blue-600' : 'bg-blue-500'
+                      isSelected ? 'bg-red-600' : 'bg-red-500'
                     }`} />
                   )}
                 </button>

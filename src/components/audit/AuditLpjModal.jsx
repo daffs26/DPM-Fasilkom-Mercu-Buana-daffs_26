@@ -26,46 +26,46 @@ const PILLAR_CONFIGS = {
     icon: Clock,
     title: 'Kedisiplinan Rundown',
     subtitle: 'Ketepatan waktu sesi acara & ketiadaan delay berlebih',
-    badgeCls: 'bg-amber-50 text-amber-700 border-amber-200',
-    iconCls: 'bg-amber-50 text-amber-600 border-amber-200',
-    accentCls: 'accent-amber-500',
-    activePresetCls: 'bg-amber-500 text-white shadow-2xs'
+    badgeCls: 'bg-red-50 text-red-700 border-red-200',
+    iconCls: 'bg-red-50 text-red-600 border-red-200/60',
+    accentCls: 'accent-red-600',
+    activePresetCls: 'bg-red-600 text-white shadow-2xs'
   },
   peserta: {
     icon: Users,
     title: 'Capaian Target Peserta',
     subtitle: 'Realisasi kehadiran peserta dibanding kuota proposal',
-    badgeCls: 'bg-sky-50 text-sky-700 border-sky-200',
-    iconCls: 'bg-sky-50 text-sky-600 border-sky-200',
-    accentCls: 'accent-sky-500',
-    activePresetCls: 'bg-sky-500 text-white shadow-2xs'
+    badgeCls: 'bg-red-50 text-red-700 border-red-200',
+    iconCls: 'bg-red-50 text-red-600 border-red-200/60',
+    accentCls: 'accent-red-600',
+    activePresetCls: 'bg-red-600 text-white shadow-2xs'
   },
   anggaran: {
     icon: Coins,
     title: 'Efisiensi Anggaran & Bukti Nota',
     subtitle: 'Kesesuaian realisasi dengan RAB & kelengkapan nota',
-    badgeCls: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    iconCls: 'bg-emerald-50 text-emerald-600 border-emerald-200',
-    accentCls: 'accent-emerald-500',
-    activePresetCls: 'bg-emerald-500 text-white shadow-2xs'
+    badgeCls: 'bg-red-50 text-red-700 border-red-200',
+    iconCls: 'bg-red-50 text-red-600 border-red-200/60',
+    accentCls: 'accent-red-600',
+    activePresetCls: 'bg-red-600 text-white shadow-2xs'
   },
   sla: {
     icon: FileCheck,
     title: 'Ketepatan Waktu Berkas',
     subtitle: 'Ketepatan waktu pengajuan Proposal (H-14) & LPJ (H+14)',
-    badgeCls: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    iconCls: 'bg-indigo-50 text-indigo-600 border-indigo-200',
-    accentCls: 'accent-indigo-500',
-    activePresetCls: 'bg-indigo-500 text-white shadow-2xs'
+    badgeCls: 'bg-red-50 text-red-700 border-red-200',
+    iconCls: 'bg-red-50 text-red-600 border-red-200/60',
+    accentCls: 'accent-red-600',
+    activePresetCls: 'bg-red-600 text-white shadow-2xs'
   },
   output: {
     icon: Target,
     title: 'Mutu Output & Dampak',
     subtitle: 'Kesesuaian hasil nyata kegiatan dengan visi ormawa',
-    badgeCls: 'bg-rose-50 text-rose-700 border-rose-200',
-    iconCls: 'bg-rose-50 text-rose-600 border-rose-200',
-    accentCls: 'accent-rose-500',
-    activePresetCls: 'bg-rose-500 text-white shadow-2xs'
+    badgeCls: 'bg-red-50 text-red-700 border-red-200',
+    iconCls: 'bg-red-50 text-red-600 border-red-200/60',
+    accentCls: 'accent-red-600',
+    activePresetCls: 'bg-red-600 text-white shadow-2xs'
   }
 };
 
@@ -612,7 +612,7 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
                     <button
                       type="button"
                       onClick={() => handleSetAllScores(18)}
-                      className="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition cursor-pointer"
+                      className="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition cursor-pointer"
                     >
                       Baik (90)
                     </button>

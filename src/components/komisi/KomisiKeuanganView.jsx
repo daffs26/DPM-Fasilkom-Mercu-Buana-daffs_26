@@ -12,9 +12,7 @@ import {
   Filter, 
   ArrowUpRight,
   ShieldAlert,
-  Sparkles,
   PieChart,
-  HelpCircle,
   Target,
   Calendar,
   FileText
@@ -83,9 +81,8 @@ function getStatusStyle(status) {
 }
 
 export default function KomisiKeuanganView() {
-  const { ormawas, budgetTransactions, currentUser } = useStore(useShallow(state => ({
+  const { ormawas, currentUser } = useStore(useShallow(state => ({
     ormawas: state.ormawas,
-    budgetTransactions: state.budgetTransactions,
     currentUser: state.currentUser
   })));
 
@@ -192,12 +189,6 @@ export default function KomisiKeuanganView() {
     { value: 'Efisiensi Pos Biaya', label: 'Efisiensi Pos Biaya' },
     { value: 'Kepatuhan SPJ & Nota Fisik', label: 'Kepatuhan SPJ & Nota Fisik' },
     { value: 'Lainnya', label: 'Lainnya' }
-  ];
-
-  const priorityOptions = [
-    { value: 'Sedang', label: 'Sedang' },
-    { value: 'Penting', label: 'Penting' },
-    { value: 'Tinggi', label: 'Tinggi' }
   ];
 
   const handleCycleStatus = (recId) => {

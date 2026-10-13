@@ -56,7 +56,7 @@ function KalenderGrid({
   const legendItems = [
     { label: 'Sabtu & Minggu', dot: 'bg-rose-600', box: 'bg-rose-50/80 border-rose-100 text-rose-700' },
     { label: 'Libur Nasional', dot: 'bg-amber-400 ring-1 ring-amber-200', box: 'bg-amber-50/90 border-amber-200 text-amber-900' },
-    { label: 'Proker Ormawa', dot: 'bg-blue-600', box: 'bg-blue-50/80 border-blue-100 text-blue-700' },
+    { label: 'Proker Ormawa (Logo)', dot: 'bg-blue-600', box: 'bg-blue-50/80 border-blue-100 text-blue-700' },
     { label: `${holidaysInMonth.length} Hari Libur`, dot: 'bg-amber-500', box: 'bg-amber-50 text-amber-800 border-amber-200' }
   ];
 
@@ -172,6 +172,9 @@ function KalenderGrid({
               p => p.startDate === item.dateStr || (p.startDate <= item.dateStr && p.endDate >= item.dateStr)
             );
             const isToday = item.dateStr === todayISO;
+            const activeOrmawas = Array.from(
+              new Set(hasEvents.map(p => p.ormawaId))
+            ).map(id => ormawas.find(o => o.id === id)).filter(Boolean);
 
             return (
               <div
@@ -181,7 +184,7 @@ function KalenderGrid({
                   setSelectedDate(item.dateStr);
                   onOpenAddProker?.(item.dateStr);
                 }}
-                className={`h-[48px] sm:h-[54px] lg:h-[58px] xl:h-[62px] p-1 sm:p-1.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between group relative ${
+                className={`min-h-[50px] sm:min-h-[56px] lg:min-h-[60px] xl:min-h-[64px] p-1 sm:p-1.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between group relative ${
                   isSelected
                     ? 'border-blue-400 bg-blue-50/90 shadow-xs ring-2 ring-blue-300/80 z-10'
                     : item.isCurrentMonth
@@ -195,7 +198,7 @@ function KalenderGrid({
                     : 'border-transparent bg-slate-50/30 text-slate-300 opacity-40 hover:opacity-70'
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-1">
                   <span 
                     className={`text-[11px] sm:text-xs leading-none ${
                       isSelected
@@ -207,6 +210,35 @@ function KalenderGrid({
                   </span>
 
                   <div className="flex items-center gap-1">
+                    {/* Logo Ormawa yang sedang prokeran */}
+                    {activeOrmawas.length > 0 && (
+                      <div 
+                        className="flex items-center -space-x-1 sm:-space-x-1.5" 
+                        title={`Proker: ${activeOrmawas.map(o => o.shortName || o.name).join(', ')}`}
+                      >
+                        {activeOrmawas.slice(0, 2).map((o) => (
+                          <div 
+                            key={o.id}
+                            className="w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-full bg-white border border-slate-200 shadow-2xs p-0.5 flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-110 transition-transform"
+                          >
+                            <img 
+                              src={o.logo} 
+                              alt={o.shortName || o.name} 
+                              className="w-full h-full object-contain block"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        ))}
+                        {activeOrmawas.length > 2 && (
+                          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-slate-800 text-white text-[7px] font-bold flex items-center justify-center shrink-0 border border-white">
+                            +{activeOrmawas.length - 2}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {isToday && (
                       <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-blue-600 ring-2 ring-white' : 'bg-blue-600'}`} title="Hari Ini" />
                     )}
@@ -235,15 +267,29 @@ function KalenderGrid({
                 )}
 
                 {hasEvents.length > 0 && (
-                  <div className="space-y-0.5">
-                    <div
-                      className={`text-[8px] font-bold truncate px-1 py-0.2 rounded leading-tight ${
-                        isSelected ? 'bg-blue-600 text-white shadow-2xs' : 'bg-slate-900 text-white'
-                      }`}
-                      title={`${ormawas.find(o => o.id === hasEvents[0].ormawaId)?.shortName}: ${hasEvents[0].title}`}
-                    >
-                      <span>{hasEvents[0].title}</span>
-                    </div>
+                  <div className="space-y-0.5 mt-auto">
+                    {(() => {
+                      const firstEvent = hasEvents[0];
+                      const firstOrmawa = ormawas.find(o => o.id === firstEvent.ormawaId);
+                      return (
+                        <div
+                          className={`text-[8px] font-bold truncate px-1 py-0.5 rounded leading-tight flex items-center gap-1 ${
+                            isSelected ? 'bg-blue-600 text-white shadow-2xs' : 'bg-slate-900 text-white'
+                          }`}
+                          title={`${firstOrmawa?.shortName || 'Ormawa'}: ${firstEvent.title}`}
+                        >
+                          {firstOrmawa?.logo && (
+                            <img 
+                              src={firstOrmawa.logo} 
+                              alt={firstOrmawa.shortName} 
+                              className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white object-contain shrink-0 p-0.2" 
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          )}
+                          <span className="truncate">{firstEvent.title}</span>
+                        </div>
+                      );
+                    })()}
                     {hasEvents.length > 1 && (
                       <div className={`text-[7px] font-bold px-0.5 leading-none ${isSelected ? 'text-blue-800' : 'text-slate-500'}`}>
                         +{hasEvents.length - 1} lagi

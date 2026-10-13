@@ -16,11 +16,20 @@ import { canPrintSP, useIsMobile, getMobileDirectPathForRole } from './utils/per
 const ProkerContainerView = lazy(() => import('./components/proker/ProkerContainerView'));
 const TransparansiContainerView = lazy(() => import('./components/berkas/TransparansiContainerView'));
 const PengawasanContainerView = lazy(() => import('./components/audit/PengawasanContainerView'));
+const KalenderContainerView = lazy(() => import('./components/kalender/KalenderContainerView'));
 const StrukturView = lazy(() => import('./components/struktur/StrukturView'));
 const KomisiKeuanganView = lazy(() => import('./components/komisi/KomisiKeuanganView'));
 const KomisiKominfoView = lazy(() => import('./components/komisi/KomisiKominfoView'));
 const KomisiAdvokasiView = lazy(() => import('./components/komisi/KomisiAdvokasiView'));
 const KomisiBendaharaView = lazy(() => import('./components/komisi/KomisiBendaharaView'));
+
+// Public domain components
+const PublicLayout = lazy(() => import('./components/public/PublicLayout'));
+const PublicLandingPage = lazy(() => import('./components/public/PublicLandingPage'));
+const PublicDashboardView = lazy(() => import('./components/public/PublicDashboardView'));
+const PublicPengawasanView = lazy(() => import('./components/public/PublicPengawasanView'));
+const PublicProkerView = lazy(() => import('./components/public/PublicProkerView'));
+const PublicStrukturView = lazy(() => import('./components/public/PublicStrukturView'));
 
 // Modals loaded on-demand (Disederhanakan & Lokasi Per Fitur)
 const AddProkerModal = lazy(() => import('./components/proker/TambahProkerModal'));
@@ -45,51 +54,40 @@ import {
   GenericPageSkeleton
 } from './components/ui/skeleton';
 
+const SKELETON_MAP = {
+  dashboard: DashboardSkeleton,
+  proker: ProkerSkeleton,
+  transparansi: BerkasSkeleton,
+  anggaran: AnggaranSkeleton,
+  audit: AuditSkeleton,
+  kalender: KalenderSkeleton,
+  berkas: BerkasSkeleton,
+  template: TemplateSkeleton,
+  sp: SuratPeringatanSkeleton,
+  history: HistorySkeleton,
+  struktur: GenericPageSkeleton
+};
+
 function ViewLoadingFallback({ tab }) {
-  switch (tab) {
-    case 'dashboard':
-      return <DashboardSkeleton />;
-    case 'proker':
-      return <ProkerSkeleton />;
-    case 'transparansi':
-      return <BerkasSkeleton />;
-    case 'anggaran':
-      return <AnggaranSkeleton />;
-    case 'audit':
-      return <AuditSkeleton />;
-    case 'kalender':
-      return <KalenderSkeleton />;
-    case 'berkas':
-      return <BerkasSkeleton />;
-    case 'template':
-      return <TemplateSkeleton />;
-    case 'sp':
-      return <SuratPeringatanSkeleton />;
-    case 'history':
-      return <HistorySkeleton />;
-    case 'struktur':
-      return <GenericPageSkeleton />;
-    default:
-      return <GenericPageSkeleton />;
-  }
+  const Component = SKELETON_MAP[tab] || GenericPageSkeleton;
+  return <Component />;
 }
 
 class RouteErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+  state = { hasError: false, error: null };
+
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
+
   componentDidCatch(error, errorInfo) {
     console.error('Route error caught:', error, errorInfo);
-    // Jika kegagalan disebabkan oleh versi build baru (chunk hash usang), otomatis refresh sekali
+    const msg = error?.message || '';
     const isChunkError = 
       error?.name === 'ChunkLoadError' ||
-      error?.message?.includes('Failed to fetch dynamically imported module') ||
-      error?.message?.includes('Importing a module script failed') ||
-      error?.message?.includes('Loading chunk');
+      msg.includes('dynamically imported module') ||
+      msg.includes('module script') ||
+      msg.includes('chunk');
 
     if (isChunkError && typeof window !== 'undefined') {
       const lastReload = window.sessionStorage.getItem('auditmawa_chunk_reload');
@@ -164,7 +162,8 @@ export default function App() {
   // Sinkronkan URL path saat ini ke activeTab di Zustand store agar backward-compatible
   const rawPathTab = location.pathname.replace(/^\//, '') || 'dashboard';
   const getActiveTabFromPath = (path) => {
-    if (['proker', 'history', 'kalender'].includes(path)) return 'proker';
+    if (['proker', 'history'].includes(path)) return 'proker';
+    if (path === 'kalender') return 'kalender';
     if (['transparansi', 'berkas', 'anggaran', 'template'].includes(path)) return 'transparansi';
     if (['audit', 'sp'].includes(path)) return 'audit';
     return path || 'dashboard';
@@ -177,6 +176,7 @@ export default function App() {
       'proker', 
       'transparansi', 
       'audit', 
+      'kalender',
       'struktur',
       'komisi/keuangan',
       'komisi/kominfo',
@@ -195,9 +195,9 @@ export default function App() {
     const targetPath = getMobileDirectPathForRole(currentUser.role);
     if (!targetPath) return;
 
-    // Saat user membuka web di HP atau login (pada root / dashboard / login), direct langsung ke komisi masing-masing
+    // Saat user membuka web di HP atau login (pada dashboard / login), direct langsung ke komisi masing-masing
     const curPath = location.pathname;
-    if (curPath === '/' || curPath === '/dashboard' || curPath === '/login' || curPath === '') {
+    if (curPath === '/dashboard' || curPath === '/login') {
       navigate(targetPath, { replace: true });
     }
   }, [currentUser, isDpm, isMobile, location.pathname, navigate]);
@@ -284,8 +284,35 @@ export default function App() {
     setIsAddProkerOpen(true);
   };
 
-  // Auth Routing: Jika belum login, hanya rute login/register yang dapat diakses
-  if (!currentUser) {
+  // 1. Tampilan Khusus Pengunjung Publik (Tanpa Login)
+  const isPublicRoute = location.pathname === '/' || location.pathname.startsWith('/publik');
+  const isAuthRoute = location.pathname === '/login' || location.pathname === '/register';
+
+  if (isPublicRoute) {
+    return (
+      <PublicLayout>
+        <Suspense fallback={<GenericPageSkeleton />}>
+          <RouteErrorBoundary>
+            <Routes>
+              <Route path="/" element={<PublicLandingPage />} />
+              <Route path="/publik/dashboard" element={<PublicDashboardView />} />
+              <Route path="/publik/pengawasan" element={<PublicPengawasanView />} />
+              <Route path="/publik/proker" element={<PublicProkerView />} />
+              <Route path="/publik/struktur" element={<PublicStrukturView />} />
+              <Route path="/publik/*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </RouteErrorBoundary>
+        </Suspense>
+        <Analytics />
+      </PublicLayout>
+    );
+  }
+
+  // 2. Tampilan Khusus Autentikasi Pengurus (Login / Register)
+  if (isAuthRoute) {
+    if (currentUser && currentUser.role !== 'guest' && currentUser.role !== 'civitas') {
+      return <Navigate to={directPath || '/dashboard'} replace />;
+    }
     return (
       <>
         <Routes>
@@ -303,11 +330,15 @@ export default function App() {
               />
             } 
           />
-          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
         <Analytics />
       </>
     );
+  }
+
+  // 3. Proteksi Website Pengurus (Wajib Login Username & Password Dahulu)
+  if (!currentUser || currentUser.role === 'guest' || currentUser.role === 'civitas') {
+    return <Navigate to="/login" replace />;
   }
 
   // Authenticated Routing: Dashboard and Sub-pages
@@ -364,14 +395,21 @@ export default function App() {
                     onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
                     onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}
                     onPrintDoc={(docData) => setPrintDocData(docData)}
-                    calendarSelectedDate={calendarSelectedDate}
-                    onDateChange={setCalendarSelectedDate}
                   />
                 } />
 
                 {/* Backward compatibility redirects for Proker */}
                 <Route path="/history" element={<Navigate to="/proker?tab=histori" replace />} />
-                <Route path="/kalender" element={<Navigate to="/proker?tab=kalender" replace />} />
+
+                {/* Standalone Kalender Jadwal View */}
+                <Route path="/kalender" element={
+                  <KalenderContainerView 
+                    onOpenAddProker={handleOpenAddProker}
+                    onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
+                    calendarSelectedDate={calendarSelectedDate}
+                    onDateChange={setCalendarSelectedDate}
+                  />
+                } />
 
                 <Route path="/transparansi" element={
                   <TransparansiContainerView 

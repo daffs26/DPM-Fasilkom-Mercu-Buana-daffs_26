@@ -8,15 +8,11 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@
 import { 
   Clock,
   RotateCcw, 
-  ShieldCheck, 
-  FileText, 
-  CheckCircle2, 
-  AlertTriangle, 
   Layers, 
   ArrowRight 
 } from 'lucide-react';
 import { formatRupiah, formatDateIndo } from '@/utils/formatters';
-import { TamuGuideCard } from '@/components/tamu/TamuComponents';
+
 
 function ProposalBadge({ proposal }) {
   if (proposal?.reviewStatus === 'approved') {
@@ -29,7 +25,7 @@ function ProposalBadge({ proposal }) {
     return <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-200/60">⚠️ Mendekati H-14</span>;
   }
   if (proposal?.fileName) {
-    return <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200/60">Menunggu Review</span>;
+    return <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-200/60">Menunggu Review</span>;
   }
   return <span className="text-slate-400 text-[10px] italic">Belum Ada Berkas</span>;
 }
@@ -42,6 +38,13 @@ function LpjBadge({ status, lpj }) {
     return <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-red-300 animate-pulse">🔴 LPJ Terlambat</span>;
   }
   return <span className="text-slate-500 text-[10px]">Batas: {lpj?.deadlineDate || '-'}</span>;
+}
+
+function getPredicateBadge(hasOverdue, oScore) {
+  if (hasOverdue) return { label: 'LPJ Terlambat', cls: 'bg-rose-100 text-rose-700' };
+  if (oScore === null) return { label: 'Belum Dinilai', cls: 'bg-slate-100 text-slate-500' };
+  if (oScore >= 85) return { label: 'Predikat A', cls: 'bg-emerald-100 text-emerald-800' };
+  return { label: oScore >= 70 ? 'Predikat B' : 'Predikat C', cls: 'bg-red-100 text-red-800' };
 }
 
 const ORMAWA_DISPLAY_NAMES = {
@@ -65,7 +68,7 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
 
   return (
     <Card className="rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border-slate-200/80 shadow-soft flex flex-col justify-start gap-3.5 sm:gap-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-3.5 border-b border-slate-100 gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-2">
         <div>
           <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight">
             Indeks Kinerja Ormawa{isFiltered && activeOrmawa ? `: ${ORMAWA_DISPLAY_NAMES[activeOrmawa.id] || activeOrmawa.shortName}` : ''}
@@ -77,14 +80,14 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
             <button
               type="button"
               onClick={() => setSelectedOrmawaFilter('all')}
-              className="text-xs font-bold text-slate-600 hover:text-blue-700 bg-slate-100 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 min-h-[34px] px-3 py-1 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
+              className="text-xs font-bold text-slate-600 hover:text-red-700 bg-slate-100 hover:bg-red-50 border border-slate-200/80 hover:border-red-200 min-h-[34px] px-3 py-1 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
               title="Tampilkan data seluruh ormawa"
             >
               <RotateCcw className="w-3 h-3 text-slate-500" />
               <span>Semua Ormawa</span>
             </button>
           )}
-          <p className="text-[10px] font-extrabold text-blue-600 bg-blue-50 border border-blue-100/80 px-2.5 py-1 rounded-full">
+          <p className="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-100/80 px-2.5 py-1 rounded-full">
             Periode 2026/2027
           </p>
         </div>
@@ -99,6 +102,7 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
             : null;
           const hasOverdue = oProkers.some(p => p.status === 'lpj_overdue');
           const isSelected = selectedOrmawaFilter === o.id;
+          const badge = getPredicateBadge(hasOverdue, oScore);
 
           return (
             <div 
@@ -108,46 +112,36 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
                 canViewAll ? 'cursor-pointer hover:shadow-xs' : 'cursor-default'
               } ${
                 isSelected 
-                  ? 'border-blue-500 bg-blue-50/40 ring-2 ring-blue-500/20 shadow-xs' 
+                  ? 'border-red-500 bg-red-50/40 ring-2 ring-red-500/20 shadow-xs' 
                   : hasOverdue 
                   ? 'border-rose-200 bg-rose-50/20 hover:border-rose-300' 
-                  : 'border-slate-200/80 bg-slate-50/40 hover:bg-white hover:border-blue-300'
+                  : 'border-slate-200/80 bg-slate-50/40 hover:bg-white hover:border-red-300'
               }`}
               title={canViewAll ? (isSelected ? 'Klik untuk reset filter' : `Klik untuk filter ${o.shortName}`) : o.name}
             >
-              {isSelected && <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-blue-600 ring-4 ring-blue-100" />}
+              {isSelected && <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-600 ring-4 ring-red-100" />}
               <div className={`w-11 h-11 p-1 rounded-xl bg-white border shadow-2xs flex items-center justify-center mb-1 group-hover:scale-105 transition ${
-                isSelected ? 'border-blue-200 shadow-blue-100' : 'border-slate-200/80'
+                isSelected ? 'border-red-200 shadow-red-100' : 'border-slate-200/80'
               }`}>
                 <img src={o.logo} alt={o.name} className="w-full h-full object-contain" />
               </div>
 
               <div>
-                <h4 className={`font-extrabold text-xs transition ${isSelected ? 'text-blue-700' : 'text-slate-900 group-hover:text-blue-600'}`}>
+                <h4 className={`font-extrabold text-xs transition ${isSelected ? 'text-red-700' : 'text-slate-900 group-hover:text-red-600'}`}>
                   {o.shortName}
                 </h4>
                 <p className="text-[10px] text-slate-500 mt-0.5 truncate max-w-[120px]">{o.type}</p>
               </div>
 
               <div className="my-1">
-                <span className={`text-xl sm:text-2xl font-black tracking-tight ${isSelected ? 'text-blue-900' : 'text-slate-900'}`}>
+                <span className={`text-xl sm:text-2xl font-black tracking-tight ${isSelected ? 'text-red-900' : 'text-slate-900'}`}>
                   {oScore !== null ? oScore : '-'}
                 </span>
                 {oScore !== null && <span className="text-[10px] text-slate-400 font-bold block">/100</span>}
               </div>
 
-              <span className={`text-[8.5px] sm:text-[9px] px-2 sm:px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0 max-w-full truncate block ${
-                hasOverdue 
-                  ? 'bg-rose-100 text-rose-700' 
-                  : oScore !== null 
-                  ? (oScore >= 85 ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800')
-                  : 'bg-slate-100 text-slate-500'
-              }`}>
-                {hasOverdue 
-                  ? 'LPJ Terlambat' 
-                  : oScore !== null 
-                  ? (oScore >= 85 ? 'Predikat A' : oScore >= 70 ? 'Predikat B' : 'Predikat C')
-                  : 'Belum Dinilai'}
+              <span className={`text-[8.5px] sm:text-[9px] px-2 sm:px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0 max-w-full truncate block ${badge.cls}`}>
+                {badge.label}
               </span>
             </div>
           );
@@ -157,104 +151,9 @@ const DashboardScorecard = React.memo(function DashboardScorecard({
   );
 });
 
-function DashboardKpiSummary({
-  avgScore,
-  pendingProposal,
-  completedProkers,
-  totalProkers,
-  overdueLPJ,
-  activeOrmawa
-}) {
-  const ormawaName = activeOrmawa?.shortName || '';
-  const cards = [
-    {
-      id: 'audit-score',
-      title: ormawaName ? `Skor Audit ${ormawaName}` : 'Skor Audit Ormawa',
-      mobileTitle: 'Skor Audit',
-      mobileSubtitle: ormawaName ? `Kepatuhan ${ormawaName}` : 'Kepatuhan Ormawa',
-      value: avgScore !== null ? avgScore : '-',
-      unit: avgScore !== null ? '/ 100 poin' : 'Belum dinilai',
-      icon: ShieldCheck,
-      iconBox: 'bg-blue-50 text-blue-600 border-blue-100/80',
-      borderBg: 'border-slate-200/90 bg-white',
-      valueColor: 'text-slate-900',
-      unitColor: 'text-slate-400 lg:text-slate-500'
-    },
-    {
-      id: 'review-proposal',
-      title: 'Proposal Butuh Review',
-      mobileTitle: 'Review Proposal',
-      mobileSubtitle: 'Perlu dicek',
-      value: pendingProposal,
-      unit: 'menunggu review',
-      icon: FileText,
-      iconBox: 'bg-amber-50 text-amber-600 border-amber-100/80',
-      borderBg: 'border-slate-200/90 bg-white',
-      valueColor: 'text-slate-900',
-      unitColor: 'text-slate-400 lg:text-slate-500'
-    },
-    {
-      id: 'lpj-verified',
-      title: 'LPJ Disetujui',
-      mobileTitle: 'LPJ Disetujui',
-      mobileSubtitle: 'Kegiatan selesai',
-      value: completedProkers,
-      unit: `dari ${totalProkers} proker`,
-      icon: CheckCircle2,
-      iconBox: 'bg-emerald-50 text-emerald-600 border-emerald-100/80',
-      borderBg: 'border-slate-200/90 bg-white',
-      valueColor: 'text-slate-900',
-      unitColor: 'text-slate-400 lg:text-slate-500'
-    },
-    {
-      id: 'lpj-overdue',
-      title: 'Keterlambatan LPJ',
-      mobileTitle: 'Keterlambatan LPJ',
-      mobileSubtitle: 'Batas H+14',
-      value: overdueLPJ,
-      unit: overdueLPJ > 0 ? 'Melewati batas H+14' : 'Semua tepat waktu',
-      icon: AlertTriangle,
-      iconBox: overdueLPJ > 0 ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-rose-50 text-rose-600 border-rose-100/80',
-      borderBg: overdueLPJ > 0 ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200/90 bg-white',
-      valueColor: overdueLPJ > 0 ? 'text-rose-600' : 'text-slate-900',
-      unitColor: overdueLPJ > 0 ? 'text-rose-600 font-bold' : 'text-slate-400 lg:text-slate-500',
-      titleColor: overdueLPJ > 0 ? 'text-rose-900' : 'text-slate-900'
-    }
-  ];
-
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {cards.map((card) => {
-        const Icon = card.icon;
-        return (
-          <div key={card.id} className={`p-3.5 sm:p-4 lg:p-5 rounded-2xl lg:rounded-3xl border shadow-2xs hover:shadow-xs transition flex flex-col justify-between min-h-[135px] lg:min-h-0 ${card.borderBg}`}>
-            <div className="flex flex-col items-center text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
-              <span className="hidden lg:inline-block text-[11px] font-bold text-slate-500 uppercase tracking-wider">{card.title}</span>
-              <div className={`w-9 h-9 lg:w-8 lg:h-8 rounded-xl border shadow-2xs flex items-center justify-center mb-1 lg:mb-0 shrink-0 ${card.iconBox}`}>
-                <Icon className="w-4 h-4 stroke-[2.2] lg:stroke-[2]" />
-              </div>
-              <div className="lg:hidden">
-                <h4 className={`font-extrabold text-xs leading-tight ${card.titleColor || 'text-slate-900'}`}>{card.mobileTitle}</h4>
-                <p className="text-[10px] text-slate-400 font-medium mt-0.5">{card.mobileSubtitle}</p>
-              </div>
-            </div>
-
-            <div className="my-1 lg:my-0 lg:mt-3 flex flex-col items-center text-center lg:flex-row lg:items-baseline lg:text-left lg:gap-2">
-              <span className={`text-xl sm:text-2xl lg:text-3xl font-black tracking-tight ${card.valueColor}`}>{card.value}</span>
-              <span className={`text-[9.5px] sm:text-[10.5px] lg:text-xs block lg:inline font-medium leading-tight max-w-full truncate sm:whitespace-normal ${card.unitColor}`}>
-                {card.unit}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onReviewProposal, onAuditLPJ }) {
   const currentUser = useStore(state => state.currentUser);
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
 
   return (
     <Card className="rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border-slate-200/80 shadow-soft">
@@ -280,11 +179,13 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
               <TableRow>
                 <TableCell colSpan={5} className="py-12 text-center">
                   <div className="flex flex-col items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 ring-8 ring-blue-50/50 flex items-center justify-center mb-3">
+                    <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 ring-8 ring-red-50/50 flex items-center justify-center mb-3">
                       <Layers className="w-6 h-6 stroke-[1.8]" />
                     </div>
                     <h4 className="text-sm font-extrabold text-slate-900">Belum Ada Program Kerja</h4>
-                    <p className="text-xs text-slate-400 mt-1 max-w-sm">Daftarkan kegiatan baru atau pilih ormawa lain untuk melihat data.</p>
+                    <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                      {isGuest ? 'Pilih entitas ormawa lain di atas untuk melihat data program kerja.' : 'Daftarkan kegiatan baru atau pilih ormawa lain untuk melihat data.'}
+                    </p>
                     {!isGuest && (
                       <Button onClick={onOpenAddProker} className="mt-3 min-h-[40px]" size="sm">
                         + Tambah Proker Baru
@@ -337,11 +238,13 @@ function DashboardProkerTable({ filteredProkers, ormawas, onOpenAddProker, onRev
       <div className="lg:hidden mt-3 space-y-2.5">
         {filteredProkers.length === 0 ? (
           <div className="py-8 text-center bg-slate-50/50 rounded-2xl border border-slate-200/80 p-4">
-            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 ring-6 ring-blue-50/50 flex items-center justify-center mx-auto mb-2">
+            <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 ring-6 ring-red-50/50 flex items-center justify-center mx-auto mb-2">
               <Layers className="w-5 h-5 stroke-[1.8]" />
             </div>
             <h4 className="text-xs font-bold text-slate-800">Belum Ada Program Kerja</h4>
-            <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5">Daftarkan kegiatan baru atau ganti filter ormawa.</p>
+            <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5">
+              {isGuest ? 'Ganti filter ormawa di atas untuk melihat data.' : 'Daftarkan kegiatan baru atau ganti filter ormawa.'}
+            </p>
           </div>
         ) : (
           filteredProkers.slice(0, 5).map((p) => {
@@ -407,7 +310,7 @@ function DashboardBudgetCard({ totalSerapan, totalPagu, serapanPercent, ormawas 
           <p className="text-[11px] text-slate-500 mt-0.5 text-left">Ringkasan alokasi &amp; realisasi anggaran periode 2026/2027</p>
         </div>
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/60 self-start sm:self-auto">
-          <span>Realisasi Total: <strong className="text-blue-600">{formatRupiah(totalSerapan)}</strong></span>
+          <span>Realisasi Total: <strong className="text-red-600">{formatRupiah(totalSerapan)}</strong></span>
           <span className="text-slate-300">•</span>
           <span className="text-slate-500 font-bold">{serapanPercent}%</span>
         </div>
@@ -424,13 +327,13 @@ function DashboardBudgetCard({ totalSerapan, totalPagu, serapanPercent, ormawas 
           <div className="mt-4">
             <div className="w-full bg-slate-200/80 h-2.5 rounded-full overflow-hidden">
               <div 
-                className="bg-blue-600 h-full rounded-full transition-all duration-500" 
+                className="bg-red-600 h-full rounded-full transition-all duration-500" 
                 style={{ width: `${Math.min(serapanPercent, 100)}%` }} 
               />
             </div>
             <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mt-1.5">
               <span>0%</span>
-              <span className="text-blue-600 font-extrabold">{serapanPercent}% Terserap</span>
+              <span className="text-red-600 font-extrabold">{serapanPercent}% Terserap</span>
               <span>100%</span>
             </div>
           </div>
@@ -490,7 +393,7 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
   const getLogMeta = (log) => {
     if (log.type === 'proker_deleted') return { badgeText: 'Dihapus', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' };
     if (log.type === 'proker_added') return { badgeText: 'Dibuat', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-    if (log.title?.toLowerCase().includes('audit')) return { badgeText: 'Audit Selesai', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' };
+    if (log.title?.toLowerCase().includes('audit')) return { badgeText: 'Audit Selesai', badgeClass: 'bg-red-50 text-red-700 border-red-200' };
     if (log.title?.toLowerCase().includes('revisi') || log.type?.includes('revisi')) return { badgeText: 'Revisi', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' };
     return { badgeText: 'Log Aktivitas', badgeClass: 'bg-slate-100 text-slate-700 border-slate-200' };
   };
@@ -511,17 +414,17 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
         <button
           type="button"
           onClick={handleOpenHistory}
-          className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50/70 hover:bg-blue-100/70 border border-blue-200/60 px-3 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shrink-0 shadow-2xs min-h-[38px]"
+          className="text-xs font-bold text-red-600 hover:text-red-800 bg-red-50/70 hover:bg-red-100/70 border border-red-200/60 px-3 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shrink-0 shadow-2xs min-h-[38px]"
           title="Buka halaman Riwayat Proker lengkap"
         >
           <span>Lihat Semua Riwayat</span>
-          <ArrowRight className="w-3.5 h-3.5 text-blue-600" />
+          <ArrowRight className="w-3.5 h-3.5 text-red-600" />
         </button>
       </div>
 
       {recentLogs.length === 0 ? (
         <div className="py-8 text-center flex flex-col items-center justify-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-          <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
+          <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-2">
             <Clock className="w-5 h-5 stroke-[1.8]" />
           </div>
           <h4 className="text-xs font-extrabold text-slate-900">Belum Ada Aktivitas Terkini</h4>
@@ -536,7 +439,7 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
             return (
               <div
                 key={log.id}
-                className="p-4 rounded-2xl bg-slate-50/50 hover:bg-white border border-slate-200/80 hover:border-blue-200/80 hover:shadow-xs transition-all duration-200 flex flex-col justify-between group"
+                className="p-4 rounded-2xl bg-slate-50/50 hover:bg-white border border-slate-200/80 hover:border-red-200/80 hover:shadow-xs transition-all duration-200 flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2.5">
@@ -565,7 +468,7 @@ function DashboardActivityFeed({ activityLogs = [], ormawas = [] }) {
                     </span>
                   </div>
 
-                  <h4 className="font-bold text-slate-900 text-xs leading-snug line-clamp-2 group-hover:text-blue-600 transition">
+                  <h4 className="font-bold text-slate-900 text-xs leading-snug line-clamp-2 group-hover:text-red-600 transition">
                     {log.title}
                   </h4>
                   <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
@@ -606,26 +509,13 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
     currentUser: state.currentUser 
   })));
 
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
   const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
   const effectiveOrmawaFilter = (isDpm || isGuest) ? selectedOrmawaFilter : (currentUser?.ormawaId || 'bem');
 
   const filteredProkers = effectiveOrmawaFilter === 'all'
     ? prokers
     : prokers.filter(p => p.ormawaId === effectiveOrmawaFilter);
-
-  const totalProkers = filteredProkers.length;
-  const pendingProposal = filteredProkers.filter(p => p.status === 'proposal_pending').length;
-  const completedProkers = filteredProkers.filter(p => p.status === 'completed').length;
-  const overdueLPJ = filteredProkers.filter(p => p.status === 'lpj_overdue').length;
-
-  const prokersWithAudit = filteredProkers.filter(p => p.lpj?.auditScore);
-  const avgScore = prokersWithAudit.length > 0
-    ? Math.round(prokersWithAudit.reduce((acc, p) => {
-        const val = typeof p.lpj.auditScore === 'number' ? p.lpj.auditScore : parseInt(p.lpj.auditScore, 10);
-        return acc + (isNaN(val) ? 0 : val);
-      }, 0) / prokersWithAudit.length)
-    : null;
 
   const activeOrmawa = effectiveOrmawaFilter === 'all' ? null : ormawas.find(o => o.id === effectiveOrmawaFilter);
   const totalPagu = activeOrmawa ? activeOrmawa.paguAnggaran : ormawas.reduce((acc, o) => acc + o.paguAnggaran, 0);
@@ -634,8 +524,6 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
 
   return (
     <div className="space-y-6">
-      {isGuest && <TamuGuideCard />}
-
       <DashboardScorecard
         isDpm={isDpm}
         isGuest={isGuest}
@@ -644,19 +532,6 @@ export default function DashboardView({ onOpenAddProker, onReviewProposal, onAud
         ormawas={ormawas}
         prokers={prokers}
       />
-
-      {effectiveOrmawaFilter !== 'all' && (
-        <div className="animate-in fade-in-50 duration-200">
-          <DashboardKpiSummary
-            avgScore={avgScore}
-            pendingProposal={pendingProposal}
-            completedProkers={completedProkers}
-            totalProkers={totalProkers}
-            overdueLPJ={overdueLPJ}
-            activeOrmawa={activeOrmawa}
-          />
-        </div>
-      )}
 
       {/* 1. Card Serapan Dana Kemahasiswaan (Horizontal Full-Width) */}
       <DashboardBudgetCard

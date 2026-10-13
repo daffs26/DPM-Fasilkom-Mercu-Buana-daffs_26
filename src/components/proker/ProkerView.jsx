@@ -12,8 +12,6 @@ import {
   UploadCloud, 
   AlertOctagon, 
   AlertTriangle, 
-  ChevronUp, 
-  ChevronDown, 
   MapPin, 
   Users, 
   Printer, 
@@ -66,7 +64,7 @@ function ProkerStatusBadge({ p, isCompleted, isOverdue, isRevisi, pendingRevisio
     );
   }
   if (p.proposal?.reviewStatus === 'approved') {
-    return <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">Proposal Disetujui</span>;
+    return <span className="bg-red-50 text-red-700 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-red-200 shrink-0">Proposal Disetujui</span>;
   }
   if (p.proposal?.isDadakan) {
     return <span className="bg-amber-50 text-amber-800 text-[10px] font-extrabold tracking-tight px-2.5 py-0.5 rounded-full border border-amber-200 shrink-0">⚠️ Mendekati H-14</span>;
@@ -100,10 +98,9 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
   const [prokerToRequestDelete, setProkerToRequestDelete] = useState(null);
   const [prokerToRevise, setProkerToRevise] = useState(null);
   const [isManageDeletionOpen, setIsManageDeletionOpen] = useState(false);
-  const [isKpiExpanded, setIsKpiExpanded] = useState(false);
 
   const pendingDeletionCount = (deletionRequests || []).filter(r => r.status === 'pending').length;
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
   const isDpm = currentUser?.ormawaId === 'dpm' && !isGuest;
   const canViewAll = isDpm || isGuest;
 
@@ -184,21 +181,13 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
     { value: 'completed', label: 'Proker Selesai', badge: statusCounts.completed }
   ], [statusCounts]);
 
-  const kpiItems = [
-    { label: 'Total Proker', count: statusCounts.all, bg: 'bg-slate-50 border-slate-200/80', text: 'text-slate-500', val: 'text-slate-900' },
-    { label: 'Proposal Disetujui', count: statusCounts.approved, bg: 'bg-blue-50/60 border-blue-200', text: 'text-blue-700', val: 'text-blue-900' },
-    { label: 'Perlu Revisi', count: statusCounts.revisi, bg: 'bg-amber-50/60 border-amber-200', text: 'text-amber-800', val: 'text-amber-900' },
-    { label: 'LPJ Terlambat', count: statusCounts.overdue, bg: 'bg-rose-50/60 border-rose-200', text: 'text-rose-700', val: 'text-rose-900' },
-    { label: 'Selesai Diaudit', count: statusCounts.completed, bg: 'bg-emerald-50/60 border-emerald-200 col-span-2 sm:col-span-1', text: 'text-emerald-700', val: 'text-emerald-900' }
-  ];
-
   return (
     <div className="space-y-4 sm:space-y-5">
-      {/* Top Filter & Quick KPI Strip */}
+      {/* Top Filter */}
       <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 border border-slate-200/80 shadow-soft transition-all duration-300">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-8 h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 shadow-2xs">
               <Layers className="w-4 h-4" />
             </div>
             <h3 className="font-black text-slate-900 text-xs sm:text-sm tracking-tight truncate">
@@ -218,21 +207,11 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                 <span className="tabular-nums">({pendingDeletionCount})</span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => setIsKpiExpanded(!isKpiExpanded)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-3 py-2 min-h-[44px] sm:min-h-[40px] h-11 sm:h-10 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200/80 rounded-xl text-xs sm:text-[11px] font-bold transition shadow-2xs cursor-pointer active:scale-95"
-              title={isKpiExpanded ? 'Tutup Ringkasan' : 'Buka Ringkasan KPI'}
-            >
-              {isKpiExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline tracking-tight">{isKpiExpanded ? 'Ringkas KPI' : 'Statistik KPI'}</span>
-              <span className="sm:hidden tracking-tight">KPI</span>
-            </button>
             {canModifyProker(currentUser?.role) && (
               <button
                 type="button"
                 onClick={onOpenAddProker}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 min-h-[44px] sm:min-h-[40px] h-11 sm:h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 min-h-[44px] sm:min-h-[40px] h-11 sm:h-10 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline tracking-tight">Tambah Proker</span>
@@ -241,18 +220,6 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
             )}
           </div>
         </div>
-
-        {/* Expanded KPI Strip */}
-        {isKpiExpanded && (
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-3 animate-in fade-in-50 duration-200">
-            {kpiItems.map((item, idx) => (
-              <div key={idx} className={`p-2.5 sm:p-3 rounded-2xl border text-center ${item.bg}`}>
-                <span className={`text-[10px] font-bold uppercase tracking-wider block ${item.text}`}>{item.label}</span>
-                <span className={`text-base sm:text-lg font-black block mt-0.5 tracking-tight tabular-nums ${item.val}`}>{item.count}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Baris Filter Dropdown Ormawa & Status Proker */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
@@ -294,7 +261,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
                   setStatusFilter('all');
                   if (canViewAll) setSelectedOrmawaFilter('all');
                 }}
-                className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer px-2 py-1.5 rounded-lg shrink-0 self-start sm:self-center transition active:scale-95"
+                className="flex items-center gap-1 text-xs font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer px-2 py-1.5 rounded-lg shrink-0 self-start sm:self-center transition active:scale-95"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span className="tracking-tight">Reset Filter</span>
@@ -469,7 +436,7 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
 
       {filtered.length === 0 && (
         <div className="bg-white rounded-3xl p-14 text-center border border-slate-200/80 shadow-soft">
-          <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 ring-8 ring-blue-50/50 flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 ring-8 ring-red-50/50 flex items-center justify-center mx-auto mb-3">
             <Layers className="w-6 h-6 stroke-[1.8]" />
           </div>
           <h3 className="font-extrabold text-slate-900 text-sm">Tidak Ada Program Kerja</h3>

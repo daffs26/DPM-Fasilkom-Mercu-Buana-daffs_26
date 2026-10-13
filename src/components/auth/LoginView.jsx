@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,8 @@ import {
   AlertCircle, 
   Globe, 
   Eye,
-  EyeOff
+  EyeOff,
+  ArrowLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -142,10 +144,20 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
 
         {/* Right Side: Login Form */}
         <div className="w-full flex-1 flex flex-col justify-center px-3 sm:px-8 lg:px-12 py-5 sm:py-6">
+          <div className="mb-2">
+            <Link 
+              to="/" 
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors py-1 group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              <span>Kembali ke Website Publik</span>
+            </Link>
+          </div>
+
           <div className="mb-5 sm:mb-6">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5 sm:mb-2">Masuk ke Akun</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5 sm:mb-2">Portal Pengurus</h1>
             <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
-              Akses dasbor pengawasan, pemantauan proker, dan administrasi ormawa dalam satu platform terpadu.
+              Khusus pengurus DPM dan ormawa untuk mengelola proker, audit LPJ, dan administrasi anggaran.
             </p>
           </div>
 
@@ -300,25 +312,23 @@ export default function LoginView({ onSwitchToRegister, notice, onClearNotice })
             </p>
           </div>
 
-          {/* Akses Tamu Publik (Mode Transparansi Ormawa) */}
-          <div className="mt-3.5">
-            <button
-              type="button"
-              onClick={() => {
-                setLoading(true);
-                setTimeout(() => {
-                  loginAsGuest();
-                  setLoading(false);
-                }, 150);
-              }}
-              className="w-full min-h-[44px] py-2.5 px-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100/80 text-blue-800 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group cursor-pointer hover:border-blue-300 active:scale-98"
-            >
-              <Globe className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
-              <span>Eksplorasi Transparansi (Masuk sebagai Civitas / Tamu Publik)</span>
-            </button>
-            <p className="text-[10px] text-slate-400 text-center mt-1">
-              Akses terbuka untuk civitas akademik &amp; umum memantau akuntabilitas tanpa login.
+          {/* Akses Pengunjung / Publik Tanpa Login */}
+          <div className="mt-4 p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-center space-y-1.5">
+            <p className="text-xs font-bold text-slate-700">
+              Bukan pengurus atau ingin melihat transparansi publik?
             </p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Pengunjung umum dapat langsung menjelajahi dashboard, daftar proker, audit, dan struktur organisasi tanpa perlu login.
+            </p>
+            <div className="pt-1">
+              <Link
+                to="/"
+                className="w-full min-h-[40px] py-2 px-3 rounded-xl border border-blue-200 bg-white hover:bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group"
+              >
+                <Globe className="w-3.5 h-3.5 text-blue-600 group-hover:scale-110 transition-transform" />
+                <span>Buka Website Publik DPM (Tanpa Login)</span>
+              </Link>
+            </div>
           </div>
 
           <div className="mt-5 text-center">

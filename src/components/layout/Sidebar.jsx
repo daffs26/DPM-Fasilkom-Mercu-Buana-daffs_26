@@ -8,11 +8,12 @@ import {
   FolderOpen, 
   Award, 
   Network, 
-  RotateCcw, 
+  CalendarDays,
   X, 
   LogOut,
   ChevronDown,
-  SlidersHorizontal
+  SlidersHorizontal,
+  RotateCcw
 } from 'lucide-react';
 import { 
   isViewerOnly, 
@@ -24,7 +25,8 @@ import LastLoginWidget from './LastLoginWidget';
 
 function getActiveMenuId(path) {
   const clean = path.replace(/^\//, '') || 'dashboard';
-  if (['proker', 'history', 'kalender'].includes(clean)) return 'proker';
+  if (['proker', 'history'].includes(clean)) return 'proker';
+  if (clean === 'kalender') return 'kalender';
   if (['transparansi', 'berkas', 'anggaran', 'template'].includes(clean)) return 'transparansi';
   if (['audit', 'sp'].includes(clean)) return 'audit';
   return clean;
@@ -136,10 +138,6 @@ function SidebarNavList({
       )}
     </div>
   );
-}
-
-function SidebarRegulatoryCard() {
-  return null;
 }
 
 function SidebarFooter({ currentUser, onLogout, onReset }) {
@@ -318,6 +316,12 @@ export default function Sidebar({ isOpen, onClose }) {
           : null 
     },
     { 
+      id: 'kalender', 
+      label: 'Kalender Jadwal', 
+      icon: CalendarDays, 
+      badge: null 
+    },
+    { 
       id: 'struktur', 
       label: 'Struktur DPM', 
       icon: Network, 
@@ -370,8 +374,6 @@ export default function Sidebar({ isOpen, onClose }) {
             currentUser={currentUser}
             isMobileDrawer={false}
           />
-
-          <SidebarRegulatoryCard />
         </div>
 
         <SidebarFooter 
@@ -426,8 +428,6 @@ export default function Sidebar({ isOpen, onClose }) {
             currentUser={currentUser}
             isMobileDrawer={true}
           />
-
-          <SidebarRegulatoryCard />
         </div>
 
         <SidebarFooter 

@@ -2,7 +2,6 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { 
   Network, 
   Users, 
-  ArrowUpRight, 
   ShieldCheck, 
   CheckCircle2, 
   User,
@@ -44,24 +43,24 @@ function InfographicNode({
 
   const colorStyles = {
     primary: {
-      circle: 'bg-blue-50 border-2 border-dashed border-blue-500 text-blue-600 ring-4 ring-white shadow-xs',
-      bottomBorder: 'border-b-4 border-b-blue-600',
-      hoverText: 'group-hover:text-blue-600',
-      hoverBorder: 'hover:border-blue-400',
-      roleText: 'text-blue-600 font-bold'
+      circle: 'bg-red-50 border-2 border-dashed border-red-500 text-red-600 ring-4 ring-white shadow-xs',
+      bottomBorder: 'border-b-4 border-b-red-600',
+      hoverText: 'group-hover:text-red-600',
+      hoverBorder: 'hover:border-red-400',
+      roleText: 'text-red-600 font-bold'
     },
     lead: {
-      circle: 'bg-blue-50 border-2 border-dashed border-blue-500 text-blue-600 ring-4 ring-white shadow-xs',
-      bottomBorder: 'border-b-4 border-b-blue-600',
-      hoverText: 'group-hover:text-blue-600',
-      hoverBorder: 'hover:border-blue-400',
-      roleText: 'text-blue-600 font-semibold'
+      circle: 'bg-red-50 border-2 border-dashed border-red-500 text-red-600 ring-4 ring-white shadow-xs',
+      bottomBorder: 'border-b-4 border-b-red-600',
+      hoverText: 'group-hover:text-red-600',
+      hoverBorder: 'hover:border-red-400',
+      roleText: 'text-red-600 font-semibold'
     },
     member: {
       circle: 'bg-slate-50 border-2 border-dashed border-slate-300 text-slate-500 ring-4 ring-white shadow-xs',
       bottomBorder: 'border-b-4 border-b-slate-400',
-      hoverText: 'group-hover:text-blue-600',
-      hoverBorder: 'hover:border-blue-300',
+      hoverText: 'group-hover:text-red-600',
+      hoverBorder: 'hover:border-red-300',
       roleText: 'text-slate-500 font-medium'
     }
   };
@@ -111,38 +110,68 @@ function InfographicNode({
   );
 }
 
+const ROLE_ICONS = {
+  pimpinan: ShieldCheck,
+  sekretaris: FileText,
+  bendahara: Wallet,
+  pengawasan: CheckCircle2,
+  keuangan: Coins,
+  advokasi: Scale,
+  kominfo: Megaphone
+};
+
+function KomisiColumn({ komisi, onSelect }) {
+  if (!komisi?.lead) return null;
+  return (
+    <div className="flex flex-col items-center pt-3">
+      <InfographicNode 
+        member={komisi.lead} 
+        onClick={onSelect} 
+        variant="lead"
+      />
+      <div className="w-0.5 h-6 bg-red-300 relative" />
+      <div className="pt-3 flex flex-col items-center w-full">
+        <InfographicNode 
+          member={komisi.members[0]} 
+          onClick={onSelect} 
+          variant="member"
+        />
+        {komisi.members[1] && (
+          <>
+            <div className="w-0.5 h-6 bg-red-300 relative" />
+            <div className="pt-3 flex flex-col items-center w-full">
+              <InfographicNode 
+                member={komisi.members[1]} 
+                onClick={onSelect} 
+                variant="member"
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /**
  * RoleCard - Kartu Tupoksi Ringkas, Proporsional & Bebas Slop
  */
 function RoleCard({ item }) {
-  const getIcon = (id) => {
-    switch (id) {
-      case 'pimpinan': return ShieldCheck;
-      case 'sekretaris': return FileText;
-      case 'bendahara': return Wallet;
-      case 'pengawasan': return CheckCircle2;
-      case 'keuangan': return Coins;
-      case 'advokasi': return Scale;
-      case 'kominfo': return Megaphone;
-      default: return ShieldCheck;
-    }
-  };
-
-  const Icon = getIcon(item.id);
+  const Icon = ROLE_ICONS[item.id] || ShieldCheck;
 
   return (
-    <div className="bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-blue-300 p-5 transition-all duration-200 hover:shadow-xs flex flex-col justify-between space-y-3.5">
+    <div className="bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-red-300 p-5 transition-all duration-200 hover:shadow-xs flex flex-col justify-between space-y-3.5">
       <div className="space-y-2.5">
         {/* Header: Icon + Title & Clean Tag */}
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+          <div className="w-8 h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 mt-0.5">
             <Icon className="w-4 h-4" />
           </div>
           <div className="min-w-0 flex-1">
             <h4 className="text-sm font-bold text-slate-900 leading-snug">
               {item.role}
             </h4>
-            <span className="text-[11px] font-medium text-blue-600 block mt-0.5">
+            <span className="text-[11px] font-medium text-red-600 block mt-0.5">
               {item.tag}
             </span>
           </div>
@@ -157,7 +186,7 @@ function RoleCard({ item }) {
         <ul className="space-y-1.5 pt-2 border-t border-slate-200/60">
           {item.responsibilities.map((resp, idx) => (
             <li key={idx} className="flex items-start gap-2 text-xs text-slate-600 leading-relaxed">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-red-600 mt-1.5 shrink-0" />
               <span>{resp}</span>
             </li>
           ))}
@@ -184,25 +213,24 @@ export default function StrukturView() {
   const sekretaris = useMemo(() => structuralMembers.find(m => m.id === 'sekretaris'), []);
   const bendahara = useMemo(() => structuralMembers.find(m => m.id === 'bendahara'), []);
 
-  const komisiKeuangan = useMemo(() => ({
-    lead: structuralMembers.find(m => m.id === 'keu-lead'),
-    members: structuralMembers.filter(m => m.category === 'keuangan' && !m.isLead)
-  }), []);
-
-  const komisiPengawasan = useMemo(() => ({
-    lead: structuralMembers.find(m => m.id === 'was-lead'),
-    members: structuralMembers.filter(m => m.category === 'pengawasan' && !m.isLead)
-  }), []);
-
-  const komisiKominfo = useMemo(() => ({
-    lead: structuralMembers.find(m => m.id === 'kom-lead'),
-    members: structuralMembers.filter(m => m.category === 'kominfo' && !m.isLead)
-  }), []);
-
-  const komisiAdvokasi = useMemo(() => ({
-    lead: structuralMembers.find(m => m.id === 'adv-lead'),
-    members: structuralMembers.filter(m => m.category === 'advokasi' && !m.isLead)
-  }), []);
+  const komisiList = useMemo(() => [
+    {
+      lead: structuralMembers.find(m => m.id === 'keu-lead'),
+      members: structuralMembers.filter(m => m.category === 'keuangan' && !m.isLead)
+    },
+    {
+      lead: structuralMembers.find(m => m.id === 'was-lead'),
+      members: structuralMembers.filter(m => m.category === 'pengawasan' && !m.isLead)
+    },
+    {
+      lead: structuralMembers.find(m => m.id === 'kom-lead'),
+      members: structuralMembers.filter(m => m.category === 'kominfo' && !m.isLead)
+    },
+    {
+      lead: structuralMembers.find(m => m.id === 'adv-lead'),
+      members: structuralMembers.filter(m => m.category === 'advokasi' && !m.isLead)
+    }
+  ], []);
 
   // Filtered members for Grid view
   const filteredGridMembers = useMemo(() => {
@@ -266,7 +294,7 @@ export default function StrukturView() {
     <div className="space-y-8 animate-fadeIn pb-12">
       {/* ── HEADER BANNER ─────────────────────────────────────────────── */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-soft relative overflow-hidden">
-        <div className="absolute -right-16 -top-16 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-16 -top-16 w-80 h-80 bg-red-600/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
@@ -286,7 +314,7 @@ export default function StrukturView() {
               onClick={() => setViewMode('chart')}
               className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer ${
                 viewMode === 'chart'
-                  ? 'bg-white text-blue-700 shadow-sm border border-slate-200/60'
+                  ? 'bg-white text-red-700 shadow-sm border border-slate-200/60'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -298,7 +326,7 @@ export default function StrukturView() {
               onClick={() => setViewMode('grid')}
               className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer ${
                 viewMode === 'grid'
-                  ? 'bg-white text-blue-700 shadow-sm border border-slate-200/60'
+                  ? 'bg-white text-red-700 shadow-sm border border-slate-200/60'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -329,7 +357,7 @@ export default function StrukturView() {
                 <p className="text-xs font-medium text-slate-500">
                   Dewan Perwakilan Mahasiswa FASILKOM UMB • Periode 2026/2027
                 </p>
-                <div className="w-16 h-0.5 bg-blue-600 rounded-full mt-1.5" />
+                <div className="w-16 h-0.5 bg-red-600 rounded-full mt-1.5" />
               </div>
 
               {/* Canvas Zoom & Fit Controls */}
@@ -360,7 +388,7 @@ export default function StrukturView() {
                   onClick={handleFitToScreen}
                   className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer border-l border-slate-200 ml-0.5 flex items-center gap-1.5 ${
                     isFitToScreen 
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200/80' 
+                      ? 'bg-red-50 text-red-700 border border-red-200/80' 
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                   title="Paskan Keseluruhan Bagan ke Layar (Tanpa Perlu Geser)"
@@ -390,7 +418,7 @@ export default function StrukturView() {
                 className="w-[1080px] shrink-0 flex flex-col items-center select-none pt-2 pb-6 transition-all duration-200"
               >
                   
-                {/* ── LEVEL 1: KETUA UMUM (PRIMARY BLUE) ──── */}
+                {/* ── LEVEL 1: KETUA UMUM (PRIMARY RED) ──── */}
                 <div className="flex flex-col items-center relative pt-4">
                   <InfographicNode 
                     member={ketum} 
@@ -399,10 +427,10 @@ export default function StrukturView() {
                   />
 
                   {/* Vertical Connector Line 1 -> 2 */}
-                  <div className="w-0.5 h-7 bg-blue-300 relative" />
+                  <div className="w-0.5 h-7 bg-red-300 relative" />
                 </div>
 
-                {/* ── LEVEL 2: WAKIL KETUA UMUM (PRIMARY BLUE) ─── */}
+                {/* ── LEVEL 2: WAKIL KETUA UMUM (PRIMARY RED) ─── */}
                 <div className="flex flex-col items-center relative w-full pt-4">
                   <InfographicNode 
                     member={waketum} 
@@ -411,23 +439,23 @@ export default function StrukturView() {
                   />
 
                   {/* Vertical Connector Line 2 -> Horizontal Distribution Spine */}
-                  <div className="w-0.5 h-6 bg-blue-300 relative" />
+                  <div className="w-0.5 h-6 bg-red-300 relative" />
 
                   {/* ── HORIZONTAL DISTRIBUTION SPINE (LEVEL 3 PARALLEL) ── */}
                   <div className="relative w-full h-6 flex items-center justify-center mb-1">
                     {/* Horizontal connecting bar between Col 1 center (8.333%) and Col 6 center (91.667%) */}
-                    <div className="absolute top-0 left-[8.333%] right-[8.333%] h-0.5 bg-blue-300" />
+                    <div className="absolute top-0 left-[8.333%] right-[8.333%] h-0.5 bg-red-300" />
                     
                     {/* Center stem from Waketum arriving at the spine */}
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0.5 h-3 bg-blue-300" />
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0.5 h-3 bg-red-300" />
 
                     {/* 6 Downward Vertical Stems to the 6 parallel columns */}
-                    <div className="absolute top-0 left-[8.333%] w-0.5 h-3 bg-blue-300 -translate-x-1/2" />
-                    <div className="absolute top-0 left-[25%] w-0.5 h-3 bg-blue-300 -translate-x-1/2" />
-                    <div className="absolute top-0 left-[41.667%] w-0.5 h-3 bg-blue-300 -translate-x-1/2" />
-                    <div className="absolute top-0 left-[58.333%] w-0.5 h-3 bg-blue-300 -translate-x-1/2" />
-                    <div className="absolute top-0 left-[75%] w-0.5 h-3 bg-blue-300 -translate-x-1/2" />
-                    <div className="absolute top-0 left-[91.667%] w-0.5 h-3 bg-blue-300 -translate-x-1/2" />
+                    <div className="absolute top-0 left-[8.333%] w-0.5 h-3 bg-red-300 -translate-x-1/2" />
+                    <div className="absolute top-0 left-[25%] w-0.5 h-3 bg-red-300 -translate-x-1/2" />
+                    <div className="absolute top-0 left-[41.667%] w-0.5 h-3 bg-red-300 -translate-x-1/2" />
+                    <div className="absolute top-0 left-[58.333%] w-0.5 h-3 bg-red-300 -translate-x-1/2" />
+                    <div className="absolute top-0 left-[75%] w-0.5 h-3 bg-red-300 -translate-x-1/2" />
+                    <div className="absolute top-0 left-[91.667%] w-0.5 h-3 bg-red-300 -translate-x-1/2" />
                   </div>
                 </div>
 
@@ -443,149 +471,14 @@ export default function StrukturView() {
                     />
                   </div>
 
-                  {/* COLUMN 2: KOMISI KEUANGAN */}
-                  <div className="flex flex-col items-center pt-3">
-                    {/* Kepala Komisi */}
-                    <InfographicNode 
-                      member={komisiKeuangan.lead} 
-                      onClick={setSelectedMember} 
-                      variant="lead"
+                  {/* COLUMNS 2 - 5: KOMISI-KOMISI */}
+                  {komisiList.map((komisi, idx) => (
+                    <KomisiColumn 
+                      key={idx} 
+                      komisi={komisi} 
+                      onSelect={setSelectedMember} 
                     />
-
-                    {/* Vertical Connector Line to Members */}
-                    <div className="w-0.5 h-6 bg-blue-300 relative" />
-
-                    {/* Anggota Komisi 1 */}
-                    <div className="pt-3 flex flex-col items-center w-full">
-                      <InfographicNode 
-                        member={komisiKeuangan.members[0]} 
-                        onClick={setSelectedMember} 
-                        variant="member"
-                      />
-
-                      {/* Vertical Connector Line to Anggota 2 */}
-                      {komisiKeuangan.members[1] && (
-                        <>
-                          <div className="w-0.5 h-6 bg-blue-300 relative" />
-                          <div className="pt-3 flex flex-col items-center w-full">
-                            <InfographicNode 
-                              member={komisiKeuangan.members[1]} 
-                              onClick={setSelectedMember} 
-                              variant="member"
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* COLUMN 3: KOMISI PENGAWASAN */}
-                  <div className="flex flex-col items-center pt-3">
-                    {/* Kepala Komisi */}
-                    <InfographicNode 
-                      member={komisiPengawasan.lead} 
-                      onClick={setSelectedMember} 
-                      variant="lead"
-                    />
-
-                    {/* Vertical Connector Line to Members */}
-                    <div className="w-0.5 h-6 bg-blue-300 relative" />
-
-                    {/* Anggota Komisi 1 */}
-                    <div className="pt-3 flex flex-col items-center w-full">
-                      <InfographicNode 
-                        member={komisiPengawasan.members[0]} 
-                        onClick={setSelectedMember} 
-                        variant="member"
-                      />
-
-                      {/* Vertical Connector Line to Anggota 2 */}
-                      {komisiPengawasan.members[1] && (
-                        <>
-                          <div className="w-0.5 h-6 bg-blue-300 relative" />
-                          <div className="pt-3 flex flex-col items-center w-full">
-                            <InfographicNode 
-                              member={komisiPengawasan.members[1]} 
-                              onClick={setSelectedMember} 
-                              variant="member"
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* COLUMN 4: KOMISI KOMINFO */}
-                  <div className="flex flex-col items-center pt-3">
-                    {/* Kepala Komisi */}
-                    <InfographicNode 
-                      member={komisiKominfo.lead} 
-                      onClick={setSelectedMember} 
-                      variant="lead"
-                    />
-
-                    {/* Vertical Connector Line to Members */}
-                    <div className="w-0.5 h-6 bg-blue-300 relative" />
-
-                    {/* Anggota Komisi 1 */}
-                    <div className="pt-3 flex flex-col items-center w-full">
-                      <InfographicNode 
-                        member={komisiKominfo.members[0]} 
-                        onClick={setSelectedMember} 
-                        variant="member"
-                      />
-
-                      {/* Vertical Connector Line to Anggota 2 */}
-                      {komisiKominfo.members[1] && (
-                        <>
-                          <div className="w-0.5 h-6 bg-blue-300 relative" />
-                          <div className="pt-3 flex flex-col items-center w-full">
-                            <InfographicNode 
-                              member={komisiKominfo.members[1]} 
-                              onClick={setSelectedMember} 
-                              variant="member"
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* COLUMN 5: KOMISI ADVOKASI */}
-                  <div className="flex flex-col items-center pt-3">
-                    {/* Kepala Komisi */}
-                    <InfographicNode 
-                      member={komisiAdvokasi.lead} 
-                      onClick={setSelectedMember} 
-                      variant="lead"
-                    />
-
-                    {/* Vertical Connector Line to Members */}
-                    <div className="w-0.5 h-6 bg-blue-300 relative" />
-
-                    {/* Anggota Komisi 1 */}
-                    <div className="pt-3 flex flex-col items-center w-full">
-                      <InfographicNode 
-                        member={komisiAdvokasi.members[0]} 
-                        onClick={setSelectedMember} 
-                        variant="member"
-                      />
-
-                      {/* Vertical Connector Line to Anggota 2 */}
-                      {komisiAdvokasi.members[1] && (
-                        <>
-                          <div className="w-0.5 h-6 bg-blue-300 relative" />
-                          <div className="pt-3 flex flex-col items-center w-full">
-                            <InfographicNode 
-                              member={komisiAdvokasi.members[1]} 
-                              onClick={setSelectedMember} 
-                              variant="member"
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  ))}
 
                   {/* COLUMN 6: BENDAHARA (PALING KANAN) */}
                   <div className="flex flex-col items-center pt-3">
@@ -638,7 +531,7 @@ export default function StrukturView() {
                   onClick={() => setActiveCategory(cat.key)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-blue-600 text-white font-semibold shadow-xs'
+                      ? 'bg-red-600 text-white font-semibold shadow-xs'
                       : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80 shadow-2xs font-medium'
                   }`}
                 >
@@ -655,62 +548,29 @@ export default function StrukturView() {
                 <div
                   key={member.id}
                   onClick={() => setSelectedMember(member)}
-                  className="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between text-center"
+                  className="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center"
                 >
-                  <div>
-                    {/* Centered Circular Border Placement Avatar */}
-                    <div className="flex justify-center mb-4">
-                      <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-slate-300 group-hover:border-blue-500 bg-slate-50/80 group-hover:bg-blue-50/40 flex items-center justify-center text-slate-400 group-hover:text-blue-600 transition-all shadow-xs shrink-0">
-                        <User className="w-8 h-8" />
-                      </div>
+                  {/* Centered Circular Border Placement Avatar */}
+                  <div className="flex justify-center mb-4">
+                    <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-slate-300 group-hover:border-red-500 bg-slate-50/80 group-hover:bg-red-50/40 flex items-center justify-center text-slate-400 group-hover:text-red-600 transition-all shadow-xs shrink-0">
+                      <User className="w-8 h-8" />
                     </div>
+                  </div>
 
-                    {/* Identity: Name, Handle & Subtitle */}
-                    <div className="space-y-1">
-                      <h4 
-                        className="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors leading-snug truncate"
-                        title={member.name}
-                      >
-                        {member.name}
-                      </h4>
-                      <p className="text-xs text-slate-400 font-medium">
-                        @{member.id}
-                      </p>
-                      <p 
-                        className="text-xs text-slate-500 font-normal leading-relaxed mt-2 max-w-[220px] mx-auto line-clamp-2"
-                        title={`${member.role} • ${member.prodi}`}
-                      >
-                        {member.role} • {member.prodi}
-                      </p>
-                    </div>
-
-                    {/* 3-Kolom Statistik Ringkas (Bahasa Indonesia) */}
-                    <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 text-center">
-                      <div>
-                        <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
-                          {member.tupoksi?.length || 4}
-                        </span>
-                        <span className="text-[11px] text-slate-400 font-medium mt-1 block">
-                          Tupoksi
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
-                          {member.category === 'exec' ? '12' : '8'}
-                        </span>
-                        <span className="text-[11px] text-slate-400 font-medium mt-1 block">
-                          Agenda
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-base sm:text-lg font-bold text-slate-900 block leading-tight">
-                          100%
-                        </span>
-                        <span className="text-[11px] text-slate-400 font-medium mt-1 block">
-                          Kinerja
-                        </span>
-                      </div>
-                    </div>
+                  {/* Identity: Name & Subtitle */}
+                  <div className="space-y-1.5 w-full">
+                    <h4 
+                      className="text-base font-bold text-slate-900 group-hover:text-red-700 transition-colors leading-snug truncate"
+                      title={member.name}
+                    >
+                      {member.name}
+                    </h4>
+                    <p 
+                      className="text-xs text-slate-500 font-normal leading-relaxed max-w-[220px] mx-auto line-clamp-2"
+                      title={`${member.role} • ${member.prodi}`}
+                    >
+                      {member.role} • {member.prodi}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -739,7 +599,7 @@ export default function StrukturView() {
             </p>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-            <Scale className="w-4 h-4 text-blue-600" />
+            <Scale className="w-4 h-4 text-red-600" />
             <span>Tata Kelola Parlemen</span>
           </div>
         </div>

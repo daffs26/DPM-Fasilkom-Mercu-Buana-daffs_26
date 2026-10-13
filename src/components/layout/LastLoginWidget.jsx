@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, ShieldCheck } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 export default function LastLoginWidget({ currentUser, variant = 'header', className = '' }) {
   const now = new Date();

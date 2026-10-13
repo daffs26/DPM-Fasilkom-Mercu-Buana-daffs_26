@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
-import { Layers, CalendarDays, History } from 'lucide-react';
+import { Layers, History } from 'lucide-react';
 import ProkerView from './ProkerView';
-import KalenderView from '../kalender/KalenderView';
 import HistoryView from '../history/HistoryView';
 
 export default function ProkerContainerView({
@@ -12,11 +11,10 @@ export default function ProkerContainerView({
   onReviewProposal,
   onOpenDetailProker,
   onAuditLPJ,
-  onPrintDoc,
-  calendarSelectedDate,
-  onDateChange
+  onPrintDoc
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const currentTab = searchParams.get('tab') || 'daftar';
 
   const {
@@ -35,6 +33,13 @@ export default function ProkerContainerView({
   const totalProkerLogs = activityLogs.filter(l => l.type && (l.type.startsWith('proker_') || l.type.startsWith('proposal_') || l.type.startsWith('lpj_'))).length;
   const unreadProkerLogsCount = Math.max(0, totalProkerLogs - (lastReadHistoryCount || 0));
 
+  // Redirect legacy /proker?tab=kalender to standalone /kalender route
+  useEffect(() => {
+    if (currentTab === 'kalender') {
+      navigate('/kalender', { replace: true });
+    }
+  }, [currentTab, navigate]);
+
   useEffect(() => {
     if (currentTab === 'histori' && unreadProkerLogsCount > 0) {
       markHistoryAsRead?.();
@@ -47,12 +52,6 @@ export default function ProkerContainerView({
       label: 'Daftar Proker',
       icon: Layers,
       badge: pendingProposalCount > 0 ? { text: `${pendingProposalCount}`, color: 'bg-amber-100 text-amber-800' } : null
-    },
-    {
-      id: 'kalender',
-      label: 'Kalender Jadwal',
-      icon: CalendarDays,
-      badge: null
     },
     {
       id: 'histori',
@@ -104,21 +103,13 @@ export default function ProkerContainerView({
       </div>
 
       {/* Active Tab View */}
-      {currentTab === 'kalender' && (
-        <KalenderView 
-          onOpenAddProker={(date) => onOpenAddProker(date || calendarSelectedDate)}
-          onReviewProposal={onReviewProposal}
-          onDateChange={onDateChange}
-        />
-      )}
-      {currentTab === 'histori' && (
+      {currentTab === 'histori' ? (
         <HistoryView 
           onOpenAddProker={() => onOpenAddProker('')}
           onOpenDetailProker={onOpenDetailProker}
           hideHeader={true}
         />
-      )}
-      {(currentTab === 'daftar' || (currentTab !== 'kalender' && currentTab !== 'histori')) && (
+      ) : (
         <ProkerView 
           onOpenAddProker={() => onOpenAddProker('')}
           onReviewProposal={onReviewProposal}

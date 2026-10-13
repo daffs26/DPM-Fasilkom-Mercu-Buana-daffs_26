@@ -139,7 +139,7 @@ function NotificationMenuDropdown({
           <button
             type="button"
             onClick={onMarkAllRead}
-            className="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 cursor-pointer"
+            className="text-[11px] text-red-600 hover:text-red-800 font-bold flex items-center gap-1 cursor-pointer"
           >
             <CheckCheck className="w-3.5 h-3.5" />
             <span>Tandai dibaca</span>
@@ -160,11 +160,11 @@ function NotificationMenuDropdown({
               key={notif.id}
               onClick={() => onNotificationClick(notif)}
               className={`p-3.5 transition cursor-pointer hover:bg-slate-50 flex items-start gap-3 ${
-                !notif.isRead ? 'bg-blue-50/40' : 'bg-white'
+                !notif.isRead ? 'bg-red-50/40' : 'bg-white'
               }`}
             >
               <div className="mt-0.5 shrink-0">
-                <span className={`w-2 h-2 rounded-full block mt-1 ${!notif.isRead ? 'bg-blue-600' : 'bg-slate-300'}`} />
+                <span className={`w-2 h-2 rounded-full block mt-1 ${!notif.isRead ? 'bg-red-600' : 'bg-slate-300'}`} />
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">
                 <h5 className={`text-xs ${!notif.isRead ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
@@ -176,7 +176,7 @@ function NotificationMenuDropdown({
                 <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
                   <span>{notif.time || notif.date}</span>
                   {notif.linkTab && (
-                    <span className="text-blue-600 font-bold hover:underline">
+                    <span className="text-red-600 font-bold hover:underline">
                       Buka {notif.linkTab.toUpperCase()} &rarr;
                     </span>
                   )}
@@ -268,18 +268,10 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOrmawaDropdownOpen(false);
-      }
-      if (desktopDropdownRef.current && !desktopDropdownRef.current.contains(e.target)) {
-        setIsDesktopOrmawaOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setIsProfileOpen(false);
-      }
-      if (notificationRef.current && !notificationRef.current.contains(e.target)) {
-        setIsNotificationsOpen(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOrmawaDropdownOpen(false);
+      if (desktopDropdownRef.current && !desktopDropdownRef.current.contains(e.target)) setIsDesktopOrmawaOpen(false);
+      if (profileRef.current && !profileRef.current.contains(e.target)) setIsProfileOpen(false);
+      if (notificationRef.current && !notificationRef.current.contains(e.target)) setIsNotificationsOpen(false);
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -293,25 +285,24 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
   const handleNotificationClick = (notif) => {
     markNotificationAsRead(notif.id);
     if (notif.linkTab) {
-      if (['proker', 'history', 'kalender'].includes(notif.linkTab)) {
-        setActiveTab('proker');
-        navigate(notif.linkTab === 'history' ? '/proker?tab=histori' : notif.linkTab === 'kalender' ? '/proker?tab=kalender' : '/proker');
-      } else if (['transparansi', 'berkas', 'anggaran', 'template'].includes(notif.linkTab)) {
-        setActiveTab('transparansi');
-        navigate(
-          notif.linkTab === 'anggaran' 
-            ? '/transparansi?tab=anggaran' 
-            : notif.linkTab === 'template' 
-              ? '/transparansi?tab=template' 
-              : '/transparansi?tab=berkas'
-        );
-      } else if (['audit', 'sp'].includes(notif.linkTab)) {
-        setActiveTab('audit');
-        navigate(notif.linkTab === 'sp' ? '/audit?tab=sp' : '/audit');
-      } else {
-        setActiveTab(notif.linkTab);
-        navigate(`/${notif.linkTab}`);
-      }
+      const tab = notif.linkTab;
+      const routeMap = {
+        history: '/proker?tab=histori',
+        proker: '/proker',
+        kalender: '/kalender',
+        anggaran: '/transparansi?tab=anggaran',
+        template: '/transparansi?tab=template',
+        berkas: '/transparansi?tab=berkas',
+        transparansi: '/transparansi?tab=berkas',
+        sp: '/audit?tab=sp',
+        audit: '/audit'
+      };
+      const activeTabTarget = ['proker', 'history'].includes(tab) ? 'proker'
+        : ['transparansi', 'berkas', 'anggaran', 'template'].includes(tab) ? 'transparansi'
+        : ['audit', 'sp'].includes(tab) ? 'audit' : tab;
+
+      setActiveTab(activeTabTarget);
+      navigate(routeMap[tab] || `/${tab}`);
     }
     setIsNotificationsOpen(false);
   };
@@ -354,7 +345,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                 <button 
                   type="button" 
                   onClick={() => setIsOrmawaDropdownOpen(prev => !prev)} 
-                  className="min-h-[44px] h-11 flex items-center gap-2 px-3 py-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white shadow-2xs cursor-pointer transition active:scale-95"
+                  className="min-h-[44px] h-11 flex items-center gap-2 px-3 py-2 rounded-2xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white shadow-2xs cursor-pointer transition active:scale-95"
                   title="Filter Ormawa"
                 >
                   {activeOrmawa ? (
@@ -367,7 +358,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                   ) : (
                     <span className="tracking-tight">Ormawa</span>
                   )}
-                  <ChevronDown className={`w-3.5 h-3.5 text-blue-200 transition-transform ${isOrmawaDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 text-red-200 transition-transform ${isOrmawaDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isOrmawaDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 space-y-1 animate-in fade-in zoom-in-95 duration-150">
@@ -375,11 +366,11 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                       type="button" 
                       onClick={() => { setSelectedOrmawaFilter('all'); setIsOrmawaDropdownOpen(false); }} 
                       className={`w-full min-h-[42px] flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
-                        selectedOrmawaFilter === 'all' ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                        selectedOrmawaFilter === 'all' ? 'bg-red-50 text-red-700' : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
                       <span className="tracking-tight">Semua Ormawa</span>
-                      {selectedOrmawaFilter === 'all' && <Check className="w-4 h-4 text-blue-600" />}
+                      {selectedOrmawaFilter === 'all' && <Check className="w-4 h-4 text-red-600" />}
                     </button>
                     {sortedOrmawas.map(o => (
                       <button 
@@ -387,7 +378,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                         type="button" 
                         onClick={() => { setSelectedOrmawaFilter(o.id); setIsOrmawaDropdownOpen(false); }} 
                         className={`w-full min-h-[42px] flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
-                          selectedOrmawaFilter === o.id ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-700 hover:bg-slate-50'
+                          selectedOrmawaFilter === o.id ? 'bg-red-600 text-white shadow-2xs' : 'text-slate-700 hover:bg-slate-50'
                         }`}
                       >
                         <div className="flex items-center gap-2 truncate">
@@ -540,11 +531,11 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                       type="button"
                       onClick={() => { setSelectedOrmawaFilter('all'); setIsDesktopOrmawaOpen(false); }}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-                        selectedOrmawaFilter === 'all' ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+                        selectedOrmawaFilter === 'all' ? 'bg-red-50 text-red-700' : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
                       <span>Semua Ormawa (Fasilkom)</span>
-                      {selectedOrmawaFilter === 'all' && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                      {selectedOrmawaFilter === 'all' && <Check className="w-3.5 h-3.5 text-red-600" />}
                     </button>
                     {sortedOrmawas.map(o => (
                       <button
@@ -552,7 +543,7 @@ export default function Header({ onOpenAddProker, onOpenIssueSP, onToggleSidebar
                         type="button"
                         onClick={() => { setSelectedOrmawaFilter(o.id); setIsDesktopOrmawaOpen(false); }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-                          selectedOrmawaFilter === o.id ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-700 hover:bg-slate-50'
+                          selectedOrmawaFilter === o.id ? 'bg-red-600 text-white shadow-2xs' : 'text-slate-700 hover:bg-slate-50'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 truncate">
