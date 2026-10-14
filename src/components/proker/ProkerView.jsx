@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import DropdownSelect from '@/components/ui/dropdown-select';
 import { AjukanHapusProkerModal, KelolaHapusProkerModal } from './ProkerHapusModal';
 import UploadRevisiModal from './UploadRevisiModal';
+import KalenderView from '@/components/kalender/KalenderView';
 import { formatDateIndo, formatDateRange } from '@/utils/formatters';
 import { canModifyProker, canDeleteProker } from '@/utils/permissions';
 
@@ -445,6 +446,30 @@ export default function ProkerView({ onOpenAddProker, onReviewProposal, onOpenDe
           </p>
         </div>
       )}
+
+      {/* Fitur Kalender Ormawa Terpadu */}
+      <div className="mt-8 pt-8 border-t border-slate-200/80 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 border border-red-100 flex items-center justify-center shadow-2xs shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                Kalender Jadwal Program Kerja Ormawa
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">
+                Sinkronisasi kalender kegiatan ormawa, hari libur nasional resmi, dan deteksi jadwal bentrok.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <KalenderView 
+          onOpenAddProker={isGuest ? undefined : onOpenAddProker}
+          onReviewProposal={(p) => onOpenDetailProker ? onOpenDetailProker(p) : onReviewProposal?.(p)}
+        />
+      </div>
 
       {/* Modal Dialog Konfirmasi Hapus Langsung (DPM) */}
       <Dialog open={Boolean(prokerToDelete)} onOpenChange={(open) => !open && setProkerToDelete(null)}>

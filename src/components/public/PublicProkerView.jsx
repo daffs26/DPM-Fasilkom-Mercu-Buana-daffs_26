@@ -13,7 +13,7 @@ export default function PublicProkerView() {
     <div className="space-y-6">
       {/* Main Proker View Component */}
       <ProkerView 
-        onOpenAddProker={() => {}}
+        onOpenAddProker={undefined}
         onReviewProposal={(proker) => setSelectedProkerForReview(proker)}
         onOpenDetailProker={(proker) => setSelectedProkerForDetail(proker)}
         onAuditLPJ={(proker) => setSelectedProkerForAudit(proker)}

@@ -28,7 +28,7 @@ export default function DetailRabTab({
   setPreviewRabReceipt
 }) {
   const currentUser = useStore(state => state.currentUser);
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
   return (
     <div className="space-y-4">
       {/* Ringkasan Finansial */}

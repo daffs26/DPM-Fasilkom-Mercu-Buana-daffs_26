@@ -30,7 +30,7 @@ export default function DetailRundownTab({
   handlePrintRundown
 }) {
   const currentUser = useStore(state => state.currentUser);
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">

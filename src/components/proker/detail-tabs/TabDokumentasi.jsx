@@ -59,7 +59,7 @@ export default function DetailDokumentasiTab({
   onDeleteMedia
 }) {
   const currentUser = useStore(state => state.currentUser);
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
 
   // State untuk form tambah media
   const [isAddingMedia, setIsAddingMedia] = useState(false);

@@ -6,15 +6,12 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
-  ChevronLeft,
-  ChevronRight,
   Info,
   PartyPopper,
   Clock,
   MapPin,
   Users,
-  CalendarCheck2,
-  Plus
+  CalendarCheck2
 } from 'lucide-react';
 import { getHoliday } from '@/data/holidays';
 import DropdownSelect from '@/components/ui/dropdown-select';
@@ -34,7 +31,9 @@ const WEEKDAY_NAMES = [
   { short: 'Sab', full: 'Sabtu', isWeekend: true },
 ];
 
-const SUPPORTED_YEARS = [2026, 2027, 2028];
+const SUPPORTED_YEARS = [2026, 2027];
+const MIN_YEAR = Math.min(...SUPPORTED_YEARS);
+const MAX_YEAR = Math.max(...SUPPORTED_YEARS);
 
 function KalenderGrid({
   currentYear,
@@ -46,8 +45,6 @@ function KalenderGrid({
   prokers,
   ormawas,
   todayISO,
-  handlePrevMonth,
-  handleNextMonth,
   handleSelectMonth,
   handleSelectYear,
   handleGoToToday,
@@ -88,51 +85,25 @@ function KalenderGrid({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
-            <div className="w-full flex items-center justify-between gap-1 bg-slate-50 p-1 rounded-2xl border border-slate-200 shadow-2xs">
-              <button
-                type="button"
-                onClick={handlePrevMonth}
-                disabled={currentYear === 2026 && currentMonth === 0}
-                className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl hover:bg-white text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition shrink-0"
-                title="Bulan Sebelumnya"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
+            <div className="w-full flex items-center">
 
               <DropdownSelect
                 value={currentMonth}
                 onChange={(val) => handleSelectMonth(val)}
                 options={MONTH_NAMES.map((name, idx) => ({ value: idx, label: name }))}
-                className="flex-1 min-w-0"
-                triggerClassName="w-full min-h-[38px] py-1.5 px-3 font-bold text-xs rounded-xl bg-white border border-slate-200/60 shadow-2xs hover:bg-slate-100 flex items-center justify-between"
+                className="w-full"
+                triggerClassName="w-full min-h-[46px] py-2 px-3.5 font-bold text-xs rounded-2xl bg-slate-50 hover:bg-white border border-slate-200 shadow-2xs flex items-center justify-between transition"
               />
-
-              <button
-                type="button"
-                onClick={handleNextMonth}
-                disabled={currentYear === 2028 && currentMonth === 11}
-                className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl hover:bg-white text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition shrink-0"
-                title="Bulan Berikutnya"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
             </div>
 
-            <div className="w-full grid grid-cols-3 gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1 shadow-2xs">
-              {SUPPORTED_YEARS.map(yr => (
-                <button
-                  key={yr}
-                  type="button"
-                  onClick={() => handleSelectYear(yr)}
-                  className={`text-xs font-bold py-1.5 min-h-[38px] rounded-xl transition text-center flex items-center justify-center ${
-                    currentYear === yr
-                      ? 'bg-white text-blue-600 shadow-xs ring-1 ring-slate-200/80'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {yr}
-                </button>
-              ))}
+            <div className="w-full flex items-center">
+              <DropdownSelect
+                value={currentYear}
+                onChange={(val) => handleSelectYear(val)}
+                options={SUPPORTED_YEARS.map(yr => ({ value: yr, label: String(yr) }))}
+                className="w-full"
+                triggerClassName="w-full min-h-[46px] py-2 px-3.5 font-bold text-xs rounded-2xl bg-slate-50 hover:bg-white border border-slate-200 shadow-2xs flex items-center justify-between transition"
+              />
             </div>
           </div>
         </div>
@@ -144,7 +115,7 @@ function KalenderGrid({
           </span>
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2 w-full">
             {legendItems.map((item, idx) => (
-              <div key={idx} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border font-bold min-w-0 ${item.box}`}>
+              <div key={idx} className={`flex items-center gap-1.5 px-2 xs:px-2.5 py-1.5 rounded-xl border font-bold min-w-0 text-[9.5px] xs:text-[10px] sm:text-[11px] ${item.box}`}>
                 <span className={`w-2 h-2 rounded-full shrink-0 ${item.dot}`} />
                 <span className="truncate">{item.label}</span>
               </div>
@@ -184,7 +155,7 @@ function KalenderGrid({
                   setSelectedDate(item.dateStr);
                   onOpenAddProker?.(item.dateStr);
                 }}
-                className={`min-h-[50px] sm:min-h-[56px] lg:min-h-[60px] xl:min-h-[64px] p-1 sm:p-1.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between group relative ${
+                className={`min-h-[46px] xs:min-h-[50px] sm:min-h-[56px] lg:min-h-[60px] xl:min-h-[64px] p-1 sm:p-1.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between group relative ${
                   isSelected
                     ? 'border-blue-400 bg-blue-50/90 shadow-xs ring-2 ring-blue-300/80 z-10'
                     : item.isCurrentMonth
@@ -309,7 +280,7 @@ function KalenderGrid({
           <span>Tanggal merah &amp; cuti bersama terintegrasi resmi dari SKB 3 Menteri.</span>
         </div>
         <div className="font-bold text-slate-700">
-          Periode: 2026 - 2028
+          Periode: {MIN_YEAR} - {MAX_YEAR}
         </div>
       </div>
     </div>
@@ -322,12 +293,10 @@ function KalenderSidebar({
   isSelectedDateWeekend,
   prokersOnDate,
   ormawas,
-  onReviewProposal,
-  onOpenAddProker,
-  selectedDate
+  onReviewProposal
 }) {
   const currentUser = useStore(state => state.currentUser);
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
 
   const formatContact = (contact) => {
     if (!isGuest || !contact) return contact;
@@ -419,8 +388,9 @@ function KalenderSidebar({
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => onReviewProposal(p)}
-                      className="w-full mt-1.5 min-h-[38px] py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition flex items-center justify-center text-center shadow-xs cursor-pointer"
+                      className="w-full mt-1.5 min-h-[44px] sm:min-h-[38px] py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition flex items-center justify-center text-center shadow-xs cursor-pointer active:scale-[0.98]"
                     >
                       Buka Detail Berkas
                     </button>
@@ -439,29 +409,19 @@ function KalenderSidebar({
           )}
         </div>
       </div>
-
-      {!isGuest && (
-        <div className="pt-3 border-t border-slate-100 shrink-0 mt-2">
-          <button
-            onClick={() => onOpenAddProker?.(selectedDate)}
-            className="w-full min-h-[38px] py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            Jadwalkan Proker di Tanggal Ini
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
 export default function KalenderView({ onOpenAddProker, onReviewProposal, onDateChange }) {
   const { prokers, ormawas } = useStore(useShallow(state => ({ prokers: state.prokers, ormawas: state.ormawas })));
+  const currentUser = useStore(state => state.currentUser);
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
 
   const today = new Date();
   const todayISO = today.toISOString().split('T')[0];
 
-  const initialYear = Math.min(Math.max(today.getFullYear(), 2026), 2028);
+  const initialYear = Math.min(Math.max(today.getFullYear(), MIN_YEAR), MAX_YEAR);
   const [currentYear, setCurrentYear] = useState(initialYear);
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState(todayISO);
@@ -479,35 +439,6 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
     setSelectedDate(newDateStr);
   };
 
-  const handlePrevMonth = () => {
-    if (currentMonth === 0) {
-      if (currentYear > 2026) {
-        const nextYr = currentYear - 1;
-        setCurrentYear(nextYr);
-        setCurrentMonth(11);
-        syncDateForNewMonthYear(nextYr, 11);
-      }
-    } else {
-      const nextMo = currentMonth - 1;
-      setCurrentMonth(nextMo);
-      syncDateForNewMonthYear(currentYear, nextMo);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      if (currentYear < 2028) {
-        const nextYr = currentYear + 1;
-        setCurrentYear(nextYr);
-        setCurrentMonth(0);
-        syncDateForNewMonthYear(nextYr, 0);
-      }
-    } else {
-      const nextMo = currentMonth + 1;
-      setCurrentMonth(nextMo);
-      syncDateForNewMonthYear(currentYear, nextMo);
-    }
-  };
 
   const handleSelectMonth = (mo) => {
     const monthNum = Number(mo);
@@ -522,7 +453,7 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
   };
 
   const handleGoToToday = () => {
-    const yr = Math.min(Math.max(today.getFullYear(), 2026), 2028);
+    const yr = Math.min(Math.max(today.getFullYear(), MIN_YEAR), MAX_YEAR);
     setCurrentYear(yr);
     setCurrentMonth(today.getMonth());
     setSelectedDate(todayISO);
@@ -686,24 +617,20 @@ export default function KalenderView({ onOpenAddProker, onReviewProposal, onDate
             prokers={prokers}
             ormawas={ormawas}
             todayISO={todayISO}
-            handlePrevMonth={handlePrevMonth}
-            handleNextMonth={handleNextMonth}
             handleSelectMonth={handleSelectMonth}
             handleSelectYear={handleSelectYear}
             handleGoToToday={handleGoToToday}
-            onOpenAddProker={onOpenAddProker}
+            onOpenAddProker={isGuest ? undefined : onOpenAddProker}
           />
         </div>
 
         <KalenderSidebar 
-          selectedDate={selectedDate}
           formattedSelectedDate={formattedSelectedDate}
           selectedDateHoliday={selectedDateHoliday}
           isSelectedDateWeekend={isSelectedDateWeekend}
           prokersOnDate={prokersOnDate}
           ormawas={ormawas}
           onReviewProposal={onReviewProposal}
-          onOpenAddProker={onOpenAddProker}
         />
       </div>
     </div>

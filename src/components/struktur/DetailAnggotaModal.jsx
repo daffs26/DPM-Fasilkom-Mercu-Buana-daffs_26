@@ -35,13 +35,13 @@ export default function DetailAnggotaModal({ member, isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg p-0 overflow-hidden rounded-3xl border border-slate-200/90 shadow-2xl bg-white">
+      <DialogContent className="max-w-lg w-[94vw] sm:w-full p-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-2xl bg-white">
         {/* Clean, Refined Header */}
-        <div className="relative px-6 sm:px-7 py-6 border-b border-slate-100 bg-slate-50/60">
-          <div className="flex items-start gap-4 pr-6">
+        <div className="relative px-5 sm:px-7 py-5 sm:py-6 border-b border-slate-100 bg-slate-50/60">
+          <div className="flex items-start gap-3.5 sm:gap-4 pr-6">
             {/* Photo Border Placement Box */}
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-2 border-dashed border-slate-300 bg-white flex items-center justify-center text-slate-400 shrink-0 shadow-2xs">
-              <User className="w-7 h-7 sm:w-8 sm:h-8 text-slate-400" />
+            <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl border-2 border-dashed border-slate-300 bg-white flex items-center justify-center text-slate-400 shrink-0 shadow-2xs">
+              <User className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
             </div>
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -55,13 +55,13 @@ export default function DetailAnggotaModal({ member, isOpen, onClose }) {
                 )}
               </div>
 
-              <DialogTitle className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-snug pt-0.5">
+              <DialogTitle className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-snug pt-0.5 truncate">
                 {member.name}
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-600 font-semibold">
+              <DialogDescription className="text-xs text-slate-600 font-semibold truncate">
                 {member.role}
               </DialogDescription>
-              <p className="text-[11px] text-slate-400 font-medium">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
                 {member.prodi} • DPM FASILKOM UMB
               </p>
             </div>
@@ -69,14 +69,13 @@ export default function DetailAnggotaModal({ member, isOpen, onClose }) {
         </div>
 
         {/* Modal Body Content */}
-        <div className="p-6 sm:p-7 space-y-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div className="p-5 sm:p-7 space-y-4 sm:space-y-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
           {/* Deskripsi Resmi */}
           {member.deskripsi && (
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
               {member.deskripsi}
             </p>
           )}
-
 
           {/* Tugas Pokok & Fungsi (Tupoksi) */}
           {member.tupoksi && member.tupoksi.length > 0 && (
@@ -99,12 +98,12 @@ export default function DetailAnggotaModal({ member, isOpen, onClose }) {
           )}
 
           {/* Media Sosial & Kontak */}
-          <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               {member.email && (
                 <a
                   href={`mailto:${member.email}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs min-h-[38px]"
                   title="Kirim Email"
                 >
                   <Mail className="w-3.5 h-3.5 text-slate-500" />
@@ -116,7 +115,7 @@ export default function DetailAnggotaModal({ member, isOpen, onClose }) {
                   href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs min-h-[38px]"
                   title="Profil LinkedIn"
                 >
                   <LinkedInIcon className="w-3.5 h-3.5 text-[#0A66C2]" />
@@ -128,7 +127,7 @@ export default function DetailAnggotaModal({ member, isOpen, onClose }) {
                   href={`https://instagram.com/${member.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs min-h-[38px]"
                   title="Akun Instagram"
                 >
                   <InstagramIcon className="w-3.5 h-3.5 text-rose-500" />
@@ -142,7 +141,7 @@ export default function DetailAnggotaModal({ member, isOpen, onClose }) {
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="rounded-xl text-xs font-semibold px-4 border-slate-200 hover:bg-slate-50 text-slate-700 cursor-pointer"
+              className="w-full sm:w-auto min-h-[42px] sm:min-h-[36px] rounded-xl text-xs font-semibold px-4 border-slate-200 hover:bg-slate-50 text-slate-700 cursor-pointer flex items-center justify-center active:scale-95"
             >
               Tutup
             </Button>

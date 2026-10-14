@@ -41,7 +41,7 @@ export default function DetailOverviewTab({
   const currentUser = useStore(state => state.currentUser);
   const ormawas = useStore(state => state.ormawas);
   const updateProkerDetails = useStore(state => state.updateProkerDetails);
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
 
   // Role creator check:
   // Hanya role / pengurus Ormawa yang membuat proker tersebut yang dapat mengkustomisasi

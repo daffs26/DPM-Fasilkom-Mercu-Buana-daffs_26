@@ -40,7 +40,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
     currentUser: state.currentUser
   })));
 
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
 
   const [noteText, setNoteText] = useState('');
   const [newRevisionInput, setNewRevisionInput] = useState('');
@@ -77,26 +77,28 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] flex flex-col">
+      <div className="bg-white w-[94vw] sm:w-full max-w-2xl rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] flex flex-col">
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
-          <div>
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0 gap-3">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md">
                 DPM FASILKOM
               </span>
-              <span className="text-xs text-slate-500 font-semibold">Review &amp; Verifikasi Proposal</span>
+              <span className="text-xs text-slate-500 font-semibold truncate">Review &amp; Verifikasi Proposal</span>
             </div>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight mt-1 leading-snug">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight mt-1 leading-snug line-clamp-2">
               {proker.title}
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">
               Ormawa: <strong>{proker.ormawaId.toUpperCase()}</strong> • Divisi: {proker.divisi || 'Umum'} • PJ: {proker.pic || '-'}
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition shrink-0 cursor-pointer"
+            className="min-w-[36px] min-h-[36px] rounded-full bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition shrink-0 cursor-pointer active:scale-95"
+            aria-label="Tutup modal"
           >
             <X className="w-4 h-4" />
           </button>
@@ -339,11 +341,11 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
         </div>
 
         {/* Modal Action Buttons */}
-        <div className="p-4 sm:p-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/70 shrink-0">
+        <div className="p-4 sm:p-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 bg-slate-50/70 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+            className="w-full sm:w-auto min-h-[44px] sm:min-h-[38px] px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer flex items-center justify-center active:scale-95"
           >
             Tutup
           </button>
@@ -353,7 +355,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
               <button
                 type="button"
                 onClick={() => handleAction('revisi')}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
+                className="flex-1 sm:flex-none min-h-[44px] sm:min-h-[38px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
               >
                 <AlertCircle className="w-4 h-4" />
                 <span>Ajukan Revisi</span>
@@ -362,7 +364,7 @@ export default function ReviewProposalModal({ isOpen, onClose, proker }) {
               <button
                 type="button"
                 onClick={() => handleAction('approved')}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition cursor-pointer active:scale-95"
+                className="flex-1 sm:flex-none min-h-[44px] sm:min-h-[38px] flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition cursor-pointer active:scale-95"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Setujui Proposal</span>

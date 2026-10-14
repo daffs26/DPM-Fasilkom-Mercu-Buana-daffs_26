@@ -104,21 +104,21 @@ export default function PublicLandingPage() {
           
           {/* Kolom Kiri: Headline, Deskripsi, Buttons (Sizing Identik Rynertia) */}
           <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left">
-            <h1 className="text-3xl sm:text-4xl lg:text-[46px] xl:text-[52px] font-extrabold text-slate-900 leading-[1.14] sm:leading-[1.1] tracking-tight">
+            <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-[46px] xl:text-[52px] font-extrabold text-slate-900 leading-[1.14] sm:leading-[1.1] tracking-tight">
               <span className="block">Akselerasi Transparansi melalui</span>
               <span className="text-red-600 inline-block pb-1 sm:pb-1.5">
                 Pengawasan &amp; Tata Kelola Ormawa
               </span>
             </h1>
 
-            <p className="text-sm sm:text-base lg:text-[16.5px] xl:text-[17px] text-slate-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+            <p className="text-xs xs:text-sm sm:text-base lg:text-[16.5px] xl:text-[17px] text-slate-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
               DPM FASILKOM UMB mengintegrasikan pengawasan kinerja, keterbukaan realisasi anggaran kemahasiswaan, dan penjaminan mutu program kerja untuk menghadirkan tata kelola ormawa yang akuntabel, inklusif, dan berdaya guna bagi mahasiswa.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 sm:gap-4 pt-1.5 sm:pt-2.5">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1.5 sm:pt-2.5 w-full">
               <Link
                 to="/publik/dashboard"
-                className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold sm:font-bold text-sm sm:text-[15px] shadow-lg shadow-red-600/20 hover:shadow-xl hover:shadow-red-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2.5 group cursor-pointer min-h-[48px] sm:min-h-[50px]"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold sm:font-bold text-xs xs:text-sm sm:text-[15px] shadow-lg shadow-red-600/20 hover:shadow-xl hover:shadow-red-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2.5 group cursor-pointer min-h-[48px] sm:min-h-[50px]"
               >
                 <span>Jelajahi Dashboard</span>
                 <Compass className="w-4.5 h-4.5 sm:w-5 sm:h-5 group-hover:rotate-45 transition-transform duration-300" />
@@ -126,7 +126,7 @@ export default function PublicLandingPage() {
 
               <Link
                 to="/publik/struktur"
-                className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 rounded-xl border-2 border-slate-300/90 bg-white/90 hover:bg-white hover:border-slate-900 hover:text-slate-900 text-slate-800 font-semibold sm:font-bold text-sm sm:text-[15px] shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2.5 hover:-translate-y-0.5 cursor-pointer min-h-[48px] sm:min-h-[50px] backdrop-blur-md group"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl border-2 border-slate-300/90 bg-white/90 hover:bg-white hover:border-slate-900 hover:text-slate-900 text-slate-800 font-semibold sm:font-bold text-xs xs:text-sm sm:text-[15px] shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2.5 hover:-translate-y-0.5 cursor-pointer min-h-[48px] sm:min-h-[50px] backdrop-blur-md group"
               >
                 <span>Bagan Struktur DPM</span>
                 <ArrowUpRight className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-600 group-hover:translate-y-0.5" />
@@ -134,41 +134,41 @@ export default function PublicLandingPage() {
             </div>
           </div>
 
-          {/* Kolom Kanan: Visual Emblem & Floating Badges (Sizing Identik Rynertia) */}
-          <div className="lg:col-span-5 relative flex items-center justify-center pt-6 lg:pt-0">
-            <div className="relative w-72 sm:w-80 h-72 sm:h-80">
+          {/* Kolom Kanan: Visual Emblem & Floating Badges (Sizing Responsif Handphone) */}
+          <div className="lg:col-span-5 relative flex items-center justify-center pt-4 sm:pt-6 lg:pt-0">
+            <div className="relative w-64 xs:w-72 sm:w-80 h-64 xs:h-72 sm:h-80 max-w-[calc(100vw-3rem)] mx-auto">
               {/* Soft Ambient Halo (Melayang Naik Turun Seirama) */}
               <div 
-                className="absolute -inset-6 sm:-inset-8 rounded-full bg-gradient-to-tr from-red-500/20 via-red-200/40 to-transparent blur-3xl pointer-events-none animate-halo-updown" 
+                className="absolute -inset-4 sm:-inset-8 rounded-full bg-gradient-to-tr from-red-500/20 via-red-200/40 to-transparent blur-3xl pointer-events-none animate-halo-updown" 
                 style={{ animation: 'halo-float-updown 3.6s ease-in-out infinite' }}
                 aria-hidden="true"
               />
 
               {/* Central Soft Circle Emblem (Melayang Naik Turun) */}
               <div 
-                className="absolute inset-0 rounded-full bg-gradient-to-tr from-slate-100/95 via-red-50/40 to-slate-50/80 flex items-center justify-center shadow-[0_10px_35px_rgba(220,38,38,0.08)] p-8 sm:p-10 animate-float-updown"
+                className="absolute inset-0 rounded-full bg-gradient-to-tr from-slate-100/95 via-red-50/40 to-slate-50/80 flex items-center justify-center shadow-[0_10px_35px_rgba(220,38,38,0.08)] p-6 xs:p-8 sm:p-10 animate-float-updown"
                 style={{ animation: 'float-updown 3.6s ease-in-out infinite' }}
               >
                 <img
                   src={logoDpm}
                   alt="DPM FASILKOM UMB Official Logo"
-                  className="w-44 h-44 sm:w-52 sm:h-52 object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.08)] select-none"
+                  className="w-36 h-36 xs:w-44 xs:h-44 sm:w-52 sm:h-52 object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.08)] select-none"
                 />
               </div>
 
               {/* Top-Right Floating Badge: 4 Ormawa */}
               <div 
-                className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 px-4 py-3 rounded-2xl border border-slate-200/90 shadow-xl flex items-center gap-3 z-20 bg-white/95 backdrop-blur-md animate-float-badge-1"
+                className="absolute -top-2 -right-2 xs:-top-3 xs:-right-3 sm:-top-4 sm:-right-4 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl border border-slate-200/90 shadow-xl flex items-center gap-2.5 sm:gap-3 z-20 bg-white/95 backdrop-blur-md animate-float-badge-1"
                 style={{ animation: 'float-badge-updown-1 3.4s ease-in-out infinite' }}
               >
-                <div className="w-9 h-9 rounded-xl bg-red-50 text-red-600 border border-red-200/60 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-red-50 text-red-600 border border-red-200/60 flex items-center justify-center shrink-0">
                   <Users2 className="w-4 h-4" />
                 </div>
                 <div className="text-left">
-                  <span className="block text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                  <span className="block text-xs sm:text-base font-bold text-slate-900 leading-tight">
                     4 Ormawa
                   </span>
-                  <span className="text-[10px] text-slate-500 uppercase font-semibold tracking-wider">
+                  <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase font-semibold tracking-wider">
                     LEMBAGA DIAWASI
                   </span>
                 </div>
@@ -176,18 +176,18 @@ export default function PublicLandingPage() {
 
               {/* Bottom-Left Floating Badge: 4 Pilar */}
               <div 
-                className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 px-4 py-3 rounded-2xl border border-slate-200/90 shadow-xl flex items-center gap-3 z-20 bg-white/95 backdrop-blur-md animate-float-badge-2"
+                className="absolute -bottom-2 -left-2 xs:-bottom-3 xs:-left-3 sm:-bottom-4 sm:-left-4 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl border border-slate-200/90 shadow-xl flex items-center gap-2.5 sm:gap-3 z-20 bg-white/95 backdrop-blur-md animate-float-badge-2 max-w-[calc(100vw-4rem)]"
                 style={{ animation: 'float-badge-updown-2 4.0s ease-in-out infinite' }}
               >
-                <div className="w-9 h-9 rounded-xl bg-slate-950 text-white border border-slate-900 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-950 text-white border border-slate-900 flex items-center justify-center shrink-0">
                   <Layers className="w-4 h-4" />
                 </div>
-                <div className="text-left">
-                  <span className="block text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                <div className="text-left min-w-0">
+                  <span className="block text-xs sm:text-base font-bold text-slate-900 leading-tight">
                     4 Pilar
                   </span>
-                  <span className="text-[10px] text-slate-500 uppercase font-semibold tracking-wider">
-                    LEGISLASI · AUDIT · ANGGARAN · ADVOKASI
+                  <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase font-semibold tracking-wider block max-w-[150px] xs:max-w-[200px] sm:max-w-none truncate sm:whitespace-normal">
+                    LEGISLASI · AUDIT · ANGGARAN · PENGAWASAN
                   </span>
                 </div>
               </div>

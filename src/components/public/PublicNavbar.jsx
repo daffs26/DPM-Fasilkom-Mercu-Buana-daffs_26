@@ -46,16 +46,16 @@ export default function PublicNavbar() {
                 className="w-full h-full object-contain" 
               />
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="font-black text-slate-900 tracking-tight text-sm sm:text-base leading-tight group-hover:text-red-600 transition-colors">
+                <span className="font-black text-slate-900 tracking-tight text-xs xs:text-sm sm:text-base leading-tight group-hover:text-red-600 transition-colors">
                   DPM FASILKOM
                 </span>
                 <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-red-50 text-red-700 border border-red-200/70 hidden sm:inline-block">
                   UMB
                 </span>
               </div>
-              <span className="text-[11px] font-medium text-slate-500 leading-tight">
+              <span className="text-[10px] xs:text-[11px] font-medium text-slate-500 leading-tight truncate max-w-[160px] xs:max-w-none">
                 Portal Transparansi Ormawa
               </span>
             </div>
@@ -82,12 +82,12 @@ export default function PublicNavbar() {
             })}
           </nav>
 
-          {/* Mobile Hamburger Toggle */}
+          {/* Mobile Hamburger Toggle (Min 44x44px Accessible Touch Target) */}
           <div className="flex md:hidden items-center gap-2">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-hidden transition"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-hidden transition active:scale-95"
               aria-label="Toggle menu navigasi"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

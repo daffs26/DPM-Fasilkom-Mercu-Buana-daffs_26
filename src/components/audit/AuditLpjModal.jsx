@@ -312,12 +312,12 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-slate-50 w-full max-w-5xl rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden max-h-[94vh] flex flex-col">
+      <div className="bg-slate-50 w-[94vw] sm:w-full max-w-5xl rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden max-h-[94vh] flex flex-col">
         {/* Header Modal */}
-        <div className="px-5 sm:px-6 py-3.5 bg-white border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <ShieldCheck className="w-5 h-5 text-white" />
+        <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldCheck className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -331,7 +331,7 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
               <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight truncate mt-0.5">
                 {proker.title}
               </h3>
-              <p className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5 flex-wrap">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 flex items-center gap-2 mt-0.5 flex-wrap">
                 <span className="font-semibold text-slate-700">{ormawa?.name || proker.ormawaId.toUpperCase()}</span>
                 <span>•</span>
                 <span>{formatDateRange(proker.startDate, proker.endDate)}</span>
@@ -342,8 +342,9 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 flex items-center justify-center transition shrink-0 cursor-pointer"
+            className="min-w-[36px] min-h-[36px] rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 flex items-center justify-center transition shrink-0 cursor-pointer active:scale-95"
             title="Tutup Form"
+            aria-label="Tutup form audit"
           >
             <X className="w-4 h-4" />
           </button>
@@ -668,16 +669,16 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
         </div>
 
         {/* Footer Modal */}
-        <div className="px-5 sm:px-6 py-3.5 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
-          <div className="text-xs text-slate-500 font-medium">
+        <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0">
+          <div className="text-[11px] sm:text-xs text-slate-500 font-medium">
             Akumulasi: <strong className="text-slate-900 font-extrabold">{totalScore} / 100</strong> • Predikat: <strong className="text-slate-900 font-extrabold">{predikat} ({predikatText})</strong>
           </div>
 
-          <div className="flex items-center justify-end gap-2.5">
+          <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 sm:flex-initial px-4 py-2 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition cursor-pointer text-center"
+              className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-[38px] px-4 py-2 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition cursor-pointer text-center flex items-center justify-center active:scale-95"
             >
               Batal
             </button>
@@ -685,7 +686,7 @@ export default function AuditLPJModal({ isOpen, onClose, proker }) {
               <button
                 type="button"
                 onClick={handleSaveAudit}
-                className="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs hover:shadow transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 sm:flex-initial min-h-[44px] sm:min-h-[38px] px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs hover:shadow transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <CheckCircle2 className="w-4 h-4 text-white" />
                 <span>Simpan &amp; Sahkan Audit</span>

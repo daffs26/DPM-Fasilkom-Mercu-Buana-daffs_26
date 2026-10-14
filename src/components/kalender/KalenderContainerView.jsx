@@ -44,7 +44,7 @@ export default function KalenderContainerView({
 
       {/* Kalender View */}
       <KalenderView 
-        onOpenAddProker={(date) => onOpenAddProker?.(date || calendarSelectedDate)}
+        onOpenAddProker={canAdd ? (date) => onOpenAddProker?.(date || calendarSelectedDate) : undefined}
         onReviewProposal={onReviewProposal}
         onDateChange={onDateChange}
       />

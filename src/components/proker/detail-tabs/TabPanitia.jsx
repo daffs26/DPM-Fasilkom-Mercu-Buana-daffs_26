@@ -12,7 +12,7 @@ export default function DetailPanitiaTab({
   handleDeletePanitia
 }) {
   const currentUser = useStore(state => state.currentUser);
-  const isGuest = currentUser?.role === 'guest';
+  const isGuest = !currentUser || currentUser?.role === 'guest' || currentUser?.role === 'civitas';
 
   const formatContact = (contact) => {
     if (!contact) return '-';

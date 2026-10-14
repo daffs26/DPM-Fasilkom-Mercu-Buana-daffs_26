@@ -111,6 +111,32 @@ export const structuralMembers = [
     fokusInti: 'Menjamin ketertiban arsip, legalitas korespondensi, dan kelancaran sirkulasi administrasi organisasi DPM.',
     motto: 'Ketertiban arsip adalah fondasi utama keterbukaan informasi dan akuntabilitas publik.'
   },
+  {
+    id: 'sekretaris-2',
+    name: 'Nama',
+    nim: '-',
+    prodi: 'Sistem Informasi',
+    role: 'Sekretaris DPM',
+    tier: 'pelaksana',
+    category: 'admin',
+    unit: 'Kesekretariatan',
+    badgeText: 'Sekretaris DPM',
+    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200/80',
+    watermark: 'SECRETARIAT',
+    cardGradient: 'from-blue-950/80 via-slate-900 to-slate-950',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80',
+    email: '',
+    linkedin: '',
+    instagram: '',
+    deskripsi: 'Sekretaris tambahan bertanggung jawab mendukung administrasi kelembagaan, pencatatan risalah rapat, dan pengelolaan arsip berkas dewan.',
+    tupoksi: [
+      'Membantu penyusunan surat resmi kelembagaan dan notulensi rapat dewan.',
+      'Mengelola pencatatan administrasi surat masuk dan keluar secara digital.',
+      'Mendukung pendokumentasian berkas persuratan dan arsip pengawasan DPM.'
+    ],
+    fokusInti: 'Mendukung kelancaran operasional kesekretariatan dan ketertiban tata kelola dokumen parlemen.',
+    motto: 'Administrasi yang tertib adalah pilar utama keteraturan organisasi mahasiswa.'
+  },
 
   // ── LEVEL 3: BENDAHARA DPM (SETARA) ─────────────────────────────────
   {
